@@ -2,6 +2,8 @@
 #include <string>
 #include <cstring>
 
+#include "../common/constants.h"
+
 using namespace std;
 
 /**
@@ -33,12 +35,15 @@ int parse_args(string &port, string &ip, char** argv, int argc){
         // Port is given.
         else if(strcmp(argv[i], "-p") == 0 && !seen_port && i + 1 < argc){
             port = argv[i + 1];
-            seen_port = false;
+            seen_port = true;
         }
         else{
             return 0;
         }
     }
+    // In case one or more arguments weren't present
+    if(!seen_ip) ip = DEFAULT_IP;
+    if(!seen_port) port = DEFAULT_PORT;
     return 1;
 }
 
@@ -46,9 +51,9 @@ int main(int argc, char** argv){
     string port, ip;
 
     if(!parse_args(port, ip, argv, argc)){
-        fprintf(stderr, "Usage: %s [-n ESIP] [-p ESport]\n", argv[0]);
+        cerr << "Usage: " << argv[0] <<  " [-n ESIP] [-p ESport]" << endl;
         return 1;
     }
-
+    cout << "IP: " << ip << " Port: " << port << endl;
     return 0;
 }
