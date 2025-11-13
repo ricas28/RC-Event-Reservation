@@ -1,27 +1,34 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -Werror -O2 -g
+CFLAGS = -Wall -Wextra -Wpedantic -Werror \
+         -Wshadow -Wpointer-arith -Wcast-align -Wstrict-prototypes \
+         -Wmissing-prototypes -Wconversion -Wsign-conversion \
+         -Wuninitialized -Wmaybe-uninitialized \
+         -fstack-protector-strong -O2 -g
 
 SERVER_DIR = src/server
 CLIENT_DIR = src/client
-BIN_DIR = bin
 
 SERVER_SOURCES = $(wildcard $(SERVER_DIR)/*.c)
 CLIENT_SOURCES = $(wildcard $(CLIENT_DIR)/*.c)
 
-SERVER_TARGET = $(BIN_DIR)/server
-CLIENT_TARGET = $(BIN_DIR)/client
+SERVER_TARGET = server
+CLIENT_TARGET = client
 
-.PHONY: all clean
+.PHONY: all clean run-server run-client
 
 all: $(SERVER_TARGET) $(CLIENT_TARGET)
 
 $(SERVER_TARGET): $(SERVER_SOURCES)
-	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(CLIENT_TARGET): $(CLIENT_SOURCES)
-	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@
 
 clean:
-	rm -rf $(BIN_DIR)
+	rm -f $(SERVER_TARGET) $(CLIENT_TARGET)
+
+run-server: $(SERVER_TARGET)
+	./$(SERVER_TARGET)
+
+run-client: $(CLIENT_TARGET)
+	./$(CLIENT_TARGET)
