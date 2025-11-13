@@ -12,8 +12,8 @@ CLIENT_DIR = src/client
 SERVER_SOURCES = $(wildcard $(SERVER_DIR)/*.cpp)
 CLIENT_SOURCES = $(wildcard $(CLIENT_DIR)/*.cpp)
 
-SERVER_TARGET = server
-CLIENT_TARGET = client
+SERVER_TARGET = ES
+CLIENT_TARGET = user
 
 .PHONY: all clean run-server run-client
 
