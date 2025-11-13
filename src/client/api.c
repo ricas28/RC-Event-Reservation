@@ -1,0 +1,1 @@
+// TODO: Implement operations. Each operation is responsible for making sure the command has valid arguments.
