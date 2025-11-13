@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -O2 -g
+CFLAGS = -Wall -Wextra -Wpedantic -Werror -O2 -g
 
 SERVER_DIR = src/server
 CLIENT_DIR = src/client
