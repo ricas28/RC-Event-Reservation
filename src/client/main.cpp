@@ -2,8 +2,8 @@
 #include <string>
 #include <cstring>
 
-#include "../common/constants.h"
-#include "parser.h"
+#include "../common/constants.hpp"
+#include "parser.hpp"
 
 #define BUFFER_SIZE 256
 
