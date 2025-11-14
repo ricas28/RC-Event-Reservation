@@ -17,7 +17,7 @@ enum Command{
 };
 
 /**
- * Parses a command.
+ * Parses a command, separating the actual command from the arguments.
  * 
  * @param line String with the whole command.
  * @param args Pointer to a string that will contain the arguments.
