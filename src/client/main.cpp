@@ -96,7 +96,7 @@ int main(int argc, char** argv){
             case CMD_MYRESERVATIONS:
                 break;
             case CMD_INVALID:
-                fprintf(stderr, "Invalid/Unknown command\n");
+                cerr << "Invalid/Unknown command" << endl;
                 break;
         }   
     }
