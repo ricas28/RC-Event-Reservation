@@ -18,7 +18,7 @@ using namespace std;
  */
 bool is_logged_in(bool logged_in){
     if(!logged_in){
-        cout << "You must be logged in order to perform this command!" << endl;
+        cout << "user not logged in" << endl;
         return false;
     }
     return true;
