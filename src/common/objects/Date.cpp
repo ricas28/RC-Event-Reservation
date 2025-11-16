@@ -16,12 +16,6 @@ int Date::daysInMonth(int m, int y){
     }
 }
 
-bool Date::isValidDate(int d, int m, int y){
-    if (m < 1 || m > 12) return false;
-    if (d < 1 || d > daysInMonth(m, y)) return false;
-    return true;
-}
-
 // --- Constructor ---
 Date::Date(int d, int m, int y) {
     if (isValidDate(d, m, y)) {
@@ -55,6 +49,12 @@ void Date::setYear(int y) {
 }
 
 // --- Methods ---
+bool Date::isValidDate(int d, int m, int y){
+    if (m < 1 || m > 12) return false;
+    if (d < 1 || d > daysInMonth(m, y)) return false;
+    return true;
+}
+
 void Date::nextDay() {
     day++;
     if (day > daysInMonth(month, year)) {
