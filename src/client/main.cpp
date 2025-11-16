@@ -42,8 +42,7 @@ void process_commands(){
         switch(parse_command(line, &args)){
             case CMD_LOGIN: {
                 if(parse_login(args, &uid, &pass)){
-                    //er_login();
-                    logged_in = true;
+                    //er_login(&logged_in);
                 }
                 break;
             }
@@ -64,8 +63,7 @@ void process_commands(){
             case CMD_LOGOUT:
                 if(!is_logged_in(logged_in)) break;
                 if(parse_logout(args)){
-                    //er_logout();
-                    logged_in = false;
+                    //er_logout(&logged_in);
                 }
                 break;
             case CMD_EXIT:
@@ -77,8 +75,13 @@ void process_commands(){
                     else quit = true;
                 }
                 break;
-            case CMD_CREATE:
+            case CMD_CREATE: {
+               // string name, event_fname, num_attendes;
+               // if(parse_create(args)){
+                //    er_create()
+                //}
                 break;
+            }
             case CMD_CLOSE:
                 break;
             case CMD_MYEVENTS:
