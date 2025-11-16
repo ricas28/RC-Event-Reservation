@@ -8,9 +8,13 @@ CXXFLAGS = -Wall -Wextra -Wpedantic -Werror \
 
 SERVER_DIR = src/server
 CLIENT_DIR = src/client
+COMMON_DIR = src/common
 
-SERVER_SOURCES = $(wildcard $(SERVER_DIR)/*.cpp)
-CLIENT_SOURCES = $(wildcard $(CLIENT_DIR)/*.cpp)
+# Pega todos os .cpp da pasta common
+COMMON_SOURCES = $(wildcard $(COMMON_DIR)/*.cpp)
+
+SERVER_SOURCES = $(wildcard $(SERVER_DIR)/*.cpp) $(COMMON_SOURCES)
+CLIENT_SOURCES = $(wildcard $(CLIENT_DIR)/*.cpp) $(COMMON_SOURCES)
 
 SERVER_TARGET = ES
 CLIENT_TARGET = user

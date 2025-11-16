@@ -4,66 +4,22 @@
 #include <unistd.h>
 
 #include "../common/constants.hpp"
+#include "../common/io.hpp"
 #include "parser.hpp"
-
-#define BUFFER_SIZE 256
 
 using namespace std;
 
 /**
- * Parses the command line arguments.
- * 
- * @param port Addres of string representing the server's port.
- * (If this parameter is not present it will be equal to DEFAULT_PORT: 58009)
- * @param ip Addres of a string representing the server's ip.
- * (If this parameter is not present, we assume the server is hosted locally)
- * @param argv Command line arguments.
- * @param argc Number of arguments.
- * 
- * @returns true if parse is successful, false otherwise.
- */
-bool parse_args(string &port, string &ip, char** argv, int argc){
-    int  opt;
-
-    // Max number of arguments is 5.
-    if(argc > 5)
-        return false;
-
-    // Put default argument values in case they are not present.
-    ip = DEFAULT_IP;
-    port = DEFAULT_PORT;
-
-    // opt will be option on argv and optarg is the next item on argv.
-    while ((opt = getopt(argc, argv, "n:p:")) != -1) {
-        switch (opt) {
-            case 'n':
-                ip = optarg;   
-                break;
-            case 'p':
-                port = optarg;
-                break;
-            // Unknown command (neither -n nor -p)
-            case '?':
-                return false;
-        }
-    }
-    return true;
-}
-
-/**
  * Processes a command from the STDIN.
  * 
- * @returns 1 if successful processing, 0 otherwise.
+ * @returns true if successful processing, false otherwise
+ * (or if an 'exit' command is executed).
  */
-int process_commands(){
+bool process_commands(){
     char line[BUFFER_SIZE], *args;
 
-    if(!fgets(line, sizeof(line), stdin)){
-        perror("Failure to read command.");
-        return 0;
-    }
-        
-    // TODO: Create function on the api file and put them here.
+    if(!parse_line(line)) return false;
+
     switch(parse_command(line, &args)){
         case CMD_LOGIN:
             //if(parse_login(args))
@@ -77,7 +33,7 @@ int process_commands(){
             break;
         case CMD_EXIT:
             // TODO: Implement logout needing to be done first before exit.
-            return 0;
+            return false;
             break;
         case CMD_CREATE:
             break;

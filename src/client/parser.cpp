@@ -1,8 +1,10 @@
 #include <iostream>
+#include <string>
 #include <unistd.h>
 #include <string.h>
 
 #include "parser.hpp"
+#include "../common/constants.hpp"
 
 using namespace std;
 
@@ -31,6 +33,34 @@ enum Command get_command(char *buf){
     else return CMD_INVALID;
 }
 
+bool parse_args(string &port, string &ip, char** argv, int argc){
+    int  opt;
+
+    // Max number of arguments is 5.
+    if(argc > 5)
+        return false;
+
+    // Put default argument values in case they are not present.
+    ip = DEFAULT_IP;
+    port = DEFAULT_PORT;
+
+    // opt will be option on argv and optarg is the next item on argv.
+    while ((opt = getopt(argc, argv, "n:p:")) != -1) {
+        switch (opt) {
+            case 'n':
+                ip = optarg;   
+                break;
+            case 'p':
+                port = optarg;
+                break;
+            // Unknown command (neither -n nor -p)
+            case '?':
+                return false;
+        }
+    }
+    return true;
+}
+
 enum Command parse_command(char *line, char **args){
     char command[COMMAND_SIZE];
     if(sscanf(line, "%s", command) < 1){
@@ -55,5 +85,5 @@ enum Command parse_command(char *line, char **args){
 
 bool parse_UID(char *arg){
     if(strlen(arg) != 6) return false;
-    
-}   
+    return true;
+}
