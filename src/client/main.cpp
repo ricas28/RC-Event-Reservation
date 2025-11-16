@@ -10,7 +10,7 @@
 using namespace std;
 
 /**
- * Checks if a user is logged in.
+ * Checks if a user is logged in. Printing a message if not.
  * 
  * @param logged_in Bool indicating if user is logged_in.
  * 
@@ -30,6 +30,9 @@ bool is_logged_in(bool logged_in){
 void process_commands(){
     bool logged_in = false, quit = false;
     char line[BUFFER_SIZE], *args;
+    // Client information
+    int uid; 
+    string pass;
 
     while(!quit){
         cout << "> ";
@@ -38,7 +41,6 @@ void process_commands(){
         // TODO: (Optional) Add Help command
         switch(parse_command(line, &args)){
             case CMD_LOGIN: {
-                int uid; string pass;
                 if(parse_login(args, &uid, &pass)){
                     //er_login();
                     logged_in = true;
@@ -54,12 +56,26 @@ void process_commands(){
                 break;
             }
             case CMD_UNREGISTER:
+                if(!is_logged_in(logged_in)) break;
+                if(parse_unregister(args)){
+                    //er_unregister();
+                }
                 break;
             case CMD_LOGOUT:
+                if(!is_logged_in(logged_in)) break;
+                if(parse_logout(args)){
+                    //er_logout();
+                    logged_in = false;
+                }
                 break;
             case CMD_EXIT:
-                // TODO: Implement logout needing to be done first before exit.
-                quit = true;
+                if(parse_exit(args)){
+                    if(logged_in){
+                        cout << "Currently logged In!" << endl;
+                        cout << "Please execute the 'logout' command first" << endl;
+                    }
+                    else quit = true;
+                }
                 break;
             case CMD_CREATE:
                 break;

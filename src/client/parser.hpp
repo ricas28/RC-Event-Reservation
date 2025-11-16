@@ -69,4 +69,31 @@ bool parse_login(char *args, int *uid, string *pass);
  */
 bool parse_change_pass(char *args, string *old_pass, string *new_pass);
 
+/**
+ * Parses a unregister command
+ * 
+ * @param args String with (hopefuly) no arguments.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_unregister(char *args);
+
+/**
+ * Parses a logout command
+ * 
+ * @param args String with (hopefuly) no arguments.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_logout(char *args);
+
+/**
+ * Parses an exit command
+ * 
+ * @param args String with (hopefuly) no arguments.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_exit(char *args);
+
 #endif

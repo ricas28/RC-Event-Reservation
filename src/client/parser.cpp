@@ -149,3 +149,30 @@ bool parse_change_pass(char *args, string *old_pass, string *new_pass){
     *new_pass = new_pass_temp;
     return true; 
 }
+
+bool parse_unregister(char *args){
+    if (args != NULL) {
+        cout << "This command has no arguments!" << endl;
+        cout << "Usage: unregister" << endl;
+        return false;
+    }
+    return true;
+}
+
+bool parse_logout(char *args){
+    if (args != NULL) {
+        cout << "This command has no arguments!" << endl;
+        cout << "Usage: logout" << endl;
+        return false;
+    }
+    return true;
+}
+
+bool parse_exit(char *args){
+    if (args != NULL) {
+        cout << "This command has no arguments!" << endl;
+        cout << "Usage: exit" << endl;
+        return false;
+    }
+    return true;
+}
