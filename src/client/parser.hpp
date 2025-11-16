@@ -45,6 +45,8 @@ enum Command parse_command(char *line, char **args);
  */
 bool parse_args(string &port, string &ip, char** argv, int argc);
 
+/* -------------------------------------------------------------------------- */
+
 /**
  * Parses a login command.
  * 
@@ -55,5 +57,16 @@ bool parse_args(string &port, string &ip, char** argv, int argc);
  * @returns true if parse is successful, false otherwise.
  */
 bool parse_login(char *args, int *uid, string *pass);
+
+/**
+ * Parses a changePass command.
+ * 
+ * @param args String with arguments.
+ * @param old_pass Pointer to old password.
+ * @param new_pass Pointer to new password.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_change_pass(char *args, string *old_pass, string *new_pass);
 
 #endif

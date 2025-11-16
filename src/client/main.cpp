@@ -10,55 +10,76 @@
 using namespace std;
 
 /**
- * Processes a command from the STDIN.
+ * Checks if a user is logged in.
  * 
- * @returns true if successful processing, false otherwise
- * (or if an 'exit' command is executed).
+ * @param logged_in Bool indicating if user is logged_in.
+ * 
+ * @returns true if user is logged in, false otherwise.
  */
-bool process_commands(){
-    //bool logged_in = false;
+bool is_logged_in(bool logged_in){
+    if(!logged_in){
+        cout << "You must be logged in order to perform this command!" << endl;
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Processes commands from the STDIN.
+ */
+void process_commands(){
+    bool logged_in = false, quit = false;
     char line[BUFFER_SIZE], *args;
 
-    cout << "> ";
-    if(parse_line(line) == -1) return false;
+    while(!quit){
+        cout << "> ";
+        if(parse_line(line) == -1) exit(EXIT_FAILURE);
 
-    switch(parse_command(line, &args)){
-        case CMD_LOGIN: {
-            int uid; string pass;
-            if(parse_login(args, &uid, &pass))
-              //  er_login();
-              //logged_in = true;
-            break;
-        }
-        case CMD_CHANGE_PASS:
-            break;
-        case CMD_UNREGISTER:
-            break;
-        case CMD_LOGOUT:
-            break;
-        case CMD_EXIT:
-            // TODO: Implement logout needing to be done first before exit.
-            return false;
-            break;
-        case CMD_CREATE:
-            break;
-        case CMD_CLOSE:
-            break;
-        case CMD_MYEVENTS:
-            break;
-        case CMD_LIST:
-            break;
-        case CMD_SHOW:
-            break;
-        case CMD_RESERVE:
-            break;
-        case CMD_MYRESERVATIONS:
-            break;
-        case CMD_INVALID:
-            cerr << "Invalid/Unknown command!\nSee help for usage." << endl;
-            break;
-    }   
-    return 1;
+        // TODO: (Optional) Add Help command
+        switch(parse_command(line, &args)){
+            case CMD_LOGIN: {
+                int uid; string pass;
+                if(parse_login(args, &uid, &pass)){
+                    //er_login();
+                    logged_in = true;
+                }
+                break;
+            }
+            case CMD_CHANGE_PASS: {
+                if(!is_logged_in(logged_in)) break;
+                string old_pass, new_pass;
+                if(parse_change_pass(args, &old_pass, &new_pass)){
+                    //er_change_pass();
+                }
+                break;
+            }
+            case CMD_UNREGISTER:
+                break;
+            case CMD_LOGOUT:
+                break;
+            case CMD_EXIT:
+                // TODO: Implement logout needing to be done first before exit.
+                quit = true;
+                break;
+            case CMD_CREATE:
+                break;
+            case CMD_CLOSE:
+                break;
+            case CMD_MYEVENTS:
+                break;
+            case CMD_LIST:
+                break;
+            case CMD_SHOW:
+                break;
+            case CMD_RESERVE:
+                break;
+            case CMD_MYRESERVATIONS:
+                break;
+            case CMD_INVALID:
+                cerr << "Invalid/Unknown command!\nSee help for usage." << endl;
+                break;
+        }   
+    }
 }
 
 int main(int argc, char** argv){
@@ -70,10 +91,6 @@ int main(int argc, char** argv){
     }
     
     cout << "Insert commands below:" << endl;
-    while(1){
-        if(!process_commands())
-            exit(EXIT_FAILURE);
-    }
-
+    process_commands();
     return EXIT_SUCCESS;
 }

@@ -84,11 +84,12 @@ enum Command parse_command(char *line, char **args){
     return get_command(command);
 }
 
+/* ------------------------------------------------------------------------- */
 bool parse_login(char *args, int *uid, string *pass){
+    bool error = false;
     char uid_temp[BUF_TEMP], pass_temp[BUF_TEMP], extra[BUF_TEMP];
 
     int n = sscanf(args, "%63s %63s %255s", uid_temp, pass_temp, extra);
-
     if (n < 2) {
         cout << "Invalid arguments! Not enough arguments." << endl;
         cout << "Usage: login <userID> <password>" << endl;
@@ -101,15 +102,50 @@ bool parse_login(char *args, int *uid, string *pass){
     }
     if (!is_valid_userid(uid_temp)) {
         cout << "Invalid userID! Must be exactly 6 digits." << endl;
-        return false;
+        error = true;
     }
     if (!is_valid_password(pass_temp)) {
         cout << "Invalid password! Must be exactly 8 alphanumeric characters." << endl;
-        return false;
+        error = true;
     }
-    //successful parse.
+    if (error) return false;
+    // Successful parse.
     *uid = atoi(uid_temp);
     *pass = pass_temp;
-    cout << "Parsed " << *uid << " and " << *pass <<endl;
+
     return true;
+}
+
+bool parse_change_pass(char *args, string *old_pass, string *new_pass){
+    bool error = false;
+    char old_pass_temp[BUF_TEMP], new_pass_temp[BUF_TEMP], extra[BUFFER_SIZE];
+
+    int n = sscanf(args, "%63s %63s %255s", old_pass_temp, new_pass_temp, extra);
+    if (n < 2) {
+        cout << "Invalid arguments! Not enough arguments." << endl;
+        cout << "Usage: changePass <oldPassword> <newPassword>" << endl;
+        return false;
+    }
+    if (n > 2) {
+        cout << "Invalid arguments! Too many arguments." << endl;
+        cout << "Usage: changePass <oldPassword> <newPassword>" << endl;
+        return false;
+    }
+    if (!is_valid_password(old_pass_temp)) {
+        cout << "Old password is invalid! Must be exactly 8 alphanumeric characters." << endl;
+        error = true;
+    }
+    if (!is_valid_password(new_pass_temp)) {
+        cout << "New password is invalid! Must be exactly 8 alphanumeric characters." << endl;
+        error = true;
+    }
+    if(strcmp(old_pass_temp, new_pass_temp) == 0){
+        cout << "Passwords can't be equal!" << endl;
+        error = true;
+    }
+    if (error) return false;
+    // Successful parse.
+    *old_pass = old_pass_temp;
+    *new_pass = new_pass_temp;
+    return true; 
 }
