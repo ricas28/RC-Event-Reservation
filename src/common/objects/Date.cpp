@@ -2,6 +2,8 @@
 
 #include "Date.hpp"
 
+using namespace std;
+
 // --- Helper functions ---
 int Date::daysInMonth(int m, int y){
     switch (m) {
@@ -66,8 +68,8 @@ void Date::nextDay() {
 }
 
 void Date::print() {
-    std::cout << (day < 10 ? "0" : "") << day << "/"
-              << (month < 10 ? "0" : "") << month << "/"
+    cout << (day < 10 ? "0" : "") << day << "-"
+              << (month < 10 ? "0" : "") << month << "-"
               << year;
 }
 

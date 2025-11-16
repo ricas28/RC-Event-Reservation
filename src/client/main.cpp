@@ -5,6 +5,7 @@
 
 #include "../common/constants.hpp"
 #include "../common/io.hpp"
+#include "../common/objects/Date.hpp"
 #include "parser.hpp"
 
 using namespace std;
@@ -76,9 +77,12 @@ void process_commands(){
                 }
                 break;
             case CMD_CREATE: {
-               // string name, event_fname, num_attendes;
-               // if(parse_create(args)){
-                //    er_create()
+                if(!is_logged_in(logged_in)) break;
+               // string name, event_fname, num_attendes; 
+                //Date event_date;
+                //int num_attendees;
+                //if(parse_create(args)){
+                    //er_create();
                 //}
                 break;
             }

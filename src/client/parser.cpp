@@ -5,6 +5,7 @@
 
 #include "../common/constants.hpp"
 #include "../common/util.hpp"
+#include "../common/objects/Date.hpp"
 #include "parser.hpp"
 
 using namespace std;
@@ -64,20 +65,24 @@ bool parse_args(string &port, string &ip, char** argv, int argc){
 
 enum Command parse_command(char *line, char **args){
     char command[COMMAND_SIZE];
-    if(sscanf(line, "%15s", command) < 1){
+    if (sscanf(line, "%15s", command) < 1) {
         cout << "Failure to parse command!" << endl;
+        return CMD_INVALID;
     }
 
     size_t command_size = strlen(command);
-    // Put args pointing to the next space after the command.
-      if (line[command_size] == ' ') {
-        *args = line + command_size + 1;
-
-        // Remove newline from the end, if it exists.
+    // Move pointer past the command
+    char* ptr = line + command_size;
+    // Skip all spaces
+    while (*ptr && isspace(*ptr)) ptr++;
+    if (*ptr) {
+        *args = ptr;
+        // Remove newline at the end, if present
         size_t len = strlen(*args);
         if (len > 0 && (*args)[len-1] == '\n')
             (*args)[len-1] = '\0';
-    } else {
+    } 
+    else {
         *args = NULL;
     }
 
@@ -85,18 +90,14 @@ enum Command parse_command(char *line, char **args){
 }
 
 /* ------------------------------------------------------------------------- */
+
 bool parse_login(char *args, int *uid, string *pass){
     bool error = false;
     char uid_temp[BUF_TEMP], pass_temp[BUF_TEMP], extra[BUF_TEMP];
 
     int n = sscanf(args, "%63s %63s %255s", uid_temp, pass_temp, extra);
-    if (n < 2) {
-        cout << "Invalid arguments! Not enough arguments." << endl;
-        cout << "Usage: login <userID> <password>" << endl;
-        return false;
-    }
-    if (n > 2) {
-        cout << "Invalid arguments! Too many arguments." << endl;
+    if (n != 2) {
+        cout << "Invalid arguments!" << endl;
         cout << "Usage: login <userID> <password>" << endl;
         return false;
     }
@@ -121,13 +122,8 @@ bool parse_change_pass(char *args, string *old_pass, string *new_pass){
     char old_pass_temp[BUF_TEMP], new_pass_temp[BUF_TEMP], extra[BUFFER_SIZE];
 
     int n = sscanf(args, "%63s %63s %255s", old_pass_temp, new_pass_temp, extra);
-    if (n < 2) {
-        cout << "Invalid arguments! Not enough arguments." << endl;
-        cout << "Usage: changePass <oldPassword> <newPassword>" << endl;
-        return false;
-    }
-    if (n > 2) {
-        cout << "Invalid arguments! Too many arguments." << endl;
+    if (n != 2) {
+        cout << "Invalid arguments!" << endl;
         cout << "Usage: changePass <oldPassword> <newPassword>" << endl;
         return false;
     }
@@ -176,3 +172,10 @@ bool parse_exit(char *args){
     }
     return true;
 }
+
+/**
+bool parse_create(char *args, string *name, string *event_fname, 
+                                        Date *event_date, int *num_attendees){
+    
+}
+ */
