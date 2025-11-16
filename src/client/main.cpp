@@ -51,55 +51,66 @@ int parse_args(string &port, string &ip, char** argv, int argc){
     return 1;
 }
 
+/**
+ * Processes a command from the STDIN.
+ * 
+ * @returns 1 if successful processing, 0 otherwise.
+ */
+int process_commands(){
+    char line[BUFFER_SIZE], *args;
+
+    if(!fgets(line, sizeof(line), stdin)){
+        perror("Failure to read command.");
+        return 0;
+    }
+        
+    // TODO: Create function on the api file and put them here.
+    switch(parse_command(line, &args)){
+        case CMD_LOGIN:
+            break;
+        case CMD_CHANGE_PASS:
+            break;
+        case CMD_UNREGISTER:
+            break;
+        case CMD_LOGOUT:
+            break;
+        case CMD_EXIT:
+            // TODO: Implement logout needing to be done first before exit.
+            return 0;
+            break;
+        case CMD_CREATE:
+            break;
+        case CMD_CLOSE:
+            break;
+        case CMD_MYEVENTS:
+            break;
+        case CMD_LIST:
+            break;
+        case CMD_SHOW:
+            break;
+        case CMD_RESERVE:
+            break;
+        case CMD_MYRESERVATIONS:
+            break;
+        case CMD_INVALID:
+            cerr << "Invalid/Unknown command" << endl;
+            break;
+    }   
+    return 1;
+}
+
 int main(int argc, char** argv){
     string port, ip;
-    bool exit = false;
 
     if(!parse_args(port, ip, argv, argc)){
         cerr << "Usage: " << argv[0] <<  " [-n ESIP] [-p ESport]" << endl;
-        return 1;
+        exit(EXIT_FAILURE);
     }
     
-    char line[BUFFER_SIZE];
-    while(!exit){
-        if(!fgets(line, sizeof(line), stdin)){
-            perror("Failure to read command.");
-            break;
-        }
-        
-        char *args;
-        // TODO: Create function on the api file and put them here.
-        switch(parse_command(line, &args)){
-            case CMD_LOGIN:
-                break;
-            case CMD_CHANGE_PASS:
-                break;
-            case CMD_UNREGISTER:
-                break;
-            case CMD_LOGOUT:
-                break;
-            case CMD_EXIT:
-                // TODO: Implement logout needing to be done first before exit.
-                exit = true;
-                break;
-            case CMD_CREATE:
-                break;
-            case CMD_CLOSE:
-                break;
-            case CMD_MYEVENTS:
-                break;
-            case CMD_LIST:
-                break;
-            case CMD_SHOW:
-                break;
-            case CMD_RESERVE:
-                break;
-            case CMD_MYRESERVATIONS:
-                break;
-            case CMD_INVALID:
-                cerr << "Invalid/Unknown command" << endl;
-                break;
-        }   
+    while(1){
+        if(!process_commands())
+            exit(EXIT_FAILURE);
     }
-    return 0;
+
+    return EXIT_SUCCESS;
 }
