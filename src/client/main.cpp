@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <unistd.h>
 
 #include "../common/constants.hpp"
 #include "parser.hpp"
@@ -23,30 +24,30 @@ using namespace std;
  * @returns 1 if parse is successful, 0 otherwise.
  */
 int parse_args(string &port, string &ip, char** argv, int argc){
-    bool seen_ip = false, seen_port = false;
+    int  opt;
+
     // Max number of arguments is 5.
     if(argc > 5)
         return 0;
 
-    // Loop through every argument, ignoring argv[0].
-    for(int i = 1; i < argc; i += 2){
-        // IP is given.
-        if(strcmp(argv[i], "-n") == 0 && !seen_ip && i + 1 < argc){
-            ip = argv[i + 1];
-            seen_ip = true;
-        } 
-        // Port is given.
-        else if(strcmp(argv[i], "-p") == 0 && !seen_port && i + 1 < argc){
-            port = argv[i + 1];
-            seen_port = true;
-        }
-        else{
-            return 0;
+    // Put default argument values in case they are not present.
+    ip = DEFAULT_IP;
+    port = DEFAULT_PORT;
+
+    // opt will be option on argv and optarg is the next item on argv.
+    while ((opt = getopt(argc, argv, "n:p:")) != -1) {
+        switch (opt) {
+            case 'n':
+                ip = optarg;   
+                break;
+            case 'p':
+                port = optarg;
+                break;
+            // Unknown command (neither -n nor -p)
+            case '?':
+                return 0;
         }
     }
-    // In case one or more arguments weren't present
-    if(!seen_ip) ip = DEFAULT_IP;
-    if(!seen_port) port = DEFAULT_PORT;
     return 1;
 }
 
