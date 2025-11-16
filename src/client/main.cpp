@@ -71,7 +71,7 @@ void process_commands(){
             case CMD_EXIT:
                 if(parse_exit(args)){
                     if(logged_in){
-                        cout << "Currently logged In!" << endl;
+                        cout << "Currently logged in!" << endl;
                         cout << "Please execute the 'logout' command first" << endl;
                     }
                     else quit = true;
