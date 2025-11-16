@@ -11,8 +11,7 @@
 using namespace std;
 
 /**
- * Parses the command line arguments and returns 1 when the parse is 
- * successful and 0 otherwise.
+ * Parses the command line arguments.
  * 
  * @param port Addres of string representing the server's port.
  * (If this parameter is not present it will be equal to DEFAULT_PORT: 58009)
@@ -21,14 +20,14 @@ using namespace std;
  * @param argv Command line arguments.
  * @param argc Number of arguments.
  * 
- * @returns 1 if parse is successful, 0 otherwise.
+ * @returns true if parse is successful, false otherwise.
  */
-int parse_args(string &port, string &ip, char** argv, int argc){
+bool parse_args(string &port, string &ip, char** argv, int argc){
     int  opt;
 
     // Max number of arguments is 5.
     if(argc > 5)
-        return 0;
+        return false;
 
     // Put default argument values in case they are not present.
     ip = DEFAULT_IP;
@@ -45,10 +44,10 @@ int parse_args(string &port, string &ip, char** argv, int argc){
                 break;
             // Unknown command (neither -n nor -p)
             case '?':
-                return 0;
+                return false;
         }
     }
-    return 1;
+    return true;
 }
 
 /**
@@ -67,6 +66,8 @@ int process_commands(){
     // TODO: Create function on the api file and put them here.
     switch(parse_command(line, &args)){
         case CMD_LOGIN:
+            //if(parse_login(args))
+              //  er_login()
             break;
         case CMD_CHANGE_PASS:
             break;

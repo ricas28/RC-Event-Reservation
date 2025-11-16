@@ -52,3 +52,8 @@ enum Command parse_command(char *line, char **args){
 
     return get_command(command);
 }
+
+bool parse_UID(char *arg){
+    if(strlen(arg) != 6) return false;
+    
+}   
