@@ -10,16 +10,16 @@ void clean_up_stdin(){
     while ((c = getchar()) != '\n' && c != EOF);
 }
 
-bool parse_line(char *line){
+int parse_line(char *line){
     if(!fgets(line, BUFFER_SIZE, stdin)){
         perror("Failure to read command.");
-        return false;
+        return -1;
     }
     // End of command wasn't found. Command is too long.
     if (strchr(line, '\n') == NULL) {
-        cout << "Command was too long" << endl;
+        cout << "Command was too long!" << endl;
         clean_up_stdin();
-        return false;
+        return 0;
     }
-    return true;
+    return 1;
 }

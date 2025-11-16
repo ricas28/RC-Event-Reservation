@@ -18,7 +18,8 @@ using namespace std;
 bool process_commands(){
     char line[BUFFER_SIZE], *args;
 
-    if(!parse_line(line)) return false;
+    cout << "> ";
+    if(parse_line(line) == -1) return false;
 
     switch(parse_command(line, &args)){
         case CMD_LOGIN:
@@ -64,6 +65,7 @@ int main(int argc, char** argv){
         exit(EXIT_FAILURE);
     }
     
+    cout << "Insert commands below:" << endl;
     while(1){
         if(!process_commands())
             exit(EXIT_FAILURE);

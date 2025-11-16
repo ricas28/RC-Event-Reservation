@@ -6,9 +6,11 @@
  * 
  * @param line buffer for storing the command.
  * 
- * @returns true if parse is successful, false otherwise.
+ * @returns -1 if an error occurs while readinf from the stdin,
+ *           0 if command given exceeds the buffer size,
+ *           1 for a successful parse.
  */
-bool parse_line(char *line);
+int parse_line(char *line);
 
 /**
  * Does a clean up of the stdin.
