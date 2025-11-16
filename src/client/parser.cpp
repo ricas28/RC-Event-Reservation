@@ -3,8 +3,9 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "parser.hpp"
 #include "../common/constants.hpp"
+#include "../common/util.hpp"
+#include "parser.hpp"
 
 using namespace std;
 
@@ -63,8 +64,8 @@ bool parse_args(string &port, string &ip, char** argv, int argc){
 
 enum Command parse_command(char *line, char **args){
     char command[COMMAND_SIZE];
-    if(sscanf(line, "%s", command) < 1){
-        perror("Failure to parse command");
+    if(sscanf(line, "%15s", command) < 1){
+        cout << "Failure to parse command!" << endl;
     }
 
     size_t command_size = strlen(command);
@@ -83,7 +84,32 @@ enum Command parse_command(char *line, char **args){
     return get_command(command);
 }
 
-bool parse_UID(char *arg){
-    if(strlen(arg) != 6) return false;
+bool parse_login(char *args, int *uid, string *pass){
+    char uid_temp[BUF_TEMP], pass_temp[BUF_TEMP], extra[BUF_TEMP];
+
+    int n = sscanf(args, "%63s %63s %255s", uid_temp, pass_temp, extra);
+
+    if (n < 2) {
+        cout << "Invalid arguments! Not enough arguments." << endl;
+        cout << "Usage: login <userID> <password>" << endl;
+        return false;
+    }
+    if (n > 2) {
+        cout << "Invalid arguments! Too many arguments." << endl;
+        cout << "Usage: login <userID> <password>" << endl;
+        return false;
+    }
+    if (!is_valid_userid(uid_temp)) {
+        cout << "Invalid userID! Must be exactly 6 digits." << endl;
+        return false;
+    }
+    if (!is_valid_password(pass_temp)) {
+        cout << "Invalid password! Must be exactly 8 alphanumeric characters." << endl;
+        return false;
+    }
+    //successful parse.
+    *uid = atoi(uid_temp);
+    *pass = pass_temp;
+    cout << "Parsed " << *uid << " and " << *pass <<endl;
     return true;
 }

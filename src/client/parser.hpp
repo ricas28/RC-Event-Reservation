@@ -45,4 +45,15 @@ enum Command parse_command(char *line, char **args);
  */
 bool parse_args(string &port, string &ip, char** argv, int argc);
 
+/**
+ * Parses a login command.
+ * 
+ * @param args String with arguments.
+ * @param uid Pointer to store user id.
+ * @param pass Pointer to password.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_login(char *args, int *uid, string *pass);
+
 #endif

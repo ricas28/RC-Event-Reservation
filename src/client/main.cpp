@@ -16,16 +16,20 @@ using namespace std;
  * (or if an 'exit' command is executed).
  */
 bool process_commands(){
+    //bool logged_in = false;
     char line[BUFFER_SIZE], *args;
 
     cout << "> ";
     if(parse_line(line) == -1) return false;
 
     switch(parse_command(line, &args)){
-        case CMD_LOGIN:
-            //if(parse_login(args))
-              //  er_login()
+        case CMD_LOGIN: {
+            int uid; string pass;
+            if(parse_login(args, &uid, &pass))
+              //  er_login();
+              //logged_in = true;
             break;
+        }
         case CMD_CHANGE_PASS:
             break;
         case CMD_UNREGISTER:
@@ -51,7 +55,7 @@ bool process_commands(){
         case CMD_MYRESERVATIONS:
             break;
         case CMD_INVALID:
-            cerr << "Invalid/Unknown command" << endl;
+            cerr << "Invalid/Unknown command!\nSee help for usage." << endl;
             break;
     }   
     return 1;
