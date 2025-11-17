@@ -16,6 +16,13 @@ int Date::daysInMonth(int m, int y){
     }
 }
 
+bool Date::isValidDate(int d, int m, int y){
+    if (m < 1 || m > 12) return false;
+    if (d < 1 || d > daysInMonth(m, y)) return false;
+    return true;
+}
+
+
 // --- Constructor ---
 Date::Date(int d, int m, int y) {
     if (isValidDate(d, m, y)) {
@@ -24,9 +31,9 @@ Date::Date(int d, int m, int y) {
         year = y;
     } else {
         // Default fallback date if invalid
-        day = 1;
-        month = 1;
-        year = 2000;
+        day = -1;
+        month = -1;
+        year = -1;
     }
 }
 
@@ -49,10 +56,9 @@ void Date::setYear(int y) {
 }
 
 // --- Methods ---
-bool Date::isValidDate(int d, int m, int y){
-    if (m < 1 || m > 12) return false;
-    if (d < 1 || d > daysInMonth(m, y)) return false;
-    return true;
+
+bool Date::invalidDate(){
+    return day == -1 && month == -1 && year == -1;
 }
 
 void Date::nextDay() {
@@ -81,5 +87,16 @@ bool Date::isAfter(Date& other) {
     if (month < other.month) return false;
 
     return day > other.day;
+}
+
+bool Date::isPast() {
+    // Get current date.
+    time_t t = time(nullptr);
+    tm* now = localtime(&t);
+    // tm_year is counting from 1900.
+    Date today(now->tm_mday, now->tm_mon + 1, now->tm_year + 1900);
+
+    // Date is past if isn't in the future or not the current date
+    return !this->isAfter(today) && !(day == today.getDay() && month == today.getMonth() && year == today.getYear());
 }
 

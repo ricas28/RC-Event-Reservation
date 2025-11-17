@@ -1,5 +1,5 @@
 #ifndef __DATE__HPP__
-#define __DATE__Hpp__
+#define __DATE__HPP__
 
 class Date {
 private:
@@ -9,6 +9,8 @@ private:
 
     // Returns how many days are on a month.
     int daysInMonth(int m, int y);
+    // Checks if date is valid.
+    bool isValidDate(int d, int m, int y);
 
 public:
     // Constructor
@@ -26,14 +28,16 @@ public:
 
     // Methods
 
-    // Checks if date is valid.
-    bool isValidDate(int d, int m, int y);
+    // Checks if date is invalid from the constructor.
+    bool invalidDate();
     // Advances the date by one day
     void nextDay();  
     // Prints the date in DD/MM/YYYY format
     void print();    
     // Compares this date to another
     bool isAfter(Date& other);
+    // Checkls if date is before current date.
+    bool isPast();
 };
 
 #endif

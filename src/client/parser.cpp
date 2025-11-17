@@ -5,8 +5,8 @@
 
 #include "../common/constants.hpp"
 #include "../common/util.hpp"
-#include "../common/objects/Date.hpp"
-#include "parser.hpp"
+#include "../common/Date.hpp"
+#include "commands.hpp"
 
 using namespace std;
 
@@ -93,7 +93,7 @@ enum Command parse_command(char *line, char **args){
 
 bool parse_login(char *args, int *uid, string *pass){
     bool error = false;
-    char uid_temp[BUF_TEMP], pass_temp[BUF_TEMP], extra[BUF_TEMP];
+    char uid_temp[BUF_TEMP], pass_temp[BUF_TEMP], extra[BUFFER_SIZE];
 
     int n = sscanf(args, "%63s %63s %255s", uid_temp, pass_temp, extra);
     if (n != 2) {
@@ -146,6 +146,8 @@ bool parse_change_pass(char *args, string *old_pass, string *new_pass){
     return true; 
 }
 
+
+/** --- No arguments commands --- */
 bool parse_unregister(char *args){
     if (args != NULL) {
         cout << "This command has no arguments!" << endl;
@@ -173,9 +175,133 @@ bool parse_exit(char *args){
     return true;
 }
 
-/**
+bool parse_myevents(char *args){
+    if (args != NULL) {
+        cout << "This command has no arguments!" << endl;
+        cout << "Usage: myevents (or) mye" << endl;
+        return false;
+    }
+    return true;
+}
+
+bool parse_list(char *args){
+    if (args != NULL) {
+        cout << "This command has no arguments!" << endl;
+        cout << "Usage: list" << endl;
+        return false;
+    }
+    return true;
+}
+
+bool parse_myreservations(char *args){
+    if (args != NULL) {
+        cout << "This command has no arguments!" << endl;
+        cout << "Usage: myreservations (or) myr" << endl;
+        return false;
+    }
+    return true;
+}
+/* ----------------------------------*/
+
 bool parse_create(char *args, string *name, string *event_fname, 
                                         Date *event_date, int *num_attendees){
-    
+    char name_temp[BUF_TEMP], event_fname_temp[BUF_TEMP], extra[BUFFER_SIZE];
+    int day, month, year, num_attendees_temp;
+    bool error = false;
+
+    int n = sscanf(args, "%63s %63s %d-%d-%d %d %255s", name_temp, event_fname_temp, 
+                                        &day, &month, &year, &num_attendees_temp, extra);
+
+    if(n != 6){
+        cout << "Invalid arguments!" << endl;
+        cout << "Usage: create <name> <event_fname> ";
+        cout << "<event_date> (format dd-mm-yyyy) <num_attendees>" << endl;
+        return false;
+    }
+    if(!is_valid_event_name(name_temp)){
+        cout << "Invalid event name! Must be up to 10 alphanumeric characters." << endl;
+        error = true;
+    }
+    if(!is_valid_file_name(event_fname_temp)){
+        cout << "Invalid file name! Must be up to 24 alphanumeric characters ";
+        cout << "(plus '-', '_' and '.'), including the 3-letter extension." << endl;
+        error = true;
+    }
+    if(!file_exists(event_fname_temp)){
+        cout << "Invalid file! File does not exist or does not exist on the current folder." << endl;
+        error = true;
+    }
+    if(!is_valid_date(day, month, year)){
+        cout << "Invalid date! Date is invalid or before current date." << endl;
+        error = true;
+    }
+    if(!is_valid_num_attendees(num_attendees_temp)){
+        cout << "Invalid number of attendees! Must be number from 10 to 999." << endl;
+        error = true;
+    }
+    if (error) return false; 
+    // Successful parse.
+    *name = name_temp;
+    *event_fname = event_fname_temp;
+    *event_date = Date(day, month, year);
+    *num_attendees = num_attendees_temp;
+    return true;
 }
- */
+
+bool parse_close(char *args, int *eid){
+    char eid_temp[BUF_TEMP], extra[BUFFER_SIZE];
+
+    int n = sscanf(args, "%63s %255s", eid_temp, extra);
+    if(n != 1){
+        cout << "Invalid arguments!\nUsage: close <EID>" << endl;
+        return false;
+    }
+    if(!is_valid_eid(eid_temp)){
+        cout << "Invalid eventID! Must be a 3 number digit." << endl;
+        return false;
+    }
+    // Successful parse.
+    *eid = atoi(eid_temp);
+    return true;
+}
+
+bool parse_show(char *args, int *eid){
+    char eid_temp[BUF_TEMP], extra[BUFFER_SIZE];
+
+    int n = sscanf(args, "%63s %255s", eid_temp, extra);
+    if(n != 1){
+        cout << "Invalid arguments!\nUsage: show <EID>" << endl;
+        return false;
+    }
+    if(!is_valid_eid(eid_temp)){
+        cout << "Invalid eventID! Must be a 3 number digit." << endl;
+        return false;
+    }
+    // Successful parse.
+    *eid = atoi(eid_temp);
+    return true;
+}
+
+bool parse_reserve(char *args, int *eid, int *seats){
+    char eid_temp[BUF_TEMP], seats_temp[BUF_TEMP], extra[BUFFER_SIZE];
+    bool error = false;
+
+    int n = sscanf(args, "%63s %63s %255s", eid_temp, seats_temp, extra);
+    if(n != 1){
+        cout << "Invalid arguments!\nUsage: close <EID>" << endl;
+        return false;
+    }
+    if(!is_valid_eid(eid_temp)){
+        cout << "Invalid eventID! Must be a 3 number digit." << endl;
+        error = true;
+    }
+    if(!is_positive_integer(seats_temp)){
+        cout << "Invalid number of seats! Must be a positive integer" << endl;
+        error = true;
+    }
+    if (error) return false;
+    // Successful parse.
+    *eid = atoi(eid_temp);
+    *seats = atoi(seats_temp);
+    return true;
+}

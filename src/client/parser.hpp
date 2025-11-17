@@ -3,23 +3,10 @@
 
 #include <string>
 
-using namespace std;
+#include "../common/Date.hpp"
+#include "commands.hpp"
 
-enum Command{
-    CMD_LOGIN,
-    CMD_CREATE,
-    CMD_CLOSE,
-    CMD_MYEVENTS,
-    CMD_LIST,
-    CMD_SHOW,
-    CMD_RESERVE,
-    CMD_MYRESERVATIONS,
-    CMD_CHANGE_PASS,
-    CMD_UNREGISTER,
-    CMD_LOGOUT,
-    CMD_EXIT,
-    CMD_INVALID
-};
+using namespace std;
 
 /**
  * Parses a command, separating the actual command from the arguments.
@@ -70,30 +57,105 @@ bool parse_login(char *args, int *uid, string *pass);
 bool parse_change_pass(char *args, string *old_pass, string *new_pass);
 
 /**
- * Parses a unregister command
+ * Parses a unregister command.
  * 
- * @param args String with (hopefuly) no arguments.
+ * @param args String with (hopefully) no arguments.
  * 
  * @returns true if parse is successful, false otherwise.
  */
 bool parse_unregister(char *args);
 
 /**
- * Parses a logout command
+ * Parses a logout command.
  * 
- * @param args String with (hopefuly) no arguments.
+ * @param args String with (hopefully) no arguments.
  * 
  * @returns true if parse is successful, false otherwise.
  */
 bool parse_logout(char *args);
 
 /**
- * Parses an exit command
+ * Parses an exit command.
  * 
- * @param args String with (hopefuly) no arguments.
+ * @param args String with (hopefully) no arguments.
  * 
  * @returns true if parse is successful, false otherwise.
  */
 bool parse_exit(char *args);
+
+/**
+ * Parses a myevents command.
+ * 
+ * @param args String with (hopefully) no arguments.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_myevents(char *args);
+
+/**
+ * Parses a list command.
+ * 
+ * @param args String with (hopefully) no arguments.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_list(char *args);
+
+/**
+ * Parses a myreservations command.
+ * 
+ * @param args String with (hopefully) no arguments.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_myreservations(char *args);
+
+/**
+ * Parses a create command.
+ * 
+ * @param args String with arguments.
+ * @param name Pointer to a string that will contain the event's name.
+ * @param event_fname Pointer to a string that will contain the name of the 
+ *  file with the event's details.
+ * @param event_date Pointer to a Date object that will contain the event's date.
+ * @param num_attendees Pointer to an integer that will contain the number of
+ *  people who can attend the event.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_create(char *args, string *name, string *event_fname, 
+                                        Date *event_date, int *num_attendees);
+
+/**
+ * Parses a close command.
+ * 
+ * @param args String with arguments.
+ * @param eid Pointer to an int that will contain the event id.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_close(char *args, int *eid);
+
+/**
+ * Parses a show command.
+ * 
+ * @param args String with arguments.
+ * @param eid Pointer to an int that will contain the event id.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_show(char *args, int *eid);
+
+/**
+ * Parses a reserve command.
+ * 
+ * @param args String with arguments.
+ * @param eid Pointer to an integer that will contain the event id.
+ * @param seats Pointer to an integer that will contain the number of seats
+ *  to be reserved.
+ * 
+ * @return true if parse is successful, false otherwise.
+ */
+bool parse_reserve(char *args, int *eid, int *seats);
 
 #endif

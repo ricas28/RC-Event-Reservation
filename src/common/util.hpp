@@ -2,7 +2,7 @@
 #define __UTIL__HPP__
 
 /**
- * Chekcs if the content of a string represents a valid user id.
+ * Checks if the content of a string represents a valid user id.
  * 
  * @param s String.
  * 
@@ -11,12 +11,78 @@
 bool is_valid_userid(char *s);
 
 /**
- * Chekcs if the content of a string represents a valid password.
+ * Checks if the content of a string represents a valid password.
  * 
  * @param s String.
  * 
  * @returns true if has a valid password, false otherwise.
  */
 bool is_valid_password(char *s);
+
+/**
+ * Checks if the content of a string represents a valid event name.
+ * 
+ * @param s String.
+ * 
+ * @returns true if has a valid event name, false otherwise.
+ */
+bool is_valid_event_name(char *s);
+
+/**
+ * Checks if the content of a string represents a valid file name.
+ * 
+ * @param s String.
+ * 
+ * @returns true if has a valid file name, false otherwise.
+ */
+bool is_valid_file_name(char *s);
+
+/**
+ * Checks if a file with the given name existe on the current directory.
+ * 
+ * @param file_name String reprsenting the name of a file.
+ * 
+ * @returns true if file exists on the current directory, false otherwise.
+ */
+bool file_exists(char *file_name);
+
+/**
+ * Checks if a day with the given attributes is valid.
+ * (Valid date and not in the past).
+ * 
+ * @param day Day of the date.
+ * @param month Month of the date.
+ * @param year Year of the date.
+ * 
+ * @returns true if it's a valid date, false otherwise.
+ */
+bool is_valid_date(int day, int month, int year);
+
+/**
+ * Checks if the given number is a valid number of attendees (10-999).
+ * 
+ * @param num_attendees Number of attendees.
+ * 
+ * @returns true if it's a valid number, false otherwise.
+ */
+bool is_valid_num_attendees(int num_attendees);
+
+/**
+ * Checks if the content of a string represents a valid event id.
+ * 
+ * @param s String.
+ * 
+ * @returns true if has a valid event id, false otherwise.
+ */
+bool is_valid_eid(char *s);
+
+/**
+ * Checks if the content of a string has a positive integer.
+ * 
+ * @param s String.
+ * 
+ * @returns true if it's a positive integer, false otherwise.
+ */
+bool is_positive_integer(char *s);
 
 #endif

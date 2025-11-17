@@ -5,25 +5,10 @@
 
 #include "../common/constants.hpp"
 #include "../common/io.hpp"
-#include "../common/objects/Date.hpp"
 #include "parser.hpp"
+#include "commands.hpp"
 
 using namespace std;
-
-/**
- * Checks if a user is logged in. Printing a message if not.
- * 
- * @param logged_in Bool indicating if user is logged_in.
- * 
- * @returns true if user is logged in, false otherwise.
- */
-bool is_logged_in(bool logged_in){
-    if(!logged_in){
-        cout << "user not logged In" << endl;
-        return false;
-    }
-    return true;
-}
 
 /**
  * Processes commands from the STDIN.
@@ -35,68 +20,48 @@ void process_commands(){
     int uid; 
     string pass;
 
+    // TODO: Implement client class that has uid, pass and logged_in status.
     while(!quit){
         cout << "> ";
         if(parse_line(line) == -1) exit(EXIT_FAILURE);
 
         // TODO: (Optional) Add Help command
         switch(parse_command(line, &args)){
-            case CMD_LOGIN: {
-                if(parse_login(args, &uid, &pass)){
-                    //er_login(&logged_in);
-                }
+            case CMD_LOGIN:
+                handle_login(args, &logged_in);
                 break;
-            }
-            case CMD_CHANGE_PASS: {
-                if(!is_logged_in(logged_in)) break;
-                string old_pass, new_pass;
-                if(parse_change_pass(args, &old_pass, &new_pass)){
-                    //er_change_pass();
-                }
+            case CMD_CHANGE_PASS:
+                handle_change_pass(args, &logged_in);
                 break;
-            }
             case CMD_UNREGISTER:
-                if(!is_logged_in(logged_in)) break;
-                if(parse_unregister(args)){
-                    //er_unregister();
-                }
+                handle_unregister(args, &logged_in);
                 break;
             case CMD_LOGOUT:
-                if(!is_logged_in(logged_in)) break;
-                if(parse_logout(args)){
-                    //er_logout(&logged_in);
-                }
+                handle_logout(args, &logged_in);
                 break;
             case CMD_EXIT:
-                if(parse_exit(args)){
-                    if(logged_in){
-                        cout << "Currently logged in!" << endl;
-                        cout << "Please execute the 'logout' command first" << endl;
-                    }
-                    else quit = true;
-                }
+                handle_exit(args, &logged_in, &quit);
                 break;
-            case CMD_CREATE: {
-                if(!is_logged_in(logged_in)) break;
-               // string name, event_fname, num_attendes; 
-                //Date event_date;
-                //int num_attendees;
-                //if(parse_create(args)){
-                    //er_create();
-                //}
+            case CMD_CREATE:
+                handle_create(args, &logged_in);
                 break;
-            }
             case CMD_CLOSE:
+                handle_close(args, &logged_in);
                 break;
             case CMD_MYEVENTS:
+                handle_myevents(args, &logged_in);
                 break;
             case CMD_LIST:
+                handle_list(args, &logged_in);
                 break;
             case CMD_SHOW:
+                handle_show(args, &logged_in);
                 break;
             case CMD_RESERVE:
+                handle_reserve(args, &logged_in);
                 break;
             case CMD_MYRESERVATIONS:
+                handle_myreservations(args, &logged_in);
                 break;
             case CMD_INVALID:
                 cerr << "Invalid/Unknown command!\nSee help for usage." << endl;
