@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "../common/Date.hpp"
+#include "../common/DateTime.hpp"
 #include "parser.hpp"
 
 using namespace std;
@@ -64,7 +64,7 @@ void handle_create(char *args, bool *logged_in){
     if (!is_logged_in(*logged_in)) return;
 
     string name, event_fname;
-    Date event_date;
+    DateTime event_date;
     int num_attendees;
 
     if (parse_create(args, &name, &event_fname, &event_date, &num_attendees)){

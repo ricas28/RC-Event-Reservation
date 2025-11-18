@@ -5,7 +5,7 @@
 
 #include "../common/constants.hpp"
 #include "../common/util.hpp"
-#include "../common/Date.hpp"
+#include "../common/DateTime.hpp"
 #include "commands.hpp"
 
 using namespace std;
@@ -204,18 +204,19 @@ bool parse_myreservations(char *args){
 /* ----------------------------------*/
 
 bool parse_create(char *args, string *name, string *event_fname, 
-                                        Date *event_date, int *num_attendees){
+                                        DateTime *event_date, int *num_attendees){
     char name_temp[BUF_TEMP], event_fname_temp[BUF_TEMP], extra[BUFFER_SIZE];
-    int day, month, year, num_attendees_temp;
+    int day, month, year, hour, minute, num_attendees_temp;
     bool error = false;
 
-    int n = sscanf(args, "%63s %63s %d-%d-%d %d %255s", name_temp, event_fname_temp, 
-                                        &day, &month, &year, &num_attendees_temp, extra);
+    int n = sscanf(args, "%63s %63s %d-%d-%d %d:%d %d %255s", name_temp, event_fname_temp, 
+                                                &day, &month, &year, &hour, &minute,
+                                                &num_attendees_temp, extra);
 
-    if(n != 6){
+    if(n != 8){
         cout << "Invalid arguments!" << endl;
         cout << "Usage: create <name> <event_fname> ";
-        cout << "<event_date> (format dd-mm-yyyy) <num_attendees>" << endl;
+        cout << "<event_date> (format dd-mm-yyyy hh:mm) <num_attendees>" << endl;
         return false;
     }
     if(!is_valid_event_name(name_temp)){
@@ -231,8 +232,9 @@ bool parse_create(char *args, string *name, string *event_fname,
         cout << "Invalid file! File does not exist or does not exist on the current folder." << endl;
         error = true;
     }
-    if(!is_valid_date(day, month, year)){
-        cout << "Invalid date! Date is invalid or before current date." << endl;
+    if(!is_valid_date_time(day, month, year, hour, minute)){
+        cout << "Invalid date and time!";
+        cout << " Date and time is invalid or before current date and time." << endl;
         error = true;
     }
     if(!is_valid_num_attendees(num_attendees_temp)){
@@ -243,7 +245,7 @@ bool parse_create(char *args, string *name, string *event_fname,
     // Successful parse.
     *name = name_temp;
     *event_fname = event_fname_temp;
-    *event_date = Date(day, month, year);
+    *event_date = DateTime(day, month, year, hour, minute);
     *num_attendees = num_attendees_temp;
     return true;
 }

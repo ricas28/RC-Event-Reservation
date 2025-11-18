@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../common/Date.hpp"
+#include "../common/DateTime.hpp"
 #include "commands.hpp"
 
 using namespace std;
@@ -124,7 +124,7 @@ bool parse_myreservations(char *args);
  * @returns true if parse is successful, false otherwise.
  */
 bool parse_create(char *args, string *name, string *event_fname, 
-                                        Date *event_date, int *num_attendees);
+                                        DateTime *event_date, int *num_attendees);
 
 /**
  * Parses a close command.

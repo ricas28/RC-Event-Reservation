@@ -47,16 +47,18 @@ bool is_valid_file_name(char *s);
 bool file_exists(char *file_name);
 
 /**
- * Checks if a day with the given attributes is valid.
- * (Valid date and not in the past).
+ * Checks if a date and time with the given attributes is valid.
+ * (Valid date and time and not in the past).
  * 
  * @param day Day of the date.
  * @param month Month of the date.
  * @param year Year of the date.
+ * @param hour Hour of the time.
+ * @param minute Minute of the time
  * 
  * @returns true if it's a valid date, false otherwise.
  */
-bool is_valid_date(int day, int month, int year);
+bool is_valid_date_time(int day, int month, int year, int hour, int minute);
 
 /**
  * Checks if the given number is a valid number of attendees (10-999).

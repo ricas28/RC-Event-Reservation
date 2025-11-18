@@ -3,7 +3,7 @@
 #include <filesystem>
 
 #include "constants.hpp"
-#include "Date.hpp"
+#include "DateTime.hpp"
 
 // Simplification
 namespace fs = std::filesystem;
@@ -43,9 +43,9 @@ bool file_exists(char *file_name){
     return fs::exists(file_name) && fs::is_regular_file(file_name);
 }
 
-bool is_valid_date(int day, int month, int year){
-    Date date(day, month, year);
-    return !date.invalidDate() and !date.isPast();
+bool is_valid_date_time(int day, int month, int year, int hour, int minute){
+    DateTime date_time(day, month, year, hour, minute);
+    return !date_time.invalidDateTime() and !date_time.isPast();
 }
 
 bool is_valid_num_attendees(int num_attendees){
