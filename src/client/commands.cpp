@@ -2,6 +2,7 @@
 
 #include "../common/DateTime.hpp"
 #include "parser.hpp"
+#include "Client.hpp"
 
 using namespace std;
 
@@ -16,16 +17,14 @@ bool is_logged_in(bool logged_in){
     return true;
 }
 
-void handle_login(char *args, bool *logged_in){
-    int uid; 
-    string pass;
-    if (parse_login(args, &uid, &pass)){
-        *logged_in = true;
+void handle_login(char *args, CLArgs *client){
+    if (parse_login(args, &client->uid, &client->pass)){
+        client->logged_in = true;
     }
 }
 
-void handle_change_pass(char *args, bool *logged_in){
-    if (!is_logged_in(*logged_in)) return;
+void handle_change_pass(char *args, CLArgs *client){
+    if (!is_logged_in(client->logged_in)) return;
 
     string old_pass, new_pass;
     if (parse_change_pass(args, &old_pass, &new_pass)){
@@ -33,25 +32,25 @@ void handle_change_pass(char *args, bool *logged_in){
     }
 }
 
-void handle_unregister(char *args, bool *logged_in){
-    if (!is_logged_in(*logged_in)) return;
+void handle_unregister(char *args, CLArgs *client){
+    if (!is_logged_in(client->logged_in)) return;
 
     if (parse_unregister(args)){
         //er_unregister();
     }
 }
 
-void handle_logout(char *args, bool *logged_in){
-    if (!is_logged_in(*logged_in)) return;
+void handle_logout(char *args, CLArgs *client){
+    if (!is_logged_in(client->logged_in)) return;
 
     if (parse_logout(args)){
-        *logged_in = false;
+        client->logged_in = false;
     }
 }
 
-void handle_exit(char *args, bool *logged_in, bool *quit){
+void handle_exit(char *args, CLArgs *client, bool *quit){
     if (parse_exit(args)){
-        if (*logged_in){
+        if (client->logged_in){
             cout << "Currently logged in!" << endl;
             cout << "Please execute the 'logout' command first" << endl;
         } else {
@@ -60,8 +59,8 @@ void handle_exit(char *args, bool *logged_in, bool *quit){
     }
 }
 
-void handle_create(char *args, bool *logged_in){
-    if (!is_logged_in(*logged_in)) return;
+void handle_create(char *args, CLArgs *client){
+    if (!is_logged_in(client->logged_in)) return;
 
     string name, event_fname;
     DateTime event_date;
@@ -72,8 +71,8 @@ void handle_create(char *args, bool *logged_in){
     }
 }
 
-void handle_close(char *args, bool *logged_in){
-    if (!is_logged_in(*logged_in)) return;
+void handle_close(char *args, CLArgs *client){
+    if (!is_logged_in(client->logged_in)) return;
 
     int eid;
     if (parse_close(args, &eid)){
@@ -81,24 +80,24 @@ void handle_close(char *args, bool *logged_in){
     }
 }
 
-void handle_myevents(char *args, bool *logged_in){
-    if (!is_logged_in(*logged_in)) return;
+void handle_myevents(char *args, CLArgs *client){
+    if (!is_logged_in(client->logged_in)) return;
 
     if (parse_myevents(args)){
         //er_myevents();
     }
 }
 
-void handle_list(char *args, bool *logged_in){
-    if (!is_logged_in(*logged_in)) return;
+void handle_list(char *args, CLArgs *client){
+    if (!is_logged_in(client->logged_in)) return;
 
     if (parse_list(args)){
         //er_list();
     }
 }
 
-void handle_show(char *args, bool *logged_in){
-    if (!is_logged_in(*logged_in)) return;
+void handle_show(char *args, CLArgs *client){
+    if (!is_logged_in(client->logged_in)) return;
 
     int eid;
     if (parse_show(args, &eid)){
@@ -106,8 +105,8 @@ void handle_show(char *args, bool *logged_in){
     }
 }
 
-void handle_reserve(char *args, bool *logged_in){
-    if (!is_logged_in(*logged_in)) return;
+void handle_reserve(char *args, CLArgs *client){
+    if (!is_logged_in(client->logged_in)) return;
 
     int eid, seats;
     if (parse_reserve(args, &eid, &seats)){
@@ -115,8 +114,8 @@ void handle_reserve(char *args, bool *logged_in){
     }
 }
 
-void handle_myreservations(char *args, bool *logged_in){
-    if (!is_logged_in(*logged_in)) return;
+void handle_myreservations(char *args, CLArgs *client){
+    if (!is_logged_in(client->logged_in)) return;
 
     if (parse_myreservations(args)){
         //er_myreservations();

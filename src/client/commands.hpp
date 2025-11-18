@@ -21,97 +21,97 @@ enum Command{
  * Handles a login command.
  * 
  * @param args String with arguments.
- * @param logged_in Pointer to a bool that represent if user is logged in.
+ * @param client Pointer to client attributes.
  */
-void handle_login(char *args, bool *logged_in);
+void handle_login(char *args, CLArgs *client);
 
 /**
  * Handles a changePass command.
  * 
  * @param args String with arguments.
- * @param logged_in Pointer to a bool that represent if user is logged in.
+ * @param client Pointer to client attributes.
  */
-void handle_change_pass(char *args, bool *logged_in);
+void handle_change_pass(char *args, CLArgs *client);
 
 /**
  * Handles a unregister command.
  * 
  * @param args String with arguments.
- * @param logged_in Pointer to a bool that represent if user is logged in.
+ * @param client Pointer to client attributes.
  */
-void handle_unregister(char *args, bool *logged_in);
+void handle_unregister(char *args, CLArgs *client);
 
 /**
  * Handles a logout command.
  * 
  * @param args String with arguments.
- * @param logged_in Pointer to a bool that represent if user is logged in.
+ * @param client Pointer to client attributes.
  */
-void handle_logout(char *args, bool *logged_in);
+void handle_logout(char *args, CLArgs *client);
 
 /**
  * Handles an exit command.
  * 
  * @param args String with arguments.
- * @param logged_in Pointer to a bool that represent if user is logged in.
+ * @param client Pointer to client attributes.
  * @param quit Pointer to a bool that represents if the program exits or not.
  */
-void handle_exit(char *args, bool *logged_in, bool *quit);
+void handle_exit(char *args, CLArgs *client, bool *quit);
 
 /**
  * Handles a create command.
  * 
  * @param args String with arguments.
- * @param logged_in Pointer to a bool that represent if user is logged in.
+ * @param client Pointer to client attributes.
  */
-void handle_create(char *args, bool *logged_in);
+void handle_create(char *args, CLArgs *client);
 
 /**
  * Handles a close command.
  * 
  * @param args String with arguments.
- * @param logged_in Pointer to a bool that represent if user is logged in.
+ * @param client Pointer to client attributes.
  */
-void handle_close(char *args, bool *logged_in);
+void handle_close(char *args, CLArgs *client);
 
 /**
  * Handles a myevents command.
  * 
  * @param args String with arguments.
- * @param logged_in Pointer to a bool that represent if user is logged in.
+ * @param client Pointer to client attributes.
  */
-void handle_myevents(char *args, bool *logged_in);
+void handle_myevents(char *args, CLArgs *client);
 
 /**
  * Handles a list command.
  * 
  * @param args String with arguments.
- * @param logged_in Pointer to a bool that represent if user is logged in.
+ * @param client Pointer to client attributes.
  */
-void handle_list(char *args, bool *logged_in);
+void handle_list(char *args, CLArgs *client);
 
 /**
  * Handles a show command.
  * 
  * @param args String with arguments.
- * @param logged_in Pointer to a bool that represent if user is logged in.
+ * @param client Pointer to client attributes.
  */
-void handle_show(char *args, bool *logged_in);
+void handle_show(char *args, CLArgs *client);
 
 /**
  * Handles a reserve command.
  * 
  * @param args String with arguments.
- * @param logged_in Pointer to a bool that represent if user is logged in.
+ * @param client Pointer to client attributes.
  */
-void handle_reserve(char *args, bool *logged_in);
+void handle_reserve(char *args, CLArgs *client);
 
 /**
  * Handles a myreservations command.
  * 
  * @param args String with arguments.
- * @param logged_in Pointer to a bool that represent if user is logged in.
+ * @param client Pointer to client attributes.
  */
-void handle_myreservations(char *args, bool *logged_in);
+void handle_myreservations(char *args, CLArgs *client);
 
 #endif

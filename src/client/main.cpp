@@ -7,6 +7,7 @@
 #include "../common/io.hpp"
 #include "parser.hpp"
 #include "commands.hpp"
+#include "Client.hpp"
 
 using namespace std;
 
@@ -17,8 +18,7 @@ void process_commands(){
     bool logged_in = false, quit = false;
     char line[BUFFER_SIZE], *args;
     // Client information
-    int uid; 
-    string pass;
+    CLArgs client;
 
     // TODO: Implement client class that has uid, pass and logged_in status.
     while(!quit){
@@ -28,40 +28,40 @@ void process_commands(){
         // TODO: (Optional) Add Help command
         switch(parse_command(line, &args)){
             case CMD_LOGIN:
-                handle_login(args, &logged_in);
+                handle_login(args, &client);
                 break;
             case CMD_CHANGE_PASS:
-                handle_change_pass(args, &logged_in);
+                handle_change_pass(args, &client);
                 break;
             case CMD_UNREGISTER:
-                handle_unregister(args, &logged_in);
+                handle_unregister(args, &client);
                 break;
             case CMD_LOGOUT:
-                handle_logout(args, &logged_in);
+                handle_logout(args, &client);
                 break;
             case CMD_EXIT:
-                handle_exit(args, &logged_in, &quit);
+                handle_exit(args, &client, &quit);
                 break;
             case CMD_CREATE:
-                handle_create(args, &logged_in);
+                handle_create(args, &client);
                 break;
             case CMD_CLOSE:
-                handle_close(args, &logged_in);
+                handle_close(args, &client);
                 break;
             case CMD_MYEVENTS:
-                handle_myevents(args, &logged_in);
+                handle_myevents(args, &client);
                 break;
             case CMD_LIST:
-                handle_list(args, &logged_in);
+                handle_list(args, &client);
                 break;
             case CMD_SHOW:
-                handle_show(args, &logged_in);
+                handle_show(args, &client);
                 break;
             case CMD_RESERVE:
-                handle_reserve(args, &logged_in);
+                handle_reserve(args, &client);
                 break;
             case CMD_MYRESERVATIONS:
-                handle_myreservations(args, &logged_in);
+                handle_myreservations(args, &client);
                 break;
             case CMD_INVALID:
                 cerr << "Invalid/Unknown command!\nSee help for usage." << endl;
