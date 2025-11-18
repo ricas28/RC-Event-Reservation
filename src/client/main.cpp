@@ -13,12 +13,12 @@ using namespace std;
 
 /**
  * Processes commands from the STDIN.
+ * 
+ * @param client Pointer to client arguments.
  */
-void process_commands(){
+void process_commands(ClLArgs *client){
     bool quit = false;
     char line[BUFFER_SIZE], *args;
-    // Client information
-    CLArgs client;
 
     // TODO: Implement client class that has uid, pass and logged_in status.
     while(!quit){
@@ -29,40 +29,40 @@ void process_commands(){
         // TODO: (Optional) Add Help command
         switch(parse_command(line, &args)){
             case CMD_LOGIN:
-                handle_login(args, &client);
+                handle_login(args, client);
                 break;
             case CMD_CHANGE_PASS:
-                handle_change_pass(args, &client);
+                handle_change_pass(args, client);
                 break;
             case CMD_UNREGISTER:
-                handle_unregister(args, &client);
+                handle_unregister(args, client);
                 break;
             case CMD_LOGOUT:
-                handle_logout(args, &client);
+                handle_logout(args, client);
                 break;
             case CMD_EXIT:
-                handle_exit(args, &client, &quit);
+                handle_exit(args, client, &quit);
                 break;
             case CMD_CREATE:
-                handle_create(args, &client);
+                handle_create(args, client);
                 break;
             case CMD_CLOSE:
-                handle_close(args, &client);
+                handle_close(args, client);
                 break;
             case CMD_MYEVENTS:
-                handle_myevents(args, &client);
+                handle_myevents(args, client);
                 break;
             case CMD_LIST:
-                handle_list(args, &client);
+                handle_list(args, client);
                 break;
             case CMD_SHOW:
-                handle_show(args, &client);
+                handle_show(args, client);
                 break;
             case CMD_RESERVE:
-                handle_reserve(args, &client);
+                handle_reserve(args, client);
                 break;
             case CMD_MYRESERVATIONS:
-                handle_myreservations(args, &client);
+                handle_myreservations(args, client);
                 break;
             case CMD_INVALID:
                 cerr << "Invalid/Unknown command!\nSee help for usage." << endl;
@@ -73,13 +73,14 @@ void process_commands(){
 
 int main(int argc, char** argv){
     string port, ip;
+    ClLArgs client;
 
     if(!parse_args(port, ip, argv, argc)){
         cerr << "Usage: " << argv[0] <<  " [-n ESIP] [-p ESport]" << endl;
         exit(EXIT_FAILURE);
-    }
+    }    
     
     cout << "Insert commands below:" << endl;
-    process_commands();
+    process_commands(&client);
     return EXIT_SUCCESS;
 }
