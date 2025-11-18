@@ -1,6 +1,8 @@
 #ifndef __COMMANDS__HPP__
 #define __COMMANDS__HPP__
 
+#include "Client.hpp"
+
 enum Command{
     CMD_LOGIN,
     CMD_CREATE,

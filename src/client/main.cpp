@@ -15,15 +15,16 @@ using namespace std;
  * Processes commands from the STDIN.
  */
 void process_commands(){
-    bool logged_in = false, quit = false;
+    bool quit = false;
     char line[BUFFER_SIZE], *args;
     // Client information
     CLArgs client;
 
     // TODO: Implement client class that has uid, pass and logged_in status.
     while(!quit){
-        cout << "> ";
-        if(parse_line(line) == -1) exit(EXIT_FAILURE);
+        // Flush because read_line uses read().
+        cout << "> " << flush;
+        if(read_line(STDIN_FILENO, line) == -1) exit(EXIT_FAILURE);
 
         // TODO: (Optional) Add Help command
         switch(parse_command(line, &args)){
