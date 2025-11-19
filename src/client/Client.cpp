@@ -10,8 +10,8 @@
 
 #include "Client.hpp"
 
-int set_client_udp_sokcet(CLArgs *client, string ip, string port){
-    struct addrinfo hints, *res;
+void set_client_udp_sokcet(CLArgs *client, string ip, string port){
+    struct addrinfo hints;
 
     client->udp_socket = socket(AF_INET, SOCK_DGRAM, 0);
     if (client->udp_socket == -1) {
@@ -19,19 +19,20 @@ int set_client_udp_sokcet(CLArgs *client, string ip, string port){
         exit(1);
     }
 
+
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;        // IPv4
     hints.ai_socktype = SOCK_DGRAM;   // UDP Socket
 
     int errcode = getaddrinfo(ip.c_str(), port.c_str(), &hints, &client->udp_addr);
     if (errcode != 0) {
+        perror("Failure executing getaddrinfo for UDP socket");
         exit(1);
     }
 }
 
-int set_client_tcp_socket(ClLArgs *client, string ip, string port){
-    struct addrinfo hints, *res;
-    struct sockaddr_in addr;
+void set_client_tcp_socket(ClLArgs *client, string ip, string port){
+    struct addrinfo hints;
 
     client->tcp_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (client->tcp_socket == -1) {
@@ -45,6 +46,7 @@ int set_client_tcp_socket(ClLArgs *client, string ip, string port){
 
     int errcode = getaddrinfo(ip.c_str(), port.c_str(), &hints, &client->tcp_addr);
     if (errcode != 0) {
+        perror("Failure executing getaddrinfo for UDP socket");
         exit(1);
     }
 }

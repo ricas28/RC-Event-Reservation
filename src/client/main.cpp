@@ -5,6 +5,7 @@
 
 #include "../common/constants.hpp"
 #include "../common/io.hpp"
+#include "../common/protocol.hpp"
 #include "parser.hpp"
 #include "commands.hpp"
 #include "Client.hpp"
@@ -20,7 +21,7 @@ void process_commands(ClLArgs *client){
     bool quit = false;
     char line[BUFFER_SIZE], *args;
 
-    // TODO: Implement client class that has uid, pass and logged_in status.
+    cout << "Insert commands below:" << endl;
     while(!quit){
         // Flush because read_line uses read().
         cout << "> " << flush;
@@ -80,8 +81,9 @@ int main(int argc, char** argv){
         exit(EXIT_FAILURE);
     }    
 
+    cout << ip <<":"<<port <<endl;
+
     client_init(&client, ip, port);
-    cout << "Insert commands below:" << endl;
     process_commands(&client);
     return EXIT_SUCCESS;
 }
