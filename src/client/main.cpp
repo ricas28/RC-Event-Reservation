@@ -73,13 +73,14 @@ void process_commands(ClLArgs *client){
 
 int main(int argc, char** argv){
     string port, ip;
-    ClLArgs client;
+    CLArgs client;
 
     if(!parse_args(port, ip, argv, argc)){
         cerr << "Usage: " << argv[0] <<  " [-n ESIP] [-p ESport]" << endl;
         exit(EXIT_FAILURE);
     }    
-    
+
+    client_init(&client, ip, port);
     cout << "Insert commands below:" << endl;
     process_commands(&client);
     return EXIT_SUCCESS;
