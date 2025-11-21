@@ -16,7 +16,7 @@ using namespace std;
  * 
  * @returns Command being executed.
  */
-enum Command parse_command(char *line, char **args);
+Command parse_command(char *line, char **args);
 
 /**
  * Parses the command line arguments.

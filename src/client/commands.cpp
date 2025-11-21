@@ -3,6 +3,7 @@
 #include "../common/DateTime.hpp"
 #include "parser.hpp"
 #include "Client.hpp"
+#include "api.hpp"
 
 using namespace std;
 
@@ -19,7 +20,7 @@ bool is_logged_in(bool logged_in){
 
 void handle_login(char *args, CLArgs *client){
     if (parse_login(args, &client->uid, &client->pass)){
-        client->logged_in = true;
+        er_login(*client, client->uid, client->pass);
     }
 }
 

@@ -19,7 +19,7 @@ using namespace std;
  * 
  * @returns Command being performed.
  */
-enum Command get_command(char *buf){
+Command get_command(char *buf){
     if(strcmp(buf, "login") == 0) return CMD_LOGIN;
     else if(strcmp(buf, "changePass") == 0) return CMD_CHANGE_PASS;
     else if(strcmp(buf, "unregister") == 0) return CMD_UNREGISTER;
@@ -60,10 +60,15 @@ bool parse_args(string &port, string &ip, char** argv, int argc){
                 return false;
         }
     }
+
+    // Arguments beyond the options.
+    if (optind < argc) {
+        return false;
+    }
     return true;
 }
 
-enum Command parse_command(char *line, char **args){
+Command parse_command(char *line, char **args){
     char command[COMMAND_SIZE];
     if (sscanf(line, "%15s", command) < 1) {
         cout << "Failure to parse command!" << endl;

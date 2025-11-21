@@ -3,7 +3,7 @@
 
 #include "Client.hpp"
 
-enum Command{
+typedef enum{
     CMD_LOGIN,
     CMD_CREATE,
     CMD_CLOSE,
@@ -17,7 +17,7 @@ enum Command{
     CMD_LOGOUT,
     CMD_EXIT,
     CMD_INVALID
-};
+}Command;
 
 /**
  * Handles a login command.

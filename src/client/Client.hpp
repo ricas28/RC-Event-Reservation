@@ -9,10 +9,9 @@ typedef struct ClLArgs{
     string pass = "";
 
     int udp_socket = -1;
-    int tcp_socket = -1;
+    struct addrinfo *udp_addr = NULL;
 
     struct addrinfo *tcp_addr = NULL;
-    struct addrinfo *udp_addr = NULL;
 
     bool logged_in = false;
 }CLArgs;
@@ -23,7 +22,16 @@ typedef struct ClLArgs{
  * @param client Pointer to a client.
  * @param ip IP where the server is running.
  * @param port Port where the server is running.
+ * 
+ * @returns 0 on success, -1 on failure.
  */
-void client_init(CLArgs *client, string ip, string port);
+int client_init(CLArgs *client, string ip, string port);
+
+/**
+ * Frees memory used by a client.
+ * 
+ * @param client Pointer to a client.
+ */
+void destroy_client(CLArgs *client);
 
 #endif

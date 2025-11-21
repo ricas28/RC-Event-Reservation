@@ -18,4 +18,47 @@ int read_line(int fd, char *line);
  */
 void clean_up_fd(int fd);
 
+/**
+ * Writes size bytes from fd into buffer.
+ * 
+ * @param fd File descriptor.
+ * @param buf Buffer with content.
+ * @param size Bytes being written.
+ * 
+ * @return Bytes that were written. 
+ */
+ssize_t write_all(int fd, const void *buf, size_t size);
+
+/**
+ * Reads size bytes into buf from fd.
+ * 
+ * @param fd File descriptor.
+ * @param buf Buffer that stores the content.
+ * @param size Bytes being read.
+ * 
+ * @return Bytes that were read.
+ */
+ssize_t read_all(int fd, void *buf, size_t size);
+
+/**
+ * Reads the content of a file to a buffer.
+ * 
+ * @param fileName Name of the file.
+ * @param out_size Pointer to size of the file that was read.
+ * 
+ * @returns Pointer to buffer with content that was read.
+ */
+unsigned char *read_file_to_buffer(const char *fileName, size_t *out_size);
+
+/**
+ * Writes the content of a buffer to a file.
+ * 
+ * @param filename Name of the file.
+ * @param buffer Buffer with content being written
+ * @param size Length being written.
+ * 
+ * @returns 0 on success, -1 on failure.
+ */
+int write_buffer_to_file(const char *filename, const void *buffer, size_t size);
+
 #endif

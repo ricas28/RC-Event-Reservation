@@ -81,9 +81,8 @@ int main(int argc, char** argv){
         exit(EXIT_FAILURE);
     }    
 
-    cout << ip <<":"<<port <<endl;
-
     client_init(&client, ip, port);
     process_commands(&client);
+    destroy_client(&client);
     return EXIT_SUCCESS;
 }
