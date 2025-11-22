@@ -10,6 +10,8 @@
 
 #include "Client.hpp"
 #include "../common/io.hpp"
+#include "../common/constants.hpp"
+#include "../common/protocol.hpp"
 
 /**
  * Initializes a UDP socket and address.
@@ -26,6 +28,14 @@ int set_client_udp_socket(CLArgs *client, string ip, string port){
     client->udp_socket = socket(AF_INET, SOCK_DGRAM, 0);
     if (client->udp_socket == -1) {
         perror("Failure to create UDP socket");
+        return -1;
+    }
+
+    struct timeval tv;
+    tv.tv_sec = UDP_TIMEOUT;
+    tv.tv_usec = 0;
+    if (setsockopt(client->udp_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+        perror("Failed to set socket receive timeout");
         return -1;
     }
 
@@ -62,6 +72,28 @@ int set_client_tcp(CLArgs *client, string ip, string port){
     }
 
     return 0;
+}
+
+char *client_udp_request(CLArgs *client, const char *msg){
+    for (int attempt = 1; attempt <= UDP_RETRIES; attempt++) {
+        if (send_udp_message(client->udp_socket, msg, client->udp_addr) == -1)
+            return NULL;
+        char *resp = receive_udp_message(client->udp_socket, client->udp_addr);
+        if (resp != NULL)
+            return resp;
+        
+        // Timeout error.
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            free(resp);
+            cerr << "[UDP] Timeout (" << attempt << "/" << UDP_RETRIES << ")";
+            if(attempt <= UDP_RETRIES - 1)
+                cerr << ", retrying..." << endl;
+            else 
+                cerr << ". Max retries reached..." << endl;
+            continue;
+        }
+    }
+    return NULL;  // no response after UDP_RETRIES attempts
 }
 
 int client_init(CLArgs *client, string ip, string port){

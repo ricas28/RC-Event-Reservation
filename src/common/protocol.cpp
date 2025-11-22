@@ -82,6 +82,7 @@ char *receive_udp_message(int socket, struct addrinfo *addr) {
         free(buffer);
         return NULL;
     }
+    
     buffer[n] = '\0';
     return buffer;
 }

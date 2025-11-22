@@ -4,6 +4,9 @@
 #define DEFAULT_IP "127.0.0.1" // Localhost
 #define DEFAULT_PORT "58009"   // 58000 + 9(Group Number)
 
+#define UDP_TIMEOUT 2  // 2 seconds
+#define UDP_RETRIES 3  
+
 #define UID_SIZE 7         //  6 + 1 for '\0'
 #define PASS_SIZE 9        //  8 + 1 for '\0'
 #define EVENT_NAME_SIZE 11 // 10 + 1 for '\0'
