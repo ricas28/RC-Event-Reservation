@@ -34,6 +34,7 @@ const char* op_to_str(OP_CODE code){
     if(code == OP_RESERVE_RESP) return "RRI";
     if(code == OP_MYRESERVATIONS) return "LMR";
     if(code == OP_MYRESERVATIONS_RESP) return "RMR";
+    if(code == ERR) return "ERR";
     return "INV";
 }
 
@@ -58,6 +59,7 @@ OP_CODE str_to_op(const char *str){
     if(strcmp(str, "RRI") == 0) return OP_RESERVE_RESP;
     if(strcmp(str, "LMR") == 0) return OP_MYRESERVATIONS;
     if(strcmp(str, "RMR") == 0) return OP_MYRESERVATIONS_RESP;
+    if(strcmp(str, "ERR") == 0) return ERR;
     return OP_INVALID;
 }
 

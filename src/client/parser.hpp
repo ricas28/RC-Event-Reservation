@@ -46,6 +46,16 @@ bool parse_args(string &port, string &ip, char** argv, int argc);
 bool parse_login(char *args, int *uid, string *pass);
 
 /**
+ * Parses a response to the login command.
+ * 
+ * @param response Response from the server.
+ * @param status String that will contain the value of the status field.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_login_response(char *response, string &status);
+
+/**
  * Parses a changePass command.
  * 
  * @param args String with arguments.

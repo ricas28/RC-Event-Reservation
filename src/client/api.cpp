@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "Client.hpp"
+#include "parser.hpp"
 #include "../common/protocol.hpp"
 
 using namespace std;
@@ -11,9 +12,19 @@ int er_login(CLArgs client, int uid, string pass){
                         to_string(uid) + " " + pass + "\n";
 
     if((response = client_udp_request(&client, message.c_str())) == NULL){
-        cerr << "Failure to execute login command" << endl;
+        cerr << "Failure to request/receive message to server" << endl;
+        return -1;
     }
-    //process_login_response(response);
+    string status = "";
+    if(!parse_login_response(response, status)){
+        cerr << "Bad message received from server!" << endl;
+        return -1;
+    }
+    // Print message according to status value
+    if(status == "OK") cout << "successful login" << endl;
+    else if(status == "NOK") cout << "incorrect login attempt" << endl;
+    else if(status == "REG") cout << "new user registered" << endl;
+    else cerr << "[API] Invalid status message passed through" << endl;
     free(response);
     return 0;
 }

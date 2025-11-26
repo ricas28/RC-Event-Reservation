@@ -25,7 +25,8 @@ typedef enum {
     OP_RESERVE_RESP,
     OP_MYRESERVATIONS,
     OP_MYRESERVATIONS_RESP,
-    OP_INVALID
+    OP_INVALID,
+    ERR
 } OP_CODE;
 
 /**

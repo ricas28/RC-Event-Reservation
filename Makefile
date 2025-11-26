@@ -10,7 +10,6 @@ SERVER_DIR = src/server
 CLIENT_DIR = src/client
 COMMON_DIR = src/common
 
-# Pega todos os .cpp da pasta common
 COMMON_SOURCES = $(wildcard $(COMMON_DIR)/*.cpp)
 
 SERVER_SOURCES = $(wildcard $(SERVER_DIR)/*.cpp) $(COMMON_SOURCES)
