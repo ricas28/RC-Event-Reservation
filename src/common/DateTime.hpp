@@ -46,7 +46,10 @@ public:
     void nextMinute();  
 
     // Prints the datetime (DD-MM-YYYY HH:MM)
-    void print();    
+    void print();  
+    
+    // Returns string representation (DD-MM-YYYY HH:MM)
+    string toString();
 
     // Compares this datetime to another (true if this > other)
     bool isAfter(DateTime& other);

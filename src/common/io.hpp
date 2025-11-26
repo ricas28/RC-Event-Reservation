@@ -2,7 +2,8 @@
 #define __IO__HPP__
 
 /**
- * Parses a line from the given fd. Line has a size of BUFFER_SIZE (256).
+ * Reads a line from the given fd. Line can have max size of 
+ * BUFFER_SIZE (256).
  * 
  * @param line buffer for storing the command.
  * @param fd File descriptor.
@@ -11,7 +12,17 @@
  *           0 if command given exceeds the buffer size,
  *           1 for a successful parse.
  */
-int read_line(int fd, char *line);
+int read_line_256(int fd, char *line);
+
+/**
+ * Reads dynamically from the given fd.
+ * 
+ * @param fd File descriptor.
+ * @param line String that will contain read content.
+ * 
+ * @returns Bytes that were
+ */
+ssize_t read_until_line_end(int fd, string &line);
 
 /**
  * Does a clean up of the given fd
@@ -48,7 +59,7 @@ ssize_t read_all(int fd, void *buf, size_t size);
  * 
  * @returns Pointer to buffer with content that was read.
  */
-unsigned char *read_file_to_buffer(const char *fileName, size_t *out_size);
+char *read_file_to_buffer(const char *fileName, size_t *out_size);
 
 /**
  * Writes the content of a buffer to a file.

@@ -19,13 +19,13 @@ using namespace std;
  */
 void process_commands(ClLArgs *client){
     bool quit = false;
-    char line[BUFFER_SIZE], *args;
+    char *args, line[BUFFER_SIZE];
 
     cout << "Insert commands below:" << endl;
     while(!quit){
         // Flush because read_line uses read().
         cout << "> " << flush;
-        if(read_line(STDIN_FILENO, line) == -1) exit(EXIT_FAILURE);
+        if(read_line_256(STDIN_FILENO, line) == -1) exit(EXIT_FAILURE);
 
         // TODO: (Optional) Add Help command
         switch(parse_command(line, &args)){

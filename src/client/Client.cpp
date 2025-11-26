@@ -96,6 +96,44 @@ char *client_udp_request(CLArgs *client, const char *msg){
     return NULL;  // no response after UDP_RETRIES attempts
 }
 
+string client_tcp_request_line(CLArgs* client, const string &msg){
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd == -1) {
+        perror("Failure to open TCP socket");
+        return "";
+    }
+
+    // Connect to server.
+    int n = connect(fd, client->tcp_addr->ai_addr, client->tcp_addr->ai_addrlen);
+    if (n == -1) {
+        perror("Failure to connect to server with TCP");
+        close(fd);
+        return "";
+    }
+
+    // Write to server.
+    if(write_all(fd, msg.c_str(), msg.size()) == -1){
+        perror("Failure to write to server with TCP");
+        close(fd);
+        return "";
+    }
+
+    // Receive response.
+    string response;
+    if(read_until_line_end(fd, response) == -1){
+        perror("Failure to read from server with TCP");
+        close(fd);
+        return "";
+    }
+    // Close session
+    close(fd);
+    return response;
+}
+
+////////////////////////////////////////////////////////////////////
+// TODO: create client_tcp_request_file(). for commands like SHOW //
+////////////////////////////////////////////////////////////////////
+
 int client_init(CLArgs *client, string ip, string port){
     if(set_client_udp_socket(client, ip, port) == -1)
         return -1;

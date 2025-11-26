@@ -13,14 +13,14 @@ void clean_up_fd(int fd){
     while (read(fd, &c, 1) == 1 && c != '\n');
 }
 
-int read_line(int fd, char *line){
+int read_line_256(int fd, char *line){
     int idx = 0;
     char c;
 
     while (idx < BUFFER_SIZE - 1) {
         ssize_t r = read(fd, &c, 1);
         if (r == -1) {
-            perror("Failure to read command.");
+            perror("Failure to read line.");
             return -1;
         }
         if (r == 0) {  // EOF
@@ -40,6 +40,22 @@ int read_line(int fd, char *line){
         return 0;
     }
     return 1;
+}
+
+ssize_t read_until_line_end(int fd, string &line){
+    line.clear();
+    char c;
+
+    while (true) {
+        ssize_t n = read(fd, &c, 1);
+        if (n <= 0) return n; // error or EOF
+
+        if (c == '\n')
+            break;
+        line.push_back(c);
+    }
+
+    return line.size();
 }
 
 ssize_t write_all(int fd, const void *buf, size_t size){
@@ -83,8 +99,7 @@ ssize_t read_all(int fd, void *buf, size_t size){
     return (ssize_t)total_read;
 }
 
-
-unsigned char *read_file_to_buffer(const char *fileName, size_t *out_size) {
+char *read_file_to_buffer(const char *fileName, size_t *out_size) {
    FILE *f = fopen(fileName, "rb");
     if (!f) {
         perror("Failure to open file");
@@ -108,7 +123,7 @@ unsigned char *read_file_to_buffer(const char *fileName, size_t *out_size) {
 
     // Conversion to size_t
     size_t size = (size_t)file_size;
-    unsigned char *buffer = (unsigned char*)malloc(size);
+    char *buffer = (char*)malloc(size);
     if (!buffer) {
         perror("Failure to allocate memory for buffer");
         fclose(f);

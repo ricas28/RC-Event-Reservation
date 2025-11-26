@@ -111,6 +111,14 @@ void DateTime::print() {
          << (minute < 10 ? "0" : "") << minute;
 }
 
+string DateTime::toString(){
+    return (day < 10 ? "0" : "") + to_string(day) + "-" +
+            (month < 10 ? "0" : "") + to_string(month) + "-" +
+            to_string(year) + "" +
+            (hour < 10 ? "0" : "") + to_string(hour) + ":" +
+            (minute < 10 ? "0" : "") + to_string(minute);
+}
+
 bool DateTime::isAfter(DateTime& other) {
     if (year != other.year) return year > other.year;
     if (month != other.month) return month > other.month;

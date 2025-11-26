@@ -12,8 +12,10 @@
 #define EVENT_NAME_SIZE 11 // 10 + 1 for '\0'
 #define EID_SIZE 4         //  3 + 1 for '\0'
 #define FILE_NAME_SIZE 25  // 24 + 1 for '\0'
+#define MAX_FILE_SIZE 10 * 1000000 // 10 MB
 
 #define BUFFER_SIZE 256
 #define BUF_TEMP 64  
 
+#define MAX_READ_SIZE BUFFER_SIZE + MAX_FILE_SIZE
 #endif

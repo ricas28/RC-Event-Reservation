@@ -77,9 +77,11 @@ void handle_create(char *args, CLArgs *client){
 
     string name, event_fname;
     DateTime event_date;
+    size_t Fsize;
+    char *Fdata;
     int num_attendees;
 
-    if (parse_create(args, &name, &event_fname, &event_date, &num_attendees)){
+    if (parse_create(args, &name, &event_fname, &Fsize, &Fdata, &event_date, &num_attendees)){
         //er_create();
     }
 }

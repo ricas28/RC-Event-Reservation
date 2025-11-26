@@ -7,6 +7,7 @@
 #include "../common/util.hpp"
 #include "../common/DateTime.hpp"
 #include "../common/protocol.hpp"
+#include "../common/io.hpp"
 #include "commands.hpp"
 
 using namespace std;
@@ -265,8 +266,8 @@ bool parse_myreservations(char *args){
 }
 /* ----------------------------------*/
 
-bool parse_create(char *args, string *name, string *event_fname, 
-                                        DateTime *event_date, int *num_attendees){
+bool parse_create(char *args, string *name, string *event_fname, size_t *Fsize,
+                        char **Fdata, DateTime *event_date, int *num_attendees){
     char name_temp[BUF_TEMP], event_fname_temp[BUF_TEMP], extra[BUFFER_SIZE];
     int day, month, year, hour, minute, num_attendees_temp;
     bool error = false;
@@ -303,12 +304,21 @@ bool parse_create(char *args, string *name, string *event_fname,
         cout << "Invalid number of attendees! Must be number from 10 to 999." << endl;
         error = true;
     }
+    // Read file and see if exceeds max_file_size.
+    size_t file_size;
+    char *buffer = read_file_to_buffer(event_fname->c_str(), &file_size);
+    if(file_size > MAX_FILE_SIZE){
+        cout << "File is too large for the server." << endl;
+        error = true;
+    }
     if (error) return false; 
     // Successful parse.
     *name = name_temp;
     *event_fname = event_fname_temp;
     *event_date = DateTime(day, month, year, hour, minute);
     *num_attendees = num_attendees_temp;
+    *Fsize = file_size;
+    *Fdata = buffer;
     return true;
 }
 

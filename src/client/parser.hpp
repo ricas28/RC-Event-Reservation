@@ -147,15 +147,18 @@ bool parse_myreservations(char *args);
  * @param name Pointer to a string that will contain the event's name.
  * @param event_fname Pointer to a string that will contain the name of the 
  *  file with the event's details.
+ * @param Fsize Pointer to size of the file that was inputed.
+ * @param Fdata Pointer to a pointer to file content.
  * @param event_date Pointer to a Date object that will contain the event's date.
  * @param num_attendees Pointer to an integer that will contain the number of
  *  people who can attend the event.
  * 
  * @returns true if parse is successful, false otherwise.
+ * 
+ * Note: After use Fdata needs to be freed using free().
  */
-bool parse_create(char *args, string *name, string *event_fname, 
-                                        DateTime *event_date, int *num_attendees);
-
+bool parse_create(char *args, string *name, string *event_fname, size_t *Fsize,
+                        char **Fdata, DateTime *event_date, int *num_attendees);
 /**
  * Parses a close command.
  * 
