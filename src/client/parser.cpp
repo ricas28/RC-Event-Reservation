@@ -133,9 +133,10 @@ bool parse_login_response(char *response, string &status){
     }
 
     // Check for status value
-    if(!strcmp(status_temp, "OK") || !strcmp(status_temp, "NOK") || !strcmp(status_temp, "REG")){
-        status = status_temp;
-        return true;
+    if(!strcmp(status_temp, "OK") || !strcmp(status_temp, "NOK") || 
+        !strcmp(status_temp, "REG") || !strcmp(status_temp, "ERR")){
+            status = status_temp;
+            return true;
     }
     return false;
 }
@@ -180,6 +181,25 @@ bool parse_unregister(char *args){
     return true;
 }
 
+bool parse_unregister_response(char *response, string &status){
+    char response_code[BUF_TEMP], status_temp[BUF_TEMP], extra[BUFFER_SIZE];
+
+    int n = sscanf(response, "%63s %63s %255s", response_code, status_temp, extra);
+    // Response has 2 arguments: code OP_UNREGISTER_RESP and ends with '\n'.
+    if(n != 2 || str_to_op(response_code) != OP_UNREGISTER_RESP || response[strlen(response)-1] != '\n'){
+       return false;
+    }
+
+    // Check for status value
+    if(!strcmp(status_temp, "OK") || !strcmp(status_temp, "NOK") || 
+        !strcmp(status_temp, "UNR") || !strcmp(status_temp, "WRP") || 
+        !strcmp(status_temp, "ERR")){
+            status = status_temp;
+            return true;
+    }
+    return false;
+}
+
 bool parse_logout(char *args){
     if (args != NULL) {
         cout << "This command has no arguments!" << endl;
@@ -187,6 +207,25 @@ bool parse_logout(char *args){
         return false;
     }
     return true;
+}
+
+bool parse_logout_response(char *response, string &status){
+    char response_code[BUF_TEMP], status_temp[BUF_TEMP], extra[BUFFER_SIZE];
+
+    int n = sscanf(response, "%63s %63s %255s", response_code, status_temp, extra);
+    // Response has 2 arguments: code OP_LOGOUT_RESP and ends with '\n'.
+    if(n != 2 || str_to_op(response_code) != OP_LOGOUT_RESP || response[strlen(response)-1] != '\n'){
+       return false;
+    }
+
+    // Check for status value
+    if(!strcmp(status_temp, "OK") || !strcmp(status_temp, "NOK") || 
+        !strcmp(status_temp, "UNR") || !strcmp(status_temp, "WRP") || 
+        !strcmp(status_temp, "ERR")){
+            status = status_temp;
+            return true;
+    }
+    return false;
 }
 
 bool parse_exit(char *args){

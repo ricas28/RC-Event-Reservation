@@ -13,7 +13,7 @@
 
 using namespace std;
 
-const char* op_to_str(OP_CODE code){
+string op_to_str(OP_CODE code){
     if(code == OP_LOGIN) return "LIN";
     if(code == OP_LOGIN_RESP) return "RLI";
     if(code == OP_CHANGE_PASS) return "CPS";

@@ -46,7 +46,7 @@ bool parse_args(string &port, string &ip, char** argv, int argc);
 bool parse_login(char *args, int *uid, string *pass);
 
 /**
- * Parses a response to the login command.
+ * Parses a response to the 'login' command.
  * 
  * @param response Response from the server.
  * @param status String that will contain the value of the status field.
@@ -76,6 +76,16 @@ bool parse_change_pass(char *args, string *old_pass, string *new_pass);
 bool parse_unregister(char *args);
 
 /**
+ * Parses a response to the 'unregister' command.
+ * 
+ * @param response Response from the server.
+ * @param status String that will contain the value of the status field.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_unregister_response(char *response, string &status);
+
+/**
  * Parses a logout command.
  * 
  * @param args String with (hopefully) no arguments.
@@ -83,6 +93,16 @@ bool parse_unregister(char *args);
  * @returns true if parse is successful, false otherwise.
  */
 bool parse_logout(char *args);
+
+/**
+ * Parses a response to the 'logout' command.
+ * 
+ * @param response Response from the server.
+ * @param status String that will contain the value of the status field.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_logout_response(char *response, string &status);
 
 /**
  * Parses an exit command.

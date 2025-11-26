@@ -4,6 +4,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+using namespace std;
+
 typedef enum {
     OP_LOGIN,
     OP_LOGIN_RESP,
@@ -29,13 +31,9 @@ typedef enum {
     ERR
 } OP_CODE;
 
-/**
- * Receives an OP_CODE and returnS it's string form.
- * 
- * @param 
- * 
- */
-const char* op_to_str(OP_CODE code);
+/** Converts the OP_CODE enum value to its string representation. */
+string op_to_str(OP_CODE code);
+/** Converts a string representation of an operation to its OP_CODE enum value */
 OP_CODE str_to_op(const char *str);
 
 /**
