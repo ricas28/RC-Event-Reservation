@@ -1,6 +1,8 @@
 #ifndef __IO__HPP__
 #define __IO__HPP__
 
+using namespace std;
+
 /**
  * Reads a line from the given fd. Line can have max size of 
  * BUFFER_SIZE (256).

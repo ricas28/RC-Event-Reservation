@@ -126,46 +126,42 @@ int er_unregister(CLArgs client){
 /* -------------- TCP COMMANDS ------------------- */
 int er_create(CLArgs client, string name, string event_fname, size_t Fsize,
                         char *Fdata, DateTime event_date, int num_attendees){
-    char *response, response_code[BUF_TEMP];
+    char response_code[BUF_TEMP];
     string message = op_to_str(OP_CREATE) + " " + to_string(client.uid) + " " + client.pass +
                         " " + name + " " + event_date.toString() + " " + to_string(num_attendees) +
                         " " + event_fname + " " + to_string(Fsize) + " " + Fdata + "\n";
-
-    if((response = client_tcp_request(&client, message.c_str())) == NULL){
+    string response;
+    if((response = client_tcp_request_line(&client, message)) == ""){
         cerr << "Failure to request/receive message to server" << endl;
         free(Fdata);
-        free(response);
         return -1;
     }
+
     // Read response code.
-    int n = sscanf(response, "%63s", response_code);
+    int n = sscanf(response.c_str(), "%63s", response_code);
     if(n != 1) cerr << "Failure to read response code to 'create' command" << endl;
 
-    string status = "";
-    int eid = -1;
+    string status = "", eid = "";
     OP_CODE code = str_to_op(response_code);
     if(code == ERR){
         cerr << "Invalid request message was sent" << endl;
         free(Fdata);
-        free(response);
         return -1;
     }
-    if(code != OP_CREATE_RESP || !parse_create_response(response, status, eid)){
+    if(code != OP_CREATE_RESP || !parse_create_response(response.c_str(), status, eid)){
         cerr << "Bad message received from server!" << endl;
         free(Fdata);
-        free(response);
         return -1;  
     }
 
     // Print message according to the status value
-    if(status == "OK") cout << "successful unregister" << endl;
-    else if(status == "NOK" || status == "WRP") cout << "incorrect unregister attempt" << endl;
-    else if(status == "UNR") cout << "unknown user" << endl;
+    if(status == "OK") cout << "successful create\nevent id: " << eid << endl;
+    else if(status == "NLG") cerr << "[API] user not logged in" << endl;
+    else if(status == "WRP") cerr << "[API] wrong password was sent on the request" << endl;
     else if(status == "ERR") 
         cerr<< "Syntax of request message is incorrect or parameter values take invalid values" << endl;
     else cerr << "[API] Invalid status message passed through" << endl;
     free(Fdata);
-    free(response);
     return 0;       
 }
 /* ----------------------------------------------- */

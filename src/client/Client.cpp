@@ -125,6 +125,7 @@ string client_tcp_request_line(CLArgs* client, const string &msg){
         close(fd);
         return "";
     }
+
     // Close session
     close(fd);
     return response;

@@ -128,7 +128,7 @@ bool parse_login_response(char *response, string &status){
     char response_code[BUF_TEMP], status_temp[BUF_TEMP], extra[BUFFER_SIZE];
 
     int n = sscanf(response, "%63s %63s %255s", response_code, status_temp, extra);
-    // Response has 2 arguments, has code OP_LOGIN_RESP and ends with '\n'.
+    // Response has 2 arguments, has code OP_LOGIN_RESP, status and ends with '\n'.
     if(n != 2 || str_to_op(response_code) != OP_LOGIN_RESP || response[strlen(response)-1] != '\n'){
        return false;
     }
@@ -186,7 +186,7 @@ bool parse_unregister_response(char *response, string &status){
     char response_code[BUF_TEMP], status_temp[BUF_TEMP], extra[BUFFER_SIZE];
 
     int n = sscanf(response, "%63s %63s %255s", response_code, status_temp, extra);
-    // Response has 2 arguments: code OP_UNREGISTER_RESP and ends with '\n'.
+    // Response has 2 arguments: code OP_UNREGISTER_RESP, status and ends with '\n'.
     if(n != 2 || str_to_op(response_code) != OP_UNREGISTER_RESP || response[strlen(response)-1] != '\n'){
        return false;
     }
@@ -214,7 +214,7 @@ bool parse_logout_response(char *response, string &status){
     char response_code[BUF_TEMP], status_temp[BUF_TEMP], extra[BUFFER_SIZE];
 
     int n = sscanf(response, "%63s %63s %255s", response_code, status_temp, extra);
-    // Response has 2 arguments: code OP_LOGOUT_RESP and ends with '\n'.
+    // Response has 2 arguments: code OP_LOGOUT_RESP, status and ends with '\n'.
     if(n != 2 || str_to_op(response_code) != OP_LOGOUT_RESP || response[strlen(response)-1] != '\n'){
        return false;
     }
@@ -275,7 +275,6 @@ bool parse_create(char *args, string *name, string *event_fname, size_t *Fsize,
     int n = sscanf(args, "%63s %63s %d-%d-%d %d:%d %d %255s", name_temp, event_fname_temp, 
                                                 &day, &month, &year, &hour, &minute,
                                                 &num_attendees_temp, extra);
-
     if(n != 8){
         cout << "Invalid arguments!" << endl;
         cout << "Usage: create <name> <event_fname> ";
@@ -306,7 +305,7 @@ bool parse_create(char *args, string *name, string *event_fname, size_t *Fsize,
     }
     // Read file and see if exceeds max_file_size.
     size_t file_size;
-    char *buffer = read_file_to_buffer(event_fname->c_str(), &file_size);
+    char *buffer = read_file_to_buffer(event_fname_temp, &file_size);
     if(file_size > MAX_FILE_SIZE){
         cout << "File is too large for the server." << endl;
         error = true;
@@ -320,6 +319,34 @@ bool parse_create(char *args, string *name, string *event_fname, size_t *Fsize,
     *Fsize = file_size;
     *Fdata = buffer;
     return true;
+}
+
+bool parse_create_response(const char *response, string &status, string &eid){
+    char response_code[BUF_TEMP], status_temp[BUF_TEMP], eid_temp[BUF_TEMP], extra[BUFFER_SIZE];
+
+    int n = sscanf(response, "%63s %63s", response_code, status_temp);
+    // Response has 3 arguments: code OP_LOGOUT_RESP, status, eid and ends with '\n'.
+    if(n != 2 || str_to_op(response_code) != OP_CREATE_RESP){
+       return false;
+    }
+
+    if(!strcmp(status_temp, "OK")){
+        n = sscanf(response, "%63s %63s %63s %255s", 
+                            response_code, status_temp, eid_temp, extra);
+        if(n != 3 || !is_valid_eid(eid_temp)  || response[strlen(response)-1] != '\n'){
+            return false;
+        }
+        status = status_temp;
+        eid = eid_temp;
+        return true;
+    }
+    // Check for status value
+    if(!strcmp(status_temp, "NOK") || !strcmp(status_temp, "NLG") ||
+        !strcmp(status_temp, "WRP") || !strcmp(status_temp, "ERR")){
+            status = status_temp;
+            return true;
+    }
+    return false;
 }
 
 bool parse_close(char *args, int *eid){

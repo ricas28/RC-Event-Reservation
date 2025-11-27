@@ -42,17 +42,20 @@ int read_line_256(int fd, char *line){
     return 1;
 }
 
-ssize_t read_until_line_end(int fd, string &line){
+size_t read_until_line_end(int fd, string &line){
     line.clear();
     char c;
+    bool seen_end = false;
 
     while (true) {
         ssize_t n = read(fd, &c, 1);
-        if (n <= 0) return n; // error or EOF
+        if (n <= 0) return (size_t)n; // error or EOF
 
         if (c == '\n')
-            break;
+            seen_end = true;
         line.push_back(c);
+        if(seen_end) 
+            break;
     }
 
     return line.size();
@@ -100,7 +103,7 @@ ssize_t read_all(int fd, void *buf, size_t size){
 }
 
 char *read_file_to_buffer(const char *fileName, size_t *out_size) {
-   FILE *f = fopen(fileName, "rb");
+    FILE *f = fopen(fileName, "rb");
     if (!f) {
         perror("Failure to open file");
         return NULL;

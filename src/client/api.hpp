@@ -32,4 +32,20 @@ int er_logout(CLArgs client);
  */
 int er_unregister(CLArgs client);
 
+/**
+ * Executes the 'create' command.
+ * 
+ * @param client Client
+ * @param name Name of the event.
+ * @param event_fname Name of the file with event content.
+ * @param Fsize Size of the file in bytes.
+ * @param Fdata Contento of the file.
+ * @param event_date Date and time of the event.
+ * @param num_attendees Number of people that will attend the event.
+ * 
+ * @return 0 for successful execution, -1 on failure.
+ */
+int er_create(CLArgs client, string name, string event_fname, size_t Fsize,
+                        char *Fdata, DateTime event_date, int num_attendees);
+
 #endif

@@ -114,7 +114,7 @@ void DateTime::print() {
 string DateTime::toString(){
     return (day < 10 ? "0" : "") + to_string(day) + "-" +
             (month < 10 ? "0" : "") + to_string(month) + "-" +
-            to_string(year) + "" +
+            to_string(year) + " " +
             (hour < 10 ? "0" : "") + to_string(hour) + ":" +
             (minute < 10 ? "0" : "") + to_string(minute);
 }

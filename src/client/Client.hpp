@@ -17,7 +17,8 @@ typedef struct ClLArgs{
 }CLArgs;
 
 /**
- * Makes a request to the server sending a message and returning the response.
+ * Makes a request to the server sending a message and returning the response,
+ * using UDP.
  * 
  * @param client Pointer to client.
  * @param msg Message being sent to the server.
@@ -27,6 +28,19 @@ typedef struct ClLArgs{
  * Note: Message that is returned needs to be freed using free().
  */
 char *client_udp_request(CLArgs *client, const char *msg);
+
+/**
+ * Makes a request to the server sending a message and returning the response,
+ * using TCP.
+ * This function is used for simple requests and responses (without files 
+ * involved).
+ * 
+ * @param client Pointer to client.
+ * @param msg Message being sent to the server.
+ * 
+ * @returns Server response on success, empty string ("") on failure.
+ */
+string client_tcp_request_line(CLArgs* client, const string &msg);
 
 /**
  * Initializes the main client's attributes.

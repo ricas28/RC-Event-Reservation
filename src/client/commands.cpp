@@ -82,7 +82,9 @@ void handle_create(char *args, CLArgs *client){
     int num_attendees;
 
     if (parse_create(args, &name, &event_fname, &Fsize, &Fdata, &event_date, &num_attendees)){
-        //er_create();
+        if(er_create(*client, name, event_fname, Fsize, Fdata, event_date, num_attendees) == -1){
+            cout << "Failure to execute 'create' command" << endl;
+        }
     }
 }
 

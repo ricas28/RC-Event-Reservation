@@ -1,6 +1,8 @@
 #ifndef __DATETIME__HPP__
 #define __DATETIME__HPP__
 
+using namespace std;
+
 class DateTime {
 private:
     int day;

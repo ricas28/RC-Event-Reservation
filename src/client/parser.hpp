@@ -159,6 +159,20 @@ bool parse_myreservations(char *args);
  */
 bool parse_create(char *args, string *name, string *event_fname, size_t *Fsize,
                         char **Fdata, DateTime *event_date, int *num_attendees);
+
+
+/**
+ * Parses a response to the 'create' command.
+ * 
+ * @param response Response from the server.
+ * @param status String that will contain the value of the status field.
+ * @param eid String that will contain event id from the created event if
+ *      command was successful .
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_create_response(const char *response, string &status, string &eid);
+
 /**
  * Parses a close command.
  * 
