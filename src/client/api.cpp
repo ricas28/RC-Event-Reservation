@@ -135,12 +135,12 @@ int er_unregister(CLArgs client){
 }
 
 void print_myevents_list(vector<pair<string, int>> &events_list){
-    cout << "-------------------------------" << endl;
+    cout << "---------------------------------------" << endl;
     for(auto event : events_list){
         cout << "Event id: " << event.first << endl;
         cout << "Event status: ";
         print_event_state(event.second);
-        cout << "-------------------------------" << endl;
+        cout << "---------------------------------------" << endl;
     }
 }
 
@@ -188,13 +188,13 @@ int er_myevents(ClLArgs client){
 }
 
 void print_myreservations_list(vector<Reservation> reservations_list){
-    cout << "-------------------------------" << endl;
+    cout << "---------------------------------------" << endl;
     for(auto reservation: reservations_list){
         cout << "Event id: " << reservation.eid << endl;
         cout << "Event date and time: ";
         reservation.datetime.print();
         cout << "Places reserved: " << reservation.value << endl;
-        cout << "-------------------------------" << endl;
+        cout << "---------------------------------------" << endl;
     }
 }
 
@@ -334,7 +334,7 @@ int er_close(CLArgs client, string eid){
 }
 
 void print_events_list(vector<Event> events_list){
-    cout << "-------------------------------" << endl;
+    cout << "---------------------------------------" << endl;
     for(auto event: events_list){
         cout << "Event id: " << event.eid << endl;
         cout << "Event name: " << event.name << endl;
@@ -342,7 +342,7 @@ void print_events_list(vector<Event> events_list){
         print_event_state(event.state);
         cout << "Event date and time: ";
         event.datetime.print();
-        cout << "-------------------------------" << endl;
+        cout << "---------------------------------------" << endl;
     }
 }
 
