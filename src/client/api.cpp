@@ -5,6 +5,7 @@
 #include "../common/protocol.hpp"
 #include "../common/constants.hpp"
 #include "../common/io.hpp"
+#include "../common/util.hpp"
 
 using namespace std;
 
@@ -136,23 +137,9 @@ int er_unregister(CLArgs client){
 void print_myevents_list(vector<pair<string, int>> &events_list){
     cout << "-------------------------------" << endl;
     for(auto event : events_list){
-        cout << "Event id: " << event.first << endl << "Status: ";
-        switch(event.second){
-            case EVENT_ACCEPTING:
-                cout << "Event still accepting" << endl;
-                break;
-            case EVENT_IN_PAST:
-                cout << "Event has already occured" << endl;
-                break;
-            case EVENT_SOLD_OUT:
-                cout << "Event is sold out" << endl;
-                break;
-            case EVENT_CLOSED:
-                cout << "Event is closed" << endl;
-                break;
-            default:
-                cerr << "Invalid state" << endl;
-        }
+        cout << "Event id: " << event.first << endl;
+        cout << "Event status: ";
+        print_event_state(event.second);
         cout << "-------------------------------" << endl;
     }
 }
@@ -204,7 +191,7 @@ void print_myreservations_list(vector<Reservation> reservations_list){
     cout << "-------------------------------" << endl;
     for(auto reservation: reservations_list){
         cout << "Event id: " << reservation.eid << endl;
-        cout << "Date and time: ";
+        cout << "Event date and time: ";
         reservation.datetime.print();
         cout << "Places reserved: " << reservation.value << endl;
         cout << "-------------------------------" << endl;
@@ -344,5 +331,56 @@ int er_close(CLArgs client, string eid){
         return -1;
     }
     return 0;       
+}
+
+void print_events_list(vector<Event> events_list){
+    cout << "-------------------------------" << endl;
+    for(auto event: events_list){
+        cout << "Event id: " << event.eid << endl;
+        cout << "Event name: " << event.name << endl;
+        cout << "Event status: ";
+        print_event_state(event.state);
+        cout << "Event date and time: ";
+        event.datetime.print();
+        cout << "-------------------------------" << endl;
+    }
+}
+
+int er_list(ClLArgs client){
+    char response_code[BUF_TEMP];
+    string message = op_to_str(OP_LIST) + "\n";
+
+    string response;
+    if((response = client_tcp_request_line(&client, message)) == ""){
+        cerr << "Failure to request/receive message to server" << endl;
+        return -1;
+    }
+
+    // Read response code.
+    int n = sscanf(response.c_str(), "%63s", response_code);
+    if(n != 1) cerr << "Failure to read response code to 'close' command" << endl;
+
+    string status = "";
+    OP_CODE code = str_to_op(response_code);
+    if(code == ERR){
+        cerr << "Invalid request message was sent" << endl;
+        return -1;
+    }
+    vector<Event> events_list = {};
+    if(code != OP_LIST_RESP || !parse_list_response(response.c_str(), status, events_list)){
+        cerr << "Bad message received from server!" << endl;
+        return -1;  
+    }
+
+    // Print message according to the status value
+    if(status == "OK") print_events_list(events_list);
+    else if(status == "NOK") cout << "no events were created" << endl;
+    else if(status == "ERR") 
+        cerr<< "Syntax of request message is incorrect or parameter values take invalid values" << endl;
+    else {
+        cerr << "[API] Invalid status message passed through" << endl;
+        return -1;
+    }
+    return 0;      
 }
 /* ----------------------------------------------- */

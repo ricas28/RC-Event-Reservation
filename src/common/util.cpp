@@ -76,3 +76,22 @@ bool is_valid_event_state(int state){
     return state == EVENT_ACCEPTING || state == EVENT_IN_PAST ||
             state == EVENT_CLOSED || state == EVENT_SOLD_OUT;
 }
+
+void print_event_state(int state){
+    switch(state){
+        case EVENT_ACCEPTING:
+            cout << "Event still accepting" << endl;
+            break;
+        case EVENT_IN_PAST:
+            cout << "Event has already occured" << endl;
+            break;
+        case EVENT_SOLD_OUT:
+            cout << "Event is sold out" << endl;
+            break;
+        case EVENT_CLOSED:
+            cout << "Event is closed" << endl;
+            break;
+        default:
+            cerr << "Invalid state" << endl;
+    }
+}

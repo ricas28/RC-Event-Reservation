@@ -136,13 +136,24 @@ bool parse_myevents_response(char *response, string &status,
                             vector<pair<string, int>> &events_list);
 
 /**
- * Parses a list command.
+ * Parses a 'list' command.
  * 
  * @param args String with (hopefully) no arguments.
  * 
  * @returns true if parse is successful, false otherwise.
  */
 bool parse_list(char *args);
+
+/**
+ * Parses a response to the 'list' command.
+ * 
+ * @param response Response form the server.
+ * @param status String that will contain the value of the status field.
+ * @param events_list vector with all events ever created if command is successful.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_list_response(const char *response, string &status, vector<Event> &events_list);
 
 /**
  * Parses a 'myreservations' command.

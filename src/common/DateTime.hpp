@@ -53,6 +53,9 @@ public:
     // Returns string representation (DD-MM-YYYY HH:MM)
     string toString();
 
+    // Parse a Datetime object from a string
+    static bool fromStrings(const string &date, const string &time, DateTime &out);
+
     // Compares this datetime to another (true if this > other)
     bool isAfter(DateTime& other);
 

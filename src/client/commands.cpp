@@ -114,10 +114,10 @@ void handle_myevents(char *args, CLArgs *client){
 }
 
 void handle_list(char *args, CLArgs *client){
-    if (!is_logged_in(client->logged_in)) return;
-
     if (parse_list(args)){
-        //er_list();
+        if(er_list(*client) == -1){
+            cerr << "Failure to execute 'list' command..." << endl;
+        }
     }
 }
 

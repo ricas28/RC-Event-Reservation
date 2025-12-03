@@ -76,4 +76,13 @@ int er_create(CLArgs client, string name, string event_fname, size_t Fsize,
  */
 int er_close(CLArgs client, string eid);
 
+/**
+ * Executes the 'list' command.
+ * 
+ * @param client Client.
+ * 
+ * @returns 0 for successful execution, -1 on failure.
+ */
+int er_list(ClLArgs client);
+
 #endif

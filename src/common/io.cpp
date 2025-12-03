@@ -57,7 +57,6 @@ size_t read_until_line_end(int fd, string &line){
         if(seen_end) 
             break;
     }
-
     return line.size();
 }
 

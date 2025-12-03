@@ -249,7 +249,7 @@ bool parse_myevents(char *args){
     return true;
 }
 
-bool parse_events_list(char *response, vector<pair<string, int>> &events_list){
+bool parse_myevents_list(char *response, vector<pair<string, int>> &events_list){
     string s(response);
     istringstream iss(s);
 
@@ -289,7 +289,7 @@ bool parse_myevents_response(char *response, string &status, vector<pair<string,
 
     // Check for status value
     if(!strcmp(status_temp, "OK")){
-        if(!parse_events_list(response, events_list)){
+        if(!parse_myevents_list(response, events_list)){
             return false;
         }
         status = status_temp;
@@ -316,6 +316,80 @@ bool parse_list(char *args){
     return true;
 }
 
+bool parse_events_list(const char *response, vector<Event> &events_list){
+    string s(response);
+    istringstream iss(s);
+
+    string token;
+    iss >> token; // "RLS"
+    iss >> token; // status (OK, NOK, WRP, NLG)
+
+    // If token is not OK, there will be no list.
+    if (token != "OK") {
+        return true;
+    }
+
+    string eid;
+    string name;
+    int state;
+    string datepart;   // dd-mm-yyyy
+    string timepart;   // hh:mm
+
+    while (iss >> eid >> name >> state >> datepart >> timepart){
+        // Validate EID
+        if (!is_valid_eid((char *)eid.c_str())) {
+            cerr << "Invalid EID in server response: " << eid << endl;
+            return false;
+        }
+        // Validate event name
+        if (!is_valid_event_name((char*)name.c_str())) {
+            cerr << "Invalid event name in server response: " << name << endl;
+            return false;
+        }
+        // Validate event state
+        if(!is_valid_event_state(state)){
+            cerr << "Invalid event state in server response: " << state << endl;
+            return false;
+        }
+        // Validate date and time.
+        DateTime dt;
+        if (!DateTime::fromStrings(datepart, timepart, dt)) {
+            // Method already prints error messages.
+            return false; 
+        }
+        events_list.push_back({eid, name, state, dt});
+    }
+    return true;
+}
+
+bool parse_list_response(const char *response, string &status, vector<Event> &events_list){
+    char response_code[BUF_TEMP], status_temp[BUF_TEMP], extra[BUFFER_SIZE];
+
+    int n = sscanf(response, "%63s %63s", response_code, status_temp);
+    // Response starts with 2 arguments: code OP_LIST_RESP, status.
+    if(n != 2 || str_to_op(response_code) != OP_LIST_RESP){
+       return false;
+    }
+
+    // Check for status value
+    if(!strcmp(status_temp, "OK")){
+        if(!parse_events_list(response, events_list)){
+            return false;
+        }
+        status = status_temp;
+        return true;
+    }
+
+    if(!strcmp(status_temp, "NOK") || !strcmp(status_temp, "ERR")){
+            n = sscanf(response, "%63s %63s %255s", response_code, status_temp, extra);
+            if(n != 2)
+                return false;
+            status = status_temp;
+            return true;
+    }
+    return false;
+}
+
 bool parse_myreservations(char *args){
     if (args != NULL) {
         cout << "This command has no arguments!" << endl;
@@ -340,7 +414,7 @@ bool parse_reservations_list(char *response, vector<Reservation> &reservations){
 
     string eid;
     string datepart;   // dd-mm-yyyy
-    string timepart;   // hh:mm:ss
+    string timepart;   // hh:mm
     int value;
 
     while (iss >> eid >> datepart >> timepart >> value){
@@ -351,31 +425,14 @@ bool parse_reservations_list(char *response, vector<Reservation> &reservations){
         }
         // Validate value
         if (!is_valid_num_attendees(value)) {
-            cerr << "Invalid reservation value: " << value << endl;
+            cerr << "Invalid reservation value in server response: " << value << endl;
             return false;
         }
-        // Date and time parsing
-        int d, m, y, hh, mm;
-        char dash1, dash2, colon1, colon2;
-
-        istringstream date_ss(datepart);
-        istringstream time_ss(timepart);
-
-        if (!(date_ss >> d >> dash1 >> m >> dash2 >> y) ||
-            dash1 != '-' || dash2 != '-'){
-                cerr << "Invalid date format: " << datepart << endl;
-                return false;
-        }
-        if (!(time_ss >> hh >> colon1 >> mm >> colon2 >> std::ws) ||
-            colon1 != ':' || colon2 != ':'){
-                cerr << "Invalid time format: " << timepart << endl;
-                return false;
-        }
-        // Validate DateTime
-        DateTime dt(d, m, y, hh, mm);
-        if (dt.invalidDateTime()) {
-            cerr << "Invalid datetime: " << datepart << " " << timepart << endl;
-            return false;
+        // Validate date and time
+        DateTime dt;
+        if (!DateTime::fromStrings(datepart, timepart, dt)) {
+            // Method already prints error messages.
+            return false; 
         }
         reservations.push_back({eid, dt, value});
     }
@@ -479,8 +536,8 @@ bool parse_create_response(const char *response, string &status, string &eid){
     if(!strcmp(status_temp, "OK")){
         n = sscanf(response, "%63s %63s %63s %255s", 
                             response_code, status_temp, eid_temp, extra);
-        // Response nees to have eid and end wint '\n'.
-        if(n != 3 || !is_valid_eid(eid_temp)  || response[strlen(response)-1] != '\n'){
+        // Response needs to have eid.
+        if(n != 3 || !is_valid_eid(eid_temp)){
             return false;
         }
         status = status_temp;
@@ -517,8 +574,9 @@ bool parse_close_response(const char *response, string &status){
     char response_code[BUF_TEMP], status_temp[BUF_TEMP], extra[BUFFER_SIZE];
 
     int n = sscanf(response, "%63s %63s %255s", response_code, status_temp, extra);
-    // Response has 2 arguments: code OP_CLOSE_RESP, status and ends with '\n'.
-    if(n != 2 || str_to_op(response_code) != OP_CLOSE_RESP || response[strlen(response)-1] != '\n'){
+    // Response has 2 arguments: code OP_CLOSE_RESP, status.
+    // Reading from TCP already checks for '\n'.
+    if(n != 2 || str_to_op(response_code) != OP_CLOSE_RESP){
        return false;
     }
 

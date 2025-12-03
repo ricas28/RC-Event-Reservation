@@ -26,6 +26,14 @@ struct Reservation {
     int value;
 };
 
+// Used for parsing list response.
+struct Event{
+    string eid;
+    string name;
+    int state;
+    DateTime datetime;
+};
+
 /**
  * Handles a login command.
  * 

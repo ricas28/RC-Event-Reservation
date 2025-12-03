@@ -96,4 +96,9 @@ bool is_positive_integer(char *s);
  */
 bool is_valid_event_state(int state);
 
+/**
+ * Prints a message according to the event state.
+ */
+void print_event_state(int state);
+
 #endif

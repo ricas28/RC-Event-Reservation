@@ -1,5 +1,7 @@
 #include <iostream>
+#include <sstream>
 #include <ctime>
+
 #include "DateTime.hpp"
 
 using namespace std;
@@ -108,7 +110,7 @@ void DateTime::print() {
          << (month < 10 ? "0" : "") << month << "-"
          << year << " "
          << (hour < 10 ? "0" : "") << hour << ":"
-         << (minute < 10 ? "0" : "") << minute;
+         << (minute < 10 ? "0" : "") << minute << endl;
 }
 
 string DateTime::toString(){
@@ -118,6 +120,35 @@ string DateTime::toString(){
             (hour < 10 ? "0" : "") + to_string(hour) + ":" +
             (minute < 10 ? "0" : "") + to_string(minute);
 }
+
+bool DateTime::fromStrings(const string &date, const string &time, DateTime &out){
+    int d, m, y, hh, mm;
+    char dash1, dash2, colon1;
+
+    // Parse dd-mm-yyyy
+    istringstream date_ss(date);
+    if (!(date_ss >> d >> dash1 >> m >> dash2 >> y) || dash1 != '-' || dash2 != '-'){
+        cerr << "Invalid date format: " << date << endl;
+        return false;
+    }
+    // Parse hh:mm
+    istringstream time_ss(time);
+    if (!(time_ss >> hh >> colon1 >> mm) || colon1 != ':'){
+        cerr << "Invalid time format: " << time << endl;
+        return false;
+    }
+
+    // Create DateTime e validate
+    DateTime dt(d, m, y, hh, mm);
+    if (dt.invalidDateTime()) {
+        cerr << "Invalid datetime: " << date << " " << time << endl;
+        return false;
+    }
+    // Successful parse.
+    out = dt;
+    return true;
+}
+
 
 bool DateTime::isAfter(DateTime& other) {
     if (year != other.year) return year > other.year;
