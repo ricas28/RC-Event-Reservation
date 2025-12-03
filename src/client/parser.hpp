@@ -232,22 +232,33 @@ bool parse_close_response(const char *response, string &status);
  * Parses a 'show' command.
  * 
  * @param args String with arguments.
- * @param eid Pointer to an int that will contain the event id.
+ * @param eid String that will contain the event id.
  * 
  * @returns true if parse is successful, false otherwise.
  */
-bool parse_show(char *args, int *eid);
+bool parse_show(char *args, string &eid);
 
 /**
  * Parses a reserve command.
  * 
  * @param args String with arguments.
- * @param eid Pointer to an integer that will contain the event id.
- * @param seats Pointer to an integer that will contain the number of seats
- *  to be reserved.
+ * @param eid String that will contain the event id.
+ * @param seats Integer that will contain the number of seats to be reserved.
  * 
  * @return true if parse is successful, false otherwise.
  */
-bool parse_reserve(char *args, int *eid, int *seats);
+bool parse_reserve(char *args, string &eid, int &seats);
+
+/**
+ * Parses a response to the 'reserve' command.
+ * 
+  *@param response Response from the server.
+ * @param status String that will contain the value of the status field.
+ * @param n_seats Integer that contains remaining seats on the event if
+ *  command is rejected.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_reserve_response(char *response, string &status, int &n_seats);
 
 #endif

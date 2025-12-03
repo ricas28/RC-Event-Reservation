@@ -122,19 +122,18 @@ void handle_list(char *args, CLArgs *client){
 }
 
 void handle_show(char *args, CLArgs *client){
-    if (!is_logged_in(client->logged_in)) return;
-
-    int eid;
-    if (parse_show(args, &eid)){
-        //er_show();
+    string eid;
+    if (parse_show(args, eid)){
+        er_show(*client, eid);
     }
 }
 
 void handle_reserve(char *args, CLArgs *client){
     if (!is_logged_in(client->logged_in)) return;
 
-    int eid, seats;
-    if (parse_reserve(args, &eid, &seats)){
+    string eid;
+    int seats;
+    if (parse_reserve(args, eid, seats)){
         //er_reserve();
     }
 }

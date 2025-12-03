@@ -85,4 +85,14 @@ int er_close(CLArgs client, string eid);
  */
 int er_list(ClLArgs client);
 
+/**
+ * Executes the 'show' command.
+ * 
+ * @param client Client.
+ * @param eid String with event id of the event being shown.
+ * 
+ * @returns 0 for successful execution, -1 on failure.
+ */
+int er_show(CLArgs client, string &eid);
+
 #endif

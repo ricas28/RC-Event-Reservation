@@ -83,7 +83,7 @@ Command parse_command(char *line, char **args){
     // Move pointer past the command
     char* ptr = line + command_size;
     // Skip all spaces
-    while (*ptr && isspace(*ptr)) ptr++;
+    while (*ptr && isspace(*ptr) ) ptr++;
     if (*ptr) {
         *args = ptr;
         // Remove newline at the end, if present
@@ -104,6 +104,10 @@ bool parse_login(char *args, int *uid, string *pass){
     bool error = false;
     char uid_temp[BUF_TEMP], pass_temp[BUF_TEMP], extra[BUFFER_SIZE];
 
+    if(!args){
+        cout << "No arguments were given!\nUsage: login <userID> <password>" << endl; 
+        return false;
+    }
     int n = sscanf(args, "%63s %63s %255s", uid_temp, pass_temp, extra);
     if (n != 2) {
         cout << "Invalid arguments!" << endl;
@@ -148,6 +152,10 @@ bool parse_change_pass(char *args, string *old_pass, string *new_pass){
     bool error = false;
     char old_pass_temp[BUF_TEMP], new_pass_temp[BUF_TEMP], extra[BUFFER_SIZE];
 
+    if(!args){
+        cout << "No arguments were given!\nUsage: changePass <oldPassword> <newPassword>" << endl; 
+        return false;
+    }
     int n = sscanf(args, "%63s %63s %255s", old_pass_temp, new_pass_temp, extra);
     if (n != 2) {
         cout << "Invalid arguments!" << endl;
@@ -424,7 +432,7 @@ bool parse_reservations_list(char *response, vector<Reservation> &reservations){
             return false;
         }
         // Validate value
-        if (!is_valid_num_attendees(value)) {
+        if (value < 1 || value > 999) {
             cerr << "Invalid reservation value in server response: " << value << endl;
             return false;
         }
@@ -475,6 +483,11 @@ bool parse_create(char *args, string *name, string *event_fname, size_t *Fsize,
     int day, month, year, hour, minute, num_attendees_temp;
     bool error = false;
 
+    if(!args){
+        cout << "No arguments were given!\nUsage: create <name> <event_fname> ";
+        cout << "<event_date> (format dd-mm-yyyy hh:mm) <num_attendees>" << endl;
+        return false;
+    }
     int n = sscanf(args, "%63s %63s %d-%d-%d %d:%d %d %255s", name_temp, event_fname_temp, 
                                                 &day, &month, &year, &hour, &minute,
                                                 &num_attendees_temp, extra);
@@ -556,6 +569,10 @@ bool parse_create_response(const char *response, string &status, string &eid){
 bool parse_close(char *args, string &eid){
     char eid_temp[BUF_TEMP], extra[BUFFER_SIZE];
 
+    if(!args){
+        cout << "No arguments were given!\nUsage: close <EID>" << endl; 
+        return false;
+    }
     int n = sscanf(args, "%63s %255s", eid_temp, extra);
     if(n != 1){
         cout << "Invalid arguments!\nUsage: close <EID>" << endl;
@@ -592,9 +609,13 @@ bool parse_close_response(const char *response, string &status){
     return false;
 }
 
-bool parse_show(char *args, int *eid){
+bool parse_show(char *args, string &eid){
     char eid_temp[BUF_TEMP], extra[BUFFER_SIZE];
 
+    if(!args){
+        cout << "No arguments were given!\nUsage: show <EID>" << endl; 
+        return false;
+    }
     int n = sscanf(args, "%63s %255s", eid_temp, extra);
     if(n != 1){
         cout << "Invalid arguments!\nUsage: show <EID>" << endl;
@@ -605,17 +626,21 @@ bool parse_show(char *args, int *eid){
         return false;
     }
     // Successful parse.
-    *eid = atoi(eid_temp);
+    eid = eid_temp;
     return true;
 }
 
-bool parse_reserve(char *args, int *eid, int *seats){
+bool parse_reserve(char *args, string &eid, int &seats){
     char eid_temp[BUF_TEMP], seats_temp[BUF_TEMP], extra[BUFFER_SIZE];
     bool error = false;
-
+    
+    if(!args){
+        cout << "No arguments were given!\nUsage: reserve <EID> <value>" << endl; 
+        return false;
+    }
     int n = sscanf(args, "%63s %63s %255s", eid_temp, seats_temp, extra);
-    if(n != 1){
-        cout << "Invalid arguments!\nUsage: close <EID>" << endl;
+    if(n != 2){
+        cout << "Invalid arguments!\nUsage: reserve <EID> <value>" << endl;
         return false;
     }
     if(!is_valid_eid(eid_temp)){
@@ -628,7 +653,38 @@ bool parse_reserve(char *args, int *eid, int *seats){
     }
     if (error) return false;
     // Successful parse.
-    *eid = atoi(eid_temp);
-    *seats = atoi(seats_temp);
+    eid = eid_temp;
+    seats = atoi(seats_temp);
     return true;
+}
+
+bool parse_reserve_response(char *response, string &status, int &n_seats){
+    char response_code[BUF_TEMP], status_temp[BUF_TEMP];
+    char n_seats_temp[BUFFER_SIZE], extra[BUFFER_SIZE];
+
+    int n = sscanf(response, "%63s %63s", response_code, status_temp);
+    // Response starts with 2 arguments: code OP_RESERVE_RESP, status.
+    if(n != 2 || str_to_op(response_code) != OP_RESERVE_RESP){
+       return false;
+    }
+
+    // Check for 'REJ' status.
+    if(!strcmp(status_temp, "REJ")){
+        n = sscanf(response,  "%63s %63s %63s %255s", response_code, status_temp,
+                                                            n_seats_temp, extra);
+        // Reading from TCP already garantees that message ends with '\n'.
+        if(n != 3 || !is_positive_integer(n_seats_temp))
+            return false;
+        n_seats = atoi(n_seats_temp);
+        return true;
+    }
+
+    // Check for status value
+    if(!strcmp(status_temp, "NOK") || !strcmp(status_temp, "NLG") || 
+        !strcmp(status_temp, "ACC") || !strcmp(status_temp, "CLS") ||
+        !strcmp(status_temp, "SLD") || !strcmp(status_temp, "ERR")){
+            status = status_temp;
+            return true;
+    }
+    return false;
 }

@@ -176,7 +176,7 @@ int er_myevents(ClLArgs client){
     // Print message according to the status value
     if(status == "OK") print_myevents_list(events_list);
     else if(status == "NOK") cout << "user has not created any events" << endl;
-    else if(status == "NLG") cerr << "user not logged in" << endl;
+    else if(status == "NLG") cerr << "[API] user not logged in" << endl;
     else if(status == "WRP") cerr << "[API] wrong password sent on the request" << endl;
     else if(status == "ERR") 
         cerr<< "Syntax of request message is incorrect or parameter values take invalid values" << endl;
@@ -321,11 +321,11 @@ int er_close(CLArgs client, string eid){
     if(status == "OK") cout << "event successfuly closed" << endl;
     else if(status == "NOK") cout << "[API] user does not exist or password is incorrect" << endl;
     else if(status == "NLG") cerr << "[API] user not logged in" << endl;
-    else if(status == "NOE") cerr << "event does not exist" << endl;
-    else if(status == "EOW") cerr << "event was not created by this user" << endl;
-    else if(status == "SLD") cerr << "event is sold out" << endl;
-    else if(status == "PST") cerr << "event was in the past" << endl;
-    else if(status == "CLO") cerr << "event was already closed" << endl;
+    else if(status == "NOE") cout << "event does not exist" << endl;
+    else if(status == "EOW") cout << "event was not created by this user" << endl;
+    else if(status == "SLD") cout << "event is sold out" << endl;
+    else if(status == "PST") cout << "event was in the past" << endl;
+    else if(status == "CLO") cout << "event was already closed" << endl;
     else if(status == "ERR") 
         cerr<< "Syntax of request message is incorrect or parameter values take invalid values" << endl;
     else {
@@ -360,7 +360,7 @@ int er_list(ClLArgs client){
 
     // Read response code.
     int n = sscanf(response.c_str(), "%63s", response_code);
-    if(n != 1) cerr << "Failure to read response code to 'close' command" << endl;
+    if(n != 1) cerr << "Failure to read response code to 'list' command" << endl;
 
     string status = "";
     OP_CODE code = str_to_op(response_code);
@@ -384,5 +384,56 @@ int er_list(ClLArgs client){
         return -1;
     }
     return 0;      
+}
+
+int er_show(CLArgs client, string &eid){
+    (void) client; // used for avoiding warnings.
+    (void) eid;    // used for avoiding warnings.
+    return 0;
+}
+
+int er_reserve(CLArgs client, string &eid, int people){
+    char response_code[BUF_TEMP];
+    string message = op_to_str(OP_RESERVE) + " " + to_string(client.uid) + 
+                        " " + client.pass + " " + eid + " " + to_string(people) + "\n";
+    string response;
+    if((response = client_tcp_request_line(&client, message)) == ""){
+        cerr << "Failure to request/receive message to server" << endl;
+        return -1;
+    }
+
+    // Read response code.
+    int n = sscanf(response.c_str(), "%63s", response_code);
+    if(n != 1) cerr << "Failure to read response code to 'reserve' command" << endl;
+
+    string status = "";
+    OP_CODE code = str_to_op(response_code);
+    if(code == ERR){
+        cerr << "Invalid request message was sent" << endl;
+        return -1;
+    }
+    int n_seats;
+    if(code != OP_RESERVE_RESP || !parse_reserve_response((char*)response.c_str(), status, n_seats)){
+        cerr << "Bad message received from server!" << endl;
+        return -1;  
+    }
+
+    // Print message according to the status value
+    if(status == "ACC") cout << "reservation successfuly made" << endl;
+    else if(status == "NOK") cout << "event is not active" << endl;
+    else if(status == "NLG") cerr << "[API] user not logged in" << endl;
+    else if(status == "CLS") cout << "event is closed" << endl;
+    else if(status == "SLD") cout << "event is sold out" << endl;
+    else if(status == "REJ"){
+        cout << "requested places larger than remaining seats" << endl;
+        cout << "remaining seats: " << n_seats << endl;
+    }
+    else if(status == "ERR") 
+        cerr<< "Syntax of request message is incorrect or parameter values take invalid values" << endl;
+    else {
+        cerr << "[API] Invalid status message passed through" << endl;
+        return -1;
+    }
+    return 0;       
 }
 /* ----------------------------------------------- */
