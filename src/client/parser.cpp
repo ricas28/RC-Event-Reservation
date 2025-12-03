@@ -648,7 +648,7 @@ bool parse_reserve(char *args, string &eid, int &seats){
         error = true;
     }
     if(!is_valid_seats(seats_temp)){
-        cout << "Invalid number of seats! Must be a positive integer" << endl;
+        cout << "Invalid number of seats! Must be an integer from 1 to " << MAX_SEATS << endl;
         error = true;
     }
     if (error) return false;
