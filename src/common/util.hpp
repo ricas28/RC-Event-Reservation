@@ -79,13 +79,13 @@ bool is_valid_num_attendees(int num_attendees);
 bool is_valid_eid(char *s);
 
 /**
- * Checks if the content of a string has a positive integer.
+ * Checks if the content of a string has a valid number of seats (1-999).
  * 
  * @param s String.
  * 
- * @returns true if it's a positive integer, false otherwise.
+ * @returns true if it's valid, false otherwise.
  */
-bool is_positive_integer(char *s);
+bool is_valid_seats(char *s);
 
 /**
  * Cheks if the given event state is valid

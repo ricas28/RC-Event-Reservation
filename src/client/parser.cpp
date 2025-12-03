@@ -647,7 +647,7 @@ bool parse_reserve(char *args, string &eid, int &seats){
         cout << "Invalid eventID! Must be a 3 number digit." << endl;
         error = true;
     }
-    if(!is_positive_integer(seats_temp)){
+    if(!is_valid_seats(seats_temp)){
         cout << "Invalid number of seats! Must be a positive integer" << endl;
         error = true;
     }
@@ -673,7 +673,7 @@ bool parse_reserve_response(char *response, string &status, int &n_seats){
         n = sscanf(response,  "%63s %63s %63s %255s", response_code, status_temp,
                                                             n_seats_temp, extra);
         // Reading from TCP already garantees that message ends with '\n'.
-        if(n != 3 || !is_positive_integer(n_seats_temp))
+        if(n != 3 || !is_valid_seats(n_seats_temp))
             return false;
         n_seats = atoi(n_seats_temp);
         status = status_temp;

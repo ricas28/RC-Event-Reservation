@@ -60,15 +60,20 @@ bool is_valid_eid(char *s){
     return true;
 }
 
-bool is_positive_integer(char *s) {
-    // Can't start with '-', '+' or '0'.
-    if (s[0] == '-' || s[0] == '+' || s[0] == 0) return false;
+bool is_valid_seats(char *s) {
+    // Can't be empty or start with '-', '+' or '0'
+    if (!s || *s == '\0' || s[0] == '-' || s[0] == '+' || s[0] == 0) 
+        return false;
 
+    int value = 0;
     size_t size = strlen(s);
-    for (size_t i = 0; i < size-1; i++) 
+    for (size_t i = 0; i < size-1; i++){
         // Each char must be a digit.
         if (!isdigit(s[i]))
             return false;
+        value = value * 10 + (s[i] - '0');
+        if (value > MAX_SEATS) return false; 
+    }
     return true;
 }
 
