@@ -8,6 +8,9 @@ using namespace std;
 
 #include "constants.hpp"
 
+// Global variable for storing rests from TCP stream.
+string _message_rest;
+
 void clean_up_fd(int fd){
     int c;
     while (read(fd, &c, 1) == 1 && c != '\n');
@@ -42,22 +45,25 @@ int read_line_256(int fd, char *line){
     return 1;
 }
 
-size_t read_until_line_end(int fd, string &line){
-    line.clear();
-    char c;
-    bool seen_end = false;
+ssize_t read_all(int fd, void *buf, size_t size){
+    size_t total_read = 0;
+    char *p = (char *)buf;
 
-    while (true) {
-        ssize_t n = read(fd, &c, 1);
-        if (n <= 0) return (size_t)n; // error or EOF
+    while (total_read < size) {
+        ssize_t n = read(fd,p + total_read, (size_t)(size - total_read));
 
-        if (c == '\n')
-            seen_end = true;
-        line.push_back(c);
-        if(seen_end) 
-            break;
+        if (n < 0) {
+            if (errno == EINTR)
+                continue; // Try again if write is interrupted
+            return -1;   // Real error.
+        }
+
+        if (n == 0) {
+            return (ssize_t)total_read;  // EOF
+        }
+        total_read += (size_t)n;
     }
-    return line.size();
+    return (ssize_t)total_read;
 }
 
 ssize_t write_all(int fd, const void *buf, size_t size){
@@ -80,25 +86,25 @@ ssize_t write_all(int fd, const void *buf, size_t size){
     return (ssize_t)total_written;
 }
 
-ssize_t read_all(int fd, void *buf, size_t size){
-    size_t total_read = 0;
-    char *p = (char *)buf;
+string read_message(int fd){
+    char buf[TCP_READING_SIZE];
 
-    while (total_read < size) {
-        ssize_t n = read(fd,p + total_read, (size_t)(size - total_read));
-
-        if (n < 0) {
-            if (errno == EINTR)
-                continue; // Try again if write is interrupted
-            return -1;   // Real error.
+    while (true) {
+        // Checks if there's a ready message on _message_rest
+        size_t pos = _message_rest.find('\n');
+        if (pos != string::npos) {
+            string line = _message_rest.substr(0, pos);
+            // Keep the rest for future readings.
+            _message_rest.erase(0, pos + 1); 
+            return line;
         }
-
-        if (n == 0) {
-            return (ssize_t)total_read;  // EOF
+        // Read from fd
+        ssize_t n = read_all(fd, buf, sizeof(buf));
+        if (n <= 0) {
+            return ""; // fd closed or error reading.
         }
-        total_read += (size_t)n;
+        _message_rest.append(buf, (size_t)n);
     }
-    return (ssize_t)total_read;
 }
 
 char *read_file_to_buffer(const char *fileName, size_t *out_size) {

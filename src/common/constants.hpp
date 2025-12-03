@@ -8,6 +8,8 @@
 #define UDP_RETRIES 3  
 #define UDP_BUFFER_SIZE 4096 // 4 KiB (safe size, if exceeded, TCP would be prefered)
 
+#define TCP_READING_SIZE 1024
+
 #define UID_SIZE 7         //  6 + 1 for '\0'
 #define PASS_SIZE 9        //  8 + 1 for '\0'
 #define EVENT_NAME_SIZE 11 // 10 + 1 for '\0'

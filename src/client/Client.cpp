@@ -120,7 +120,7 @@ string client_tcp_request_line(CLArgs* client, const string &msg){
 
     // Receive response.
     string response;
-    if(read_until_line_end(fd, response) == -1){
+    if((response = read_message(fd)) == ""){
         perror("Failure to read from server with TCP");
         close(fd);
         return "";

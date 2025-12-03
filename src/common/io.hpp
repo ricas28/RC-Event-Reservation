@@ -17,14 +17,14 @@ using namespace std;
 int read_line_256(int fd, char *line);
 
 /**
- * Reads dynamically from the given fd.
+ * Reads the next message from the given fd. Read until seeing '\n'.
+ * This function is mostly used for TCP connections.
  * 
  * @param fd File descriptor.
- * @param line String that will contain read content.
  * 
- * @returns Bytes that were
+ * @returns Next message.
  */
-ssize_t read_until_line_end(int fd, string &line);
+string read_message(int fd);
 
 /**
  * Does a clean up of the given fd
