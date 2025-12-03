@@ -4,6 +4,7 @@
 
 #include "constants.hpp"
 #include "DateTime.hpp"
+#include "protocol.hpp"
 
 // Simplification
 namespace fs = std::filesystem;
@@ -69,4 +70,9 @@ bool is_positive_integer(char *s) {
         if (!isdigit(s[i]))
             return false;
     return true;
+}
+
+bool is_valid_event_state(int state){
+    return state == EVENT_ACCEPTING || state == EVENT_IN_PAST ||
+            state == EVENT_CLOSED || state == EVENT_SOLD_OUT;
 }

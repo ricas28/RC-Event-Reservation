@@ -87,4 +87,13 @@ bool is_valid_eid(char *s);
  */
 bool is_positive_integer(char *s);
 
+/**
+ * Cheks if the given event state is valid
+ * 
+ * @param state event state
+ * 
+ * @return true if state is vaid, false otherwise.
+ */
+bool is_valid_event_state(int state);
+
 #endif

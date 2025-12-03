@@ -33,6 +33,15 @@ int er_logout(CLArgs client);
 int er_unregister(CLArgs client);
 
 /**
+ * Executes the 'myevents' command.
+ * 
+ * @param client Client.
+ * 
+ * @return 0 for successful execution, -1 on failure.  
+*/ 
+int er_myevents(ClLArgs client);
+
+/**
  * Executes the 'create' command.
  * 
  * @param client Client

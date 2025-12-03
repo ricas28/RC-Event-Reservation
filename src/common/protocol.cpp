@@ -73,11 +73,11 @@ int send_udp_message(int socket, const char *message, const struct addrinfo *add
 }
 
 char *receive_udp_message(int socket, struct addrinfo *addr) {
-    char *buffer = (char *)malloc(BUFFER_SIZE);
+    char *buffer = (char *)malloc(UDP_BUFFER_SIZE);
     if (!buffer) return NULL;
-
+    
     socklen_t addrlen = addr->ai_addrlen;
-    ssize_t n = recvfrom(socket, buffer, BUFFER_SIZE, 0, addr->ai_addr, &addrlen);
+    ssize_t n = recvfrom(socket, buffer, UDP_BUFFER_SIZE, 0, addr->ai_addr, &addrlen);
 
     if (n == -1) {
         perror("Failure to receive message with UDP");
@@ -88,7 +88,6 @@ char *receive_udp_message(int socket, struct addrinfo *addr) {
     buffer[n] = '\0';
     return buffer;
 }
-
 
 void close_socket_connection(int socket, struct addrinfo *addr){
     free(addr);

@@ -1,7 +1,9 @@
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <unistd.h>
 #include <string.h>
+#include <vector>
 
 #include "../common/constants.hpp"
 #include "../common/util.hpp"
@@ -247,6 +249,65 @@ bool parse_myevents(char *args){
     return true;
 }
 
+bool parse_events_list(char *response, vector<pair<string, int>> &events_list){
+    string s(response);
+    istringstream iss(s);
+
+    string token;
+
+    // Skip the response code and status in the response.
+    iss >> token; // response_code
+    iss >> token; // status
+
+    // Read in pairs of EID and state.
+    char eid[BUF_TEMP];
+    int state;
+    while (iss >> eid >> state) {
+        // Validate EID
+        if (!is_valid_eid(eid)){
+            cerr << "Invalid EID on server's response: " << eid << endl;  
+            return false;
+        }
+        // Validate state
+        if (!is_valid_event_state(state)){
+            cerr << "Invalid event state on server's response: " << state << endl; 
+            return false;
+        }
+        events_list.push_back({eid, state});
+    }
+    return true;
+}
+
+bool parse_myevents_response(char *response, string &status, 
+                            vector<pair<string, int>> &events_list){
+    char response_code[BUF_TEMP], status_temp[BUF_TEMP], extra[BUFFER_SIZE];
+
+    int n = sscanf(response, "%63s %63s", response_code, status_temp);
+    // Response starts with 2 arguments: code OP_MYEVENTS_RESP, status.
+    if(n != 2 || str_to_op(response_code) != OP_MYEVENTS_RESP){
+       return false;
+    }
+
+    // Check for status value
+    if(!strcmp(status_temp, "OK")){
+        if(!parse_events_list(response, events_list)){
+            return false;
+        }
+        status = status_temp;
+        return true;
+    }
+
+    if(!strcmp(status_temp, "NOK") || !strcmp(status_temp, "NLG") || 
+        !strcmp(status_temp, "WRP") || !strcmp(status_temp, "ERR")){
+            n = sscanf(response, "%63s %63s %255s", response_code, status_temp, extra);
+            if(n != 2)
+                return false;
+            status = status_temp;
+            return true;
+    }
+    return false;
+}
+
 bool parse_list(char *args){
     if (args != NULL) {
         cout << "This command has no arguments!" << endl;
@@ -325,7 +386,7 @@ bool parse_create_response(const char *response, string &status, string &eid){
     char response_code[BUF_TEMP], status_temp[BUF_TEMP], eid_temp[BUF_TEMP], extra[BUFFER_SIZE];
 
     int n = sscanf(response, "%63s %63s", response_code, status_temp);
-    // Response has 3 arguments: code OP_LOGOUT_RESP, status, eid and ends with '\n'.
+    // Response starts with 2 arguments: code OP_LOGOUT_RESP and status.
     if(n != 2 || str_to_op(response_code) != OP_CREATE_RESP){
        return false;
     }
@@ -333,6 +394,7 @@ bool parse_create_response(const char *response, string &status, string &eid){
     if(!strcmp(status_temp, "OK")){
         n = sscanf(response, "%63s %63s %63s %255s", 
                             response_code, status_temp, eid_temp, extra);
+        // Response nees to have eid and end wint '\n'.
         if(n != 3 || !is_valid_eid(eid_temp)  || response[strlen(response)-1] != '\n'){
             return false;
         }

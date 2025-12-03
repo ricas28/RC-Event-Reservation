@@ -2,6 +2,7 @@
 #define __PARSER__HPP__
 
 #include <string>
+#include <vector>
 
 #include "../common/DateTime.hpp"
 #include "commands.hpp"
@@ -121,6 +122,18 @@ bool parse_exit(char *args);
  * @returns true if parse is successful, false otherwise.
  */
 bool parse_myevents(char *args);
+
+/**
+ * Parses a response to the 'myevents' command.
+ * 
+ * @param response Response from the server.
+ * @param status String that will contain the value of the status field.
+ * @param events_list vector with events created by the user if command is successful.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_myevents_response(char *response, string &status, 
+                            vector<pair<string, int>> &events_list);
 
 /**
  * Parses a list command.

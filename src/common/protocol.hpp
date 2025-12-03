@@ -6,6 +6,11 @@
 
 using namespace std;
 
+#define EVENT_IN_PAST 0
+#define EVENT_ACCEPTING 1
+#define EVENT_SOLD_OUT 2
+#define EVENT_CLOSED 3
+
 typedef enum {
     OP_LOGIN,
     OP_LOGIN_RESP,

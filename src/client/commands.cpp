@@ -19,6 +19,10 @@ bool is_logged_in(bool logged_in){
 }
 
 void handle_login(char *args, CLArgs *client){
+    if(client->logged_in){
+        cout << "user already logged in" << endl;
+        return;
+    }
     if (parse_login(args, &client->uid, &client->pass)){
         if(er_login(*client, client->uid, client->pass) == -1){
             cerr << "Failure to execute 'login' command..." << endl;
@@ -101,7 +105,9 @@ void handle_myevents(char *args, CLArgs *client){
     if (!is_logged_in(client->logged_in)) return;
 
     if (parse_myevents(args)){
-        //er_myevents();
+        if(er_myevents(*client) == -1){
+            cerr << "Failure to execute 'myevents' command..." << endl;
+        }
     }
 }
 
