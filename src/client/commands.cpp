@@ -24,11 +24,10 @@ void handle_login(char *args, CLArgs *client){
         return;
     }
     if (parse_login(args, &client->uid, &client->pass)){
-        if(er_login(*client, client->uid, client->pass) == -1){
+        if(er_login(client, client->uid, client->pass) == -1){
             cerr << "Failure to execute 'login' command..." << endl;
             return;
         }
-        client->logged_in = true;
     }
 }
 
@@ -45,11 +44,10 @@ void handle_unregister(char *args, CLArgs *client){
     if (!is_logged_in(client->logged_in)) return;
 
     if (parse_unregister(args)){
-         if(er_unregister(*client) == -1){
+         if(er_unregister(client) == -1){
             cerr << "Failure to execute 'unregister' command..." << endl;
             return;
         }
-        client->logged_in = false;
     }
 }
 
@@ -57,11 +55,10 @@ void handle_logout(char *args, CLArgs *client){
     if (!is_logged_in(client->logged_in)) return;
 
     if (parse_logout(args)){
-        if(er_logout(*client) == -1){
+        if(er_logout(client) == -1){
             cerr << "Failure to execute 'logout' command..." << endl;
             return;
         }
-        client->logged_in = false;
     }
 }
 
@@ -134,7 +131,9 @@ void handle_reserve(char *args, CLArgs *client){
     string eid;
     int seats;
     if (parse_reserve(args, eid, seats)){
-        //er_reserve();
+        if(er_reserve(*client, eid, seats) == -1){
+            cerr << "Failure to execute 'reserve' command..." << endl;
+        }
     }
 }
 

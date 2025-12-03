@@ -93,7 +93,7 @@ string read_message(int fd){
         // Checks if there's a ready message on _message_rest
         size_t pos = _message_rest.find('\n');
         if (pos != string::npos) {
-            string line = _message_rest.substr(0, pos);
+            string line = _message_rest.substr(0, pos + 1);
             // Keep the rest for future readings.
             _message_rest.erase(0, pos + 1); 
             return line;

@@ -12,12 +12,12 @@ using namespace std;
 #define LINE_SEPARATOR "---------------------------------------"
 
 /* -------------- UDP COMMANDS ------------------- */
-int er_login(CLArgs client, int uid, string pass){
+int er_login(CLArgs *client, int uid, string pass){
     char *response, response_code[BUF_TEMP];
     string message = op_to_str(OP_LOGIN) + " " + 
                         to_string(uid) + " " + pass + "\n";
 
-    if((response = client_udp_request(&client, message.c_str())) == NULL){
+    if((response = client_udp_request(client, message.c_str())) == NULL){
         cerr << "Failure to request/receive message to server" << endl;
         free(response);
         return -1;
@@ -39,7 +39,10 @@ int er_login(CLArgs client, int uid, string pass){
     }
 
     // Print message according to the status value
-    if(status == "OK") cout << "successful login" << endl;
+    if(status == "OK"){
+        cout << "successful login" << endl;
+        client->logged_in = true;
+    }
     else if(status == "NOK") cout << "incorrect login attempt" << endl;
     else if(status == "REG") cout << "new user registered" << endl;
     else if(status == "ERR") 
@@ -53,12 +56,12 @@ int er_login(CLArgs client, int uid, string pass){
     return 0;         
 }
 
-int er_logout(CLArgs client){
+int er_logout(CLArgs *client){
     char *response, response_code[BUF_TEMP];
-    string message = op_to_str(OP_LOGOUT) + " " + to_string(client.uid) + 
-                                            " " + client.pass + "\n";
+    string message = op_to_str(OP_LOGOUT) + " " + to_string(client->uid) + 
+                                            " " + client->pass + "\n";
                                             
-    if((response = client_udp_request(&client, message.c_str())) == NULL){
+    if((response = client_udp_request(client, message.c_str())) == NULL){
         cerr << "Failure to request/receive message to server" << endl;
         free(response);
         return -1;
@@ -80,7 +83,10 @@ int er_logout(CLArgs client){
     }
 
     // Print message according to the status value
-    if(status == "OK") cout << "successful logout" << endl;
+    if(status == "OK"){
+        cout << "successful logout" << endl;
+        client->logged_in = false;
+    } 
     else if(status == "NOK") cout << "user not logged in" << endl;
     else if(status == "UNR") cout << "unknown user" << endl;
     else if(status == "WRP") cerr << "[API] Wrong password sent on 'logout' command" << endl;
@@ -95,12 +101,12 @@ int er_logout(CLArgs client){
     return 0;                         
 }
 
-int er_unregister(CLArgs client){
+int er_unregister(CLArgs *client){
     char *response, response_code[BUF_TEMP];
-    string message = op_to_str(OP_UNREGISTER) + " " + to_string(client.uid) + 
-                                            " " + client.pass + "\n";
+    string message = op_to_str(OP_UNREGISTER) + " " + to_string(client->uid) + 
+                                            " " + client->pass + "\n";
                                             
-    if((response = client_udp_request(&client, message.c_str())) == NULL){
+    if((response = client_udp_request(client, message.c_str())) == NULL){
         cerr << "Failure to request/receive message to server" << endl;
         free(response);
         return -1;
@@ -122,7 +128,10 @@ int er_unregister(CLArgs client){
     }
 
     // Print message according to the status value
-    if(status == "OK") cout << "successful unregister" << endl;
+    if(status == "OK"){
+        cout << "successful unregister" << endl;
+        client->logged_in = false;
+    }
     else if(status == "NOK" || status == "WRP") cout << "incorrect unregister attempt" << endl;
     else if(status == "UNR") cout << "unknown user" << endl;
     else if(status == "ERR") 
@@ -425,8 +434,7 @@ int er_reserve(CLArgs client, string &eid, int people){
     else if(status == "CLS") cout << "event is closed" << endl;
     else if(status == "SLD") cout << "event is sold out" << endl;
     else if(status == "REJ"){
-        cout << "requested places larger than remaining seats" << endl;
-        cout << "remaining seats: " << n_seats << endl;
+        cout << "requested places are larger than remaining seats: " << n_seats << endl;
     }
     else if(status == "ERR") 
         cerr<< "Syntax of request message is incorrect or parameter values take invalid values" << endl;

@@ -676,6 +676,7 @@ bool parse_reserve_response(char *response, string &status, int &n_seats){
         if(n != 3 || !is_positive_integer(n_seats_temp))
             return false;
         n_seats = atoi(n_seats_temp);
+        status = status_temp;
         return true;
     }
 

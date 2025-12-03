@@ -6,31 +6,31 @@
 /**
  * Executes the 'login' command.
  * 
- * @param client Client.
+ * @param client Pointer to a client.
  * @param uid User id that user typed in.
  * @param pass Password that user typed in.
  * 
  * @returns 0 for successful execetion, -1 on failure.
  */
-int er_login(CLArgs client, int uid, string pass);
+int er_login(CLArgs *client, int uid, string pass);
 
 /**
  * Executes the 'logout' command.
  * 
- * @param client Client.
+ * @param client Pointer to a client.
  * 
  * @returns 0 for successful execetion, -1 on failure.
  */
-int er_logout(CLArgs client);
+int er_logout(CLArgs *client);
 
 /**
  * Executes the 'unregister' command.
  * 
- * @param client Client.
+ * @param client Pointer to a client.
  * 
  * @returns 0 for successful execetion, -1 on failure.
  */
-int er_unregister(CLArgs client);
+int er_unregister(CLArgs *client);
 
 /**
  * Executes the 'myevents' command.
@@ -94,5 +94,16 @@ int er_list(ClLArgs client);
  * @returns 0 for successful execution, -1 on failure.
  */
 int er_show(CLArgs client, string &eid);
+
+/**
+ * Executes the 'reserve' command.
+ * 
+ * @param client Client.
+ * @param eid String with event id of the event being reserved.
+ * @param people Number of seats being reserved.
+ * 
+ * @returns 0 for successful execution, -1 on failure.
+ */
+int er_reserve(CLArgs client, string &eid, int people);
 
 #endif
