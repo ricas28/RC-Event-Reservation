@@ -198,17 +198,27 @@ bool parse_create(char *args, string *name, string *event_fname, size_t *Fsize,
 bool parse_create_response(const char *response, string &status, string &eid);
 
 /**
- * Parses a close command.
+ * Parses a 'close' command.
  * 
  * @param args String with arguments.
- * @param eid Pointer to an int that will contain the event id.
+ * @param eid Pointer to a string that will contain the event id.
  * 
  * @returns true if parse is successful, false otherwise.
  */
-bool parse_close(char *args, int *eid);
+bool parse_close(char *args, string &eid);
 
 /**
- * Parses a show command.
+ * Parses a response to the 'close' command.
+ * 
+ * @param response Response from the server.
+ * @param status String that will contain the value of the status field.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_close_response(const char *response, string &status);
+
+/**
+ * Parses a 'show' command.
  * 
  * @param args String with arguments.
  * @param eid Pointer to an int that will contain the event id.

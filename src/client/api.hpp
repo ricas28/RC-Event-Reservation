@@ -66,4 +66,14 @@ int er_myreservations(ClLArgs client);
 int er_create(CLArgs client, string name, string event_fname, size_t Fsize,
                         char *Fdata, DateTime event_date, int num_attendees);
 
+/**
+ * Executes the 'close' command.
+ * 
+ * @param client Client.
+ * @param eid Id of the event being closed.
+ * 
+ * @returns 0 for successful execution, -1 on failure.
+ */
+int er_close(CLArgs client, string eid);
+
 #endif

@@ -299,7 +299,7 @@ bool parse_myevents_response(char *response, string &status, vector<pair<string,
     if(!strcmp(status_temp, "NOK") || !strcmp(status_temp, "NLG") || 
         !strcmp(status_temp, "WRP") || !strcmp(status_temp, "ERR")){
             n = sscanf(response, "%63s %63s %255s", response_code, status_temp, extra);
-            if(n != 2)
+            if(n != 2 && response[strlen(response)-1] != '\n')
                 return false;
             status = status_temp;
             return true;
@@ -403,7 +403,7 @@ bool parse_myreservations_response(char *response, string &status, vector<Reserv
     if(!strcmp(status_temp, "NOK") || !strcmp(status_temp, "NLG") || 
         !strcmp(status_temp, "WRP") || !strcmp(status_temp, "ERR")){
             n = sscanf(response, "%63s %63s %255s", response_code, status_temp, extra);
-            if(n != 2)
+            if(n != 2 && response[strlen(response)-1] != '\n')
                 return false;
             status = status_temp;
             return true;
@@ -496,7 +496,7 @@ bool parse_create_response(const char *response, string &status, string &eid){
     return false;
 }
 
-bool parse_close(char *args, int *eid){
+bool parse_close(char *args, string &eid){
     char eid_temp[BUF_TEMP], extra[BUFFER_SIZE];
 
     int n = sscanf(args, "%63s %255s", eid_temp, extra);
@@ -509,8 +509,29 @@ bool parse_close(char *args, int *eid){
         return false;
     }
     // Successful parse.
-    *eid = atoi(eid_temp);
+    eid = eid_temp;
     return true;
+}
+
+bool parse_close_response(const char *response, string &status){
+    char response_code[BUF_TEMP], status_temp[BUF_TEMP], extra[BUFFER_SIZE];
+
+    int n = sscanf(response, "%63s %63s %255s", response_code, status_temp, extra);
+    // Response has 2 arguments: code OP_CLOSE_RESP, status and ends with '\n'.
+    if(n != 2 || str_to_op(response_code) != OP_CLOSE_RESP || response[strlen(response)-1] != '\n'){
+       return false;
+    }
+
+    // Check for status value
+    if(!strcmp(status_temp, "OK") || !strcmp(status_temp, "NOK") || 
+        !strcmp(status_temp, "NLG") || !strcmp(status_temp, "NOE") ||
+        !strcmp(status_temp, "EOW") || !strcmp(status_temp, "SLD") ||
+        !strcmp(status_temp, "PST") || !strcmp(status_temp, "CLO") ||
+        !strcmp(status_temp, "ERR")){
+            status = status_temp;
+            return true;
+    }
+    return false;
 }
 
 bool parse_show(char *args, int *eid){

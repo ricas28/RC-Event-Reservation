@@ -87,7 +87,7 @@ void handle_create(char *args, CLArgs *client){
 
     if (parse_create(args, &name, &event_fname, &Fsize, &Fdata, &event_date, &num_attendees)){
         if(er_create(*client, name, event_fname, Fsize, Fdata, event_date, num_attendees) == -1){
-            cout << "Failure to execute 'create' command" << endl;
+            cerr << "Failure to execute 'create' command..." << endl;
         }
     }
 }
@@ -95,9 +95,11 @@ void handle_create(char *args, CLArgs *client){
 void handle_close(char *args, CLArgs *client){
     if (!is_logged_in(client->logged_in)) return;
 
-    int eid;
-    if (parse_close(args, &eid)){
-        //er_close();
+    string eid;
+    if (parse_close(args, eid)){
+        if(er_close(*client, eid) == -1){
+            cerr << "Failure to execute 'close' command..." << endl;
+        }
     }
 }
 
