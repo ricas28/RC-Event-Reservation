@@ -145,13 +145,24 @@ bool parse_myevents_response(char *response, string &status,
 bool parse_list(char *args);
 
 /**
- * Parses a myreservations command.
+ * Parses a 'myreservations' command.
  * 
  * @param args String with (hopefully) no arguments.
  * 
  * @returns true if parse is successful, false otherwise.
  */
 bool parse_myreservations(char *args);
+
+/**
+ * Parses a response to the 'myreservations' command.
+ * 
+ * @param response Response from the server.
+ * @param status String that will contain the value of the status field.
+ * @param events_list vector with reservations made by the user if command is successful.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_myreservations_response(char *response, string &status, vector<Reservation> &reservations_list);
 
 /**
  * Parses a create command.

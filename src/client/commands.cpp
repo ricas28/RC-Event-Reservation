@@ -141,6 +141,8 @@ void handle_myreservations(char *args, CLArgs *client){
     if (!is_logged_in(client->logged_in)) return;
 
     if (parse_myreservations(args)){
-        //er_myreservations();
+        if(er_myreservations(*client) == -1){
+            cerr << "Failure to execute 'myreservations' command..." << endl;
+        }
     }
 }

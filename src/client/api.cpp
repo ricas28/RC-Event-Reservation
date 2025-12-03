@@ -122,8 +122,9 @@ int er_unregister(CLArgs client){
 }
 
 void print_myevents_list(vector<pair<string, int>> &events_list){
+    cout << "-------------------------------" << endl;
     for(auto event : events_list){
-        cout << event.first << ": ";
+        cout << "Event id: " << event.first << endl << "Status: ";
         switch(event.second){
             case EVENT_ACCEPTING:
                 cout << "Event still accepting" << endl;
@@ -140,6 +141,7 @@ void print_myevents_list(vector<pair<string, int>> &events_list){
             default:
                 cerr << "Invalid state" << endl;
         }
+        cout << "-------------------------------" << endl;
     }
 }
 
@@ -173,6 +175,57 @@ int er_myevents(ClLArgs client){
     // Print message according to the status value
     if(status == "OK") print_myevents_list(events_list);
     else if(status == "NOK") cout << "user has not created any events" << endl;
+    else if(status == "NLG") cerr << "user not logged in" << endl;
+    else if(status == "WRP") cerr << "[API] wrong password sent on the request" << endl;
+    else if(status == "ERR") 
+        cerr<< "Syntax of request message is incorrect or parameter values take invalid values" << endl;
+    else cerr << "[API] Invalid status message passed through" << endl;
+    free(response);
+    return 0;  
+}
+
+void print_myreservations_list(vector<Reservation> reservations_list){
+    cout << "--------------------" << endl;
+    for(auto reservation: reservations_list){
+        cout << "Event id: " << reservation.eid << endl;
+        cout << "Date and time: ";
+        reservation.datetime.print();
+        cout << "Places reserved: " << reservation.value << endl;
+        cout << "--------------------" << endl;
+    }
+}
+
+int er_myreservations(ClLArgs client){
+    char *response, response_code[BUF_TEMP];
+    string message = op_to_str(OP_MYRESERVATIONS) + " " + to_string(client.uid) + 
+                                            " " + client.pass + "\n";
+                                            
+    if((response = client_udp_request(&client, message.c_str())) == NULL){
+        cerr << "Failure to request/receive message to server" << endl;
+        free(response);
+        return -1;
+    }
+    // Read response code.
+    int n = sscanf(response, "%63s", response_code);
+    if(n != 1) cerr << "Failure to read response code to 'myevents' command" << endl;
+    string status = "";
+    OP_CODE code = str_to_op(response_code);
+    if(code == ERR){
+        cerr << "Invalid request message was sent" << endl;
+        free(response);
+        return -1;
+    }
+    vector<Reservation> reservations_list = {};
+    if(code != OP_MYRESERVATIONS_RESP || 
+            !parse_myreservations_response(response, status, reservations_list)){
+        cerr << "Bad message received from server!" << endl;
+        free(response);
+        return -1;  
+    }
+
+    // Print message according to the status value
+    if(status == "OK") print_myreservations_list(reservations_list);
+    else if(status == "NOK") cout << "user has not made any reservations" << endl;
     else if(status == "NLG") cerr << "user not logged in" << endl;
     else if(status == "WRP") cerr << "[API] wrong password sent on the request" << endl;
     else if(status == "ERR") 

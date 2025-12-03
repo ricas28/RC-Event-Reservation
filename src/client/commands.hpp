@@ -19,6 +19,13 @@ typedef enum{
     CMD_INVALID
 }Command;
 
+// Used for parsing of myreservations response.
+struct Reservation {
+    string eid;
+    DateTime datetime;
+    int value;
+};
+
 /**
  * Handles a login command.
  * 

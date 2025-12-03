@@ -42,6 +42,15 @@ int er_unregister(CLArgs client);
 int er_myevents(ClLArgs client);
 
 /**
+ * Executes the 'myreservations' command.
+ * 
+ * @param client Client.
+ * 
+ * @return 0 for successful execution, -1 on failure.  
+*/ 
+int er_myreservations(ClLArgs client);
+
+/**
  * Executes the 'create' command.
  * 
  * @param client Client

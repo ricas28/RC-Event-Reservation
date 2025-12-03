@@ -278,8 +278,7 @@ bool parse_events_list(char *response, vector<pair<string, int>> &events_list){
     return true;
 }
 
-bool parse_myevents_response(char *response, string &status, 
-                            vector<pair<string, int>> &events_list){
+bool parse_myevents_response(char *response, string &status, vector<pair<string, int>> &events_list){
     char response_code[BUF_TEMP], status_temp[BUF_TEMP], extra[BUFFER_SIZE];
 
     int n = sscanf(response, "%63s %63s", response_code, status_temp);
@@ -324,6 +323,92 @@ bool parse_myreservations(char *args){
         return false;
     }
     return true;
+}
+
+bool parse_reservations_list(char *response, vector<Reservation> &reservations){
+    string s(response);
+    istringstream iss(s);
+
+    string token;
+    iss >> token; // "RMR"
+    iss >> token; // status (OK, NOK, WRP, NLG)
+
+    // If token is not OK, there will be no list.
+    if (token != "OK") {
+        return true;
+    }
+
+    string eid;
+    string datepart;   // dd-mm-yyyy
+    string timepart;   // hh:mm:ss
+    int value;
+
+    while (iss >> eid >> datepart >> timepart >> value){
+        // Validate EID
+        if (!is_valid_eid((char *)eid.c_str())) {
+            cerr << "Invalid EID in server response: " << eid << endl;
+            return false;
+        }
+        // Validate value
+        if (!is_valid_num_attendees(value)) {
+            cerr << "Invalid reservation value: " << value << endl;
+            return false;
+        }
+        // Date and time parsing
+        int d, m, y, hh, mm;
+        char dash1, dash2, colon1, colon2;
+
+        istringstream date_ss(datepart);
+        istringstream time_ss(timepart);
+
+        if (!(date_ss >> d >> dash1 >> m >> dash2 >> y) ||
+            dash1 != '-' || dash2 != '-'){
+                cerr << "Invalid date format: " << datepart << endl;
+                return false;
+        }
+        if (!(time_ss >> hh >> colon1 >> mm >> colon2 >> std::ws) ||
+            colon1 != ':' || colon2 != ':'){
+                cerr << "Invalid time format: " << timepart << endl;
+                return false;
+        }
+        // Validate DateTime
+        DateTime dt(d, m, y, hh, mm);
+        if (dt.invalidDateTime()) {
+            cerr << "Invalid datetime: " << datepart << " " << timepart << endl;
+            return false;
+        }
+        reservations.push_back({eid, dt, value});
+    }
+    return true;
+}
+
+bool parse_myreservations_response(char *response, string &status, vector<Reservation> &reservations_list){
+    char response_code[BUF_TEMP], status_temp[BUF_TEMP], extra[BUFFER_SIZE];
+
+    int n = sscanf(response, "%63s %63s", response_code, status_temp);
+    // Response starts with 2 arguments: code OP_MYRESERVATIONS_RESP, status.
+    if(n != 2 || str_to_op(response_code) != OP_MYRESERVATIONS_RESP){
+       return false;
+    }
+
+    // Check for status value
+    if(!strcmp(status_temp, "OK")){
+        if(!parse_reservations_list(response, reservations_list)){
+            return false;
+        }
+        status = status_temp;
+        return true;
+    }
+
+    if(!strcmp(status_temp, "NOK") || !strcmp(status_temp, "NLG") || 
+        !strcmp(status_temp, "WRP") || !strcmp(status_temp, "ERR")){
+            n = sscanf(response, "%63s %63s %255s", response_code, status_temp, extra);
+            if(n != 2)
+                return false;
+            status = status_temp;
+            return true;
+    }
+    return false;
 }
 /* ----------------------------------*/
 
