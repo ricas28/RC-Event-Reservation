@@ -19,14 +19,14 @@ typedef enum{
     CMD_INVALID
 }Command;
 
-// Used for parsing of myreservations response.
+// Used for parsing of 'myreservations' response.
 struct Reservation {
     string eid;
     DateTime datetime;
     int value;
 };
 
-// Used for parsing list response.
+// Used for parsing 'list' response.
 struct Event{
     string eid;
     string name;
@@ -35,7 +35,7 @@ struct Event{
 };
 
 /**
- * Handles a login command.
+ * Handles a 'login' command.
  * 
  * @param args String with arguments.
  * @param client Pointer to client attributes.
@@ -43,15 +43,15 @@ struct Event{
 void handle_login(char *args, CLArgs *client);
 
 /**
- * Handles a changePass command.
+ * Handles a 'changePass' command.
  * 
  * @param args String with arguments.
  * @param client Pointer to client attributes.
  */
-void handle_change_pass(char *args, CLArgs *client);
+void handle_changePass(char *args, CLArgs *client);
 
 /**
- * Handles a unregister command.
+ * Handles a 'unregister' command.
  * 
  * @param args String with arguments.
  * @param client Pointer to client attributes.
@@ -59,7 +59,7 @@ void handle_change_pass(char *args, CLArgs *client);
 void handle_unregister(char *args, CLArgs *client);
 
 /**
- * Handles a logout command.
+ * Handles a 'logout' command.
  * 
  * @param args String with arguments.
  * @param client Pointer to client attributes.
@@ -67,7 +67,7 @@ void handle_unregister(char *args, CLArgs *client);
 void handle_logout(char *args, CLArgs *client);
 
 /**
- * Handles an exit command.
+ * Handles an 'exit' command.
  * 
  * @param args String with arguments.
  * @param client Pointer to client attributes.
@@ -76,7 +76,7 @@ void handle_logout(char *args, CLArgs *client);
 void handle_exit(char *args, CLArgs *client, bool *quit);
 
 /**
- * Handles a create command.
+ * Handles a 'create' command.
  * 
  * @param args String with arguments.
  * @param client Pointer to client attributes.
@@ -84,7 +84,7 @@ void handle_exit(char *args, CLArgs *client, bool *quit);
 void handle_create(char *args, CLArgs *client);
 
 /**
- * Handles a close command.
+ * Handles a 'close' command.
  * 
  * @param args String with arguments.
  * @param client Pointer to client attributes.
@@ -92,7 +92,7 @@ void handle_create(char *args, CLArgs *client);
 void handle_close(char *args, CLArgs *client);
 
 /**
- * Handles a myevents command.
+ * Handles a 'myevents' command.
  * 
  * @param args String with arguments.
  * @param client Pointer to client attributes.
@@ -100,7 +100,7 @@ void handle_close(char *args, CLArgs *client);
 void handle_myevents(char *args, CLArgs *client);
 
 /**
- * Handles a list command.
+ * Handles a 'list' command.
  * 
  * @param args String with arguments.
  * @param client Pointer to client attributes.
@@ -108,7 +108,7 @@ void handle_myevents(char *args, CLArgs *client);
 void handle_list(char *args, CLArgs *client);
 
 /**
- * Handles a show command.
+ * Handles a 'show' command.
  * 
  * @param args String with arguments.
  * @param client Pointer to client attributes.
@@ -116,7 +116,7 @@ void handle_list(char *args, CLArgs *client);
 void handle_show(char *args, CLArgs *client);
 
 /**
- * Handles a reserve command.
+ * Handles a 'reserve' command.
  * 
  * @param args String with arguments.
  * @param client Pointer to client attributes.
@@ -124,7 +124,7 @@ void handle_show(char *args, CLArgs *client);
 void handle_reserve(char *args, CLArgs *client);
 
 /**
- * Handles a myreservations command.
+ * Handles a 'myreservations' command.
  * 
  * @param args String with arguments.
  * @param client Pointer to client attributes.

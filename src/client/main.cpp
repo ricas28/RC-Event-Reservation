@@ -33,7 +33,7 @@ void process_commands(ClLArgs *client){
                 handle_login(args, client);
                 break;
             case CMD_CHANGE_PASS:
-                handle_change_pass(args, client);
+                handle_changePass(args, client);
                 break;
             case CMD_UNREGISTER:
                 handle_unregister(args, client);

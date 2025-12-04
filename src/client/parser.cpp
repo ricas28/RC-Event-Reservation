@@ -148,7 +148,7 @@ bool parse_login_response(char *response, string &status){
     return false;
 }
 
-bool parse_change_pass(char *args, string *old_pass, string *new_pass){
+bool parse_changePass(char *args, string *old_pass, string *new_pass){
     bool error = false;
     char old_pass_temp[BUF_TEMP], new_pass_temp[BUF_TEMP], extra[BUFFER_SIZE];
 
@@ -179,6 +179,25 @@ bool parse_change_pass(char *args, string *old_pass, string *new_pass){
     *old_pass = old_pass_temp;
     *new_pass = new_pass_temp;
     return true; 
+}
+
+bool parse_changePass_response(char *response, string &status){
+     char response_code[BUF_TEMP], status_temp[BUF_TEMP], extra[BUFFER_SIZE];
+
+    int n = sscanf(response, "%63s %63s %255s", response_code, status_temp, extra);
+    // Response has 2 arguments, has code OP_CHANGE_PASS_RESP, status and ends with '\n'.
+    if(n != 2 || str_to_op(response_code) != OP_CHANGE_PASS_RESP || response[strlen(response)-1] != '\n'){
+       return false;
+    }
+
+    // Check for status value
+    if(!strcmp(status_temp, "OK") || !strcmp(status_temp, "NOK") || 
+        !strcmp(status_temp, "NID") || !strcmp(status_temp, "NLG") || 
+        !strcmp(status_temp, "ERR")){
+            status = status_temp;
+            return true;
+    }
+    return false;
 }
 
 

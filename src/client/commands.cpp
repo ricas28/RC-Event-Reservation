@@ -23,20 +23,24 @@ void handle_login(char *args, CLArgs *client){
         cout << "user already logged in" << endl;
         return;
     }
-    if (parse_login(args, &client->uid, &client->pass)){
-        if(er_login(client, client->uid, client->pass) == -1){
+    int uid;
+    string pass;
+    if (parse_login(args, &uid, &pass)){
+        if(er_login(client, uid, pass) == -1){
             cerr << "Failure to execute 'login' command..." << endl;
             return;
         }
     }
 }
 
-void handle_change_pass(char *args, CLArgs *client){
+void handle_changePass(char *args, CLArgs *client){
     if (!is_logged_in(client->logged_in)) return;
 
     string old_pass, new_pass;
-    if (parse_change_pass(args, &old_pass, &new_pass)){
-        //er_change_pass();
+    if (parse_changePass(args, &old_pass, &new_pass)){
+        if(er_changePass(*client, old_pass, new_pass) == -1){
+            cerr << "Failure to execute 'changePass' command..." << endl;
+        }
     }
 }
 
@@ -46,7 +50,6 @@ void handle_unregister(char *args, CLArgs *client){
     if (parse_unregister(args)){
          if(er_unregister(client) == -1){
             cerr << "Failure to execute 'unregister' command..." << endl;
-            return;
         }
     }
 }
@@ -57,7 +60,6 @@ void handle_logout(char *args, CLArgs *client){
     if (parse_logout(args)){
         if(er_logout(client) == -1){
             cerr << "Failure to execute 'logout' command..." << endl;
-            return;
         }
     }
 }

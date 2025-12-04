@@ -57,7 +57,7 @@ bool parse_login(char *args, int *uid, string *pass);
 bool parse_login_response(char *response, string &status);
 
 /**
- * Parses a changePass command.
+ * Parses a 'changePass' command.
  * 
  * @param args String with arguments.
  * @param old_pass Pointer to old password.
@@ -65,10 +65,20 @@ bool parse_login_response(char *response, string &status);
  * 
  * @returns true if parse is successful, false otherwise.
  */
-bool parse_change_pass(char *args, string *old_pass, string *new_pass);
+bool parse_changePass(char *args, string *old_pass, string *new_pass);
 
 /**
- * Parses a unregister command.
+ * Parses a response to the 'changePass' command.
+ * 
+ * @param response Response from the server.
+ * @param status String that will contain the value of the status field.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_changePass_response(char *response, string &status);
+
+/**
+ * Parses a 'unregister' command.
  * 
  * @param args String with (hopefully) no arguments.
  * 
@@ -87,7 +97,7 @@ bool parse_unregister(char *args);
 bool parse_unregister_response(char *response, string &status);
 
 /**
- * Parses a logout command.
+ * Parses a 'logout' command.
  * 
  * @param args String with (hopefully) no arguments.
  * 
@@ -106,7 +116,7 @@ bool parse_logout(char *args);
 bool parse_logout_response(char *response, string &status);
 
 /**
- * Parses an exit command.
+ * Parses an 'exit' command.
  * 
  * @param args String with (hopefully) no arguments.
  * 
@@ -115,7 +125,7 @@ bool parse_logout_response(char *response, string &status);
 bool parse_exit(char *args);
 
 /**
- * Parses a myevents command.
+ * Parses a 'myevents' command.
  * 
  * @param args String with (hopefully) no arguments.
  * 
@@ -176,7 +186,7 @@ bool parse_myreservations(char *args);
 bool parse_myreservations_response(char *response, string &status, vector<Reservation> &reservations_list);
 
 /**
- * Parses a create command.
+ * Parses a 'create' command.
  * 
  * @param args String with arguments.
  * @param name Pointer to a string that will contain the event's name.
@@ -239,7 +249,7 @@ bool parse_close_response(const char *response, string &status);
 bool parse_show(char *args, string &eid);
 
 /**
- * Parses a reserve command.
+ * Parses a 'reserve' command.
  * 
  * @param args String with arguments.
  * @param eid String that will contain the event id.

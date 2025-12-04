@@ -42,6 +42,8 @@ int er_login(CLArgs *client, int uid, string pass){
     if(status == "OK"){
         cout << "successful login" << endl;
         client->logged_in = true;
+        client->uid = uid;
+        client ->pass = pass;
     }
     else if(status == "NOK") cout << "incorrect login attempt" << endl;
     else if(status == "REG") cout << "new user registered" << endl;
@@ -428,13 +430,13 @@ int er_reserve(CLArgs client, string &eid, int people){
     }
 
     // Print message according to the status value
-    if(status == "ACC") cout << "reservation successfuly made" << endl;
+    if(status == "ACC") cout << "reservation accepted" << endl;
     else if(status == "NOK") cout << "event is not active" << endl;
     else if(status == "NLG") cerr << "[API] user not logged in" << endl;
     else if(status == "CLS") cout << "event is closed" << endl;
-    else if(status == "SLD") cout << "event is sold out" << endl;
+    else if(status == "SLD") cout << "reservation refused: event is sold out" << endl;
     else if(status == "REJ"){
-        cout << "requested places are larger than remaining seats: " << n_seats << endl;
+        cout << "reservation refused: requested places are larger than remaining seats -> " << n_seats << endl;
     }
     else if(status == "ERR") 
         cerr<< "Syntax of request message is incorrect or parameter values take invalid values" << endl;
@@ -444,4 +446,45 @@ int er_reserve(CLArgs client, string &eid, int people){
     }
     return 0;       
 }
-/* ----------------------------------------------- */
+
+int er_changePass(ClLArgs &client, string old_pass, string new_pass){
+    char response_code[BUF_TEMP];
+    string message = op_to_str(OP_CHANGE_PASS) + " " + to_string(client.uid) +  
+                        " " + old_pass + " " + new_pass + "\n";
+    string response;
+    if((response = client_tcp_request_line(&client, message)) == ""){
+        cerr << "Failure to request/receive message to server" << endl;
+        return -1;
+    }
+
+    // Read response code.
+    int n = sscanf(response.c_str(), "%63s", response_code);
+    if(n != 1) cerr << "Failure to read response code to 'changePass' command" << endl;
+
+    string status = "";
+    OP_CODE code = str_to_op(response_code);
+    if(code == ERR){
+        cerr << "Invalid request message was sent" << endl;
+        return -1;
+    }
+    if(code != OP_CHANGE_PASS_RESP || !parse_changePass_response((char*)response.c_str(), status)){
+        cerr << "Bad message received from server!" << endl;
+        return -1;  
+    }
+
+    // Print message according to the status value
+    if(status == "OK"){
+        cout << "successful password change" << endl;
+        client.pass = new_pass;
+    }
+    else if(status == "NOK") cout << "incorrect password" << endl;
+    else if(status == "NLG") cerr << "user not logged in" << endl;
+    else if(status == "NID") cout << "unknown user" << endl;
+    else if(status == "ERR") 
+        cerr<< "Syntax of request message is incorrect or parameter values take invalid values" << endl;
+    else {
+        cerr << "[API] Invalid status message passed through" << endl;
+        return -1;
+    }
+    return 0;       
+}

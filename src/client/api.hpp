@@ -106,4 +106,15 @@ int er_show(CLArgs client, string &eid);
  */
 int er_reserve(CLArgs client, string &eid, int people);
 
+/**
+ * Executes the 'changePass' command.
+ * 
+ * @param client Pointer to a client.
+ * @param old_pass Old pass that is being changed.
+ * @param new_pass New password that user typed in.
+ * 
+ * @returns 0 for successful execetion, -1 on failure.
+ */
+int er_changePass(ClLArgs &client, string old_pass, string new_pass);
+
 #endif
