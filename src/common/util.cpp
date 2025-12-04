@@ -67,7 +67,7 @@ bool is_valid_seats(char *s) {
 
     int value = 0;
     size_t size = strlen(s);
-    for (size_t i = 0; i < size-1; i++){
+    for (size_t i = 0; i < size; i++){
         // Each char must be a digit.
         if (!isdigit(s[i]))
             return false;
