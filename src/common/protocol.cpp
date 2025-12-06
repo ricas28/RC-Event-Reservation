@@ -10,6 +10,7 @@
 
 #include "constants.hpp"
 #include "protocol.hpp"
+#include "io.hpp"
 
 using namespace std;
 
@@ -30,6 +31,8 @@ string op_to_str(OP_CODE code){
     if(code == OP_MYEVENTS_RESP) return "RME";
     if(code == OP_LIST) return "LST";
     if(code == OP_LIST_RESP) return "RLS";
+    if(code == OP_SHOW) return "SED";
+    if(code == OP_SHOW_RESP) return "RSE";
     if(code == OP_RESERVE) return "RID";
     if(code == OP_RESERVE_RESP) return "RRI";
     if(code == OP_MYRESERVATIONS) return "LMR";
@@ -55,6 +58,8 @@ OP_CODE str_to_op(const char *str){
     if(strcmp(str, "RME") == 0) return OP_MYEVENTS_RESP;
     if(strcmp(str, "LST") == 0) return OP_LIST;
     if(strcmp(str, "RLS") == 0) return OP_LIST_RESP;
+    if(strcmp(str, "SED") == 0) return OP_SHOW;
+    if(strcmp(str, "RSE") == 0) return OP_SHOW_RESP;
     if(strcmp(str, "RID") == 0) return OP_RESERVE;
     if(strcmp(str, "RRI") == 0) return OP_RESERVE_RESP;
     if(strcmp(str, "LMR") == 0) return OP_MYRESERVATIONS;
@@ -70,6 +75,45 @@ int send_udp_message(int socket, const char *message, const struct addrinfo *add
         return -1;
     }
     return 0;
+}
+
+string tcp_read_message(int fd) {
+    string buffer;
+    char tmp[TCP_READING_SIZE];
+
+    while (true) {
+        ssize_t n = read(fd, tmp, sizeof(tmp));
+        if (n <= 0) {
+            // EOF or error.
+            return buffer.empty() ? "" : buffer;
+        }
+        buffer.append(tmp, (size_t)n);
+
+        // Check if line has ended.
+        size_t pos = buffer.find('\n');
+        if (pos != string::npos) {
+            return buffer.substr(0, pos + 1);
+        }
+    }
+}
+
+string tcp_read_word(int fd, bool *end_line){
+    string word;
+    char c;
+
+    while (true) {
+        ssize_t n = read(fd, &c, 1); 
+        if (n <= 0) {
+            // EOF or error
+            return word;
+        }
+        if (c == ' ' || c == '\n') {
+            if (c == '\n' && end_line) *end_line = true;
+            break; // end of word found.
+        }
+        word += c;
+    }
+    return word;
 }
 
 char *receive_udp_message(int socket, struct addrinfo *addr) {

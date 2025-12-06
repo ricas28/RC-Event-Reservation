@@ -82,10 +82,32 @@ bool is_valid_eid(char *s);
  * Checks if the content of a string has a valid number of seats (1-999).
  * 
  * @param s String.
+ * @param seats (Optional) Pointer to int that will contain converted int 
+ * if it's valid 
  * 
  * @returns true if it's valid, false otherwise.
  */
-bool is_valid_seats(char *s);
+bool is_valid_seats(char *s, int *seats = nullptr);
+
+/** 
+ * Checks if a given string is a positiv integer.
+ * 
+ * @param s String.
+ * @param out_value (Optional) Stores the value if it's a positive integer.
+ * 
+ * @returns true if it's a positive integer, false otherwise.
+ */
+bool is_positive_integer(const char* s, int* out_value = nullptr);
+
+/**
+ * Does the same as is_positive_integer but includes 0 value.
+ * 
+ * @param s String.
+ * @param out_value (Optional) Stores the value if it's a positive integer.
+ * 
+ * @returns true if it's a nonnegative integer, false otherwise.
+ */
+bool is_nonnegative_integer(const char* s, int* out_value = nullptr);
 
 /**
  * Cheks if the given event state is valid

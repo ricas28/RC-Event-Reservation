@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "../common/DateTime.hpp"
+#include "../common/protocol.hpp"
 #include "commands.hpp"
 
 using namespace std;
@@ -163,7 +164,7 @@ bool parse_list(char *args);
  * 
  * @returns true if parse is successful, false otherwise.
  */
-bool parse_list_response(const char *response, string &status, vector<Event> &events_list);
+bool parse_list_response(const char *response, string &status, vector<Event_list> &events_list);
 
 /**
  * Parses a 'myreservations' command.
@@ -247,6 +248,22 @@ bool parse_close_response(const char *response, string &status);
  * @returns true if parse is successful, false otherwise.
  */
 bool parse_show(char *args, string &eid);
+
+/**
+ * @brief Parses a response to the 'show' command.
+ * 
+ * This functions works differently from the others. Instead of 
+ * only checking a response's parameters, it reads and then validates
+ * due to the structure of the 'show' command. This function should be 
+ * called only if status on the response is 'OK'. It has undefined behaviour
+ * for other cases.
+ * 
+ * @param fd TCP socket.
+ * @param event Struct with event information.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_show_response(int fd, Event_Info &event);
 
 /**
  * Parses a 'reserve' command.

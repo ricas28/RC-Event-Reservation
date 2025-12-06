@@ -19,21 +19,6 @@ typedef enum{
     CMD_INVALID
 }Command;
 
-// Used for parsing of 'myreservations' response.
-struct Reservation {
-    string eid;
-    DateTime datetime;
-    int value;
-};
-
-// Used for parsing 'list' response.
-struct Event{
-    string eid;
-    string name;
-    int state;
-    DateTime datetime;
-};
-
 /**
  * Handles a 'login' command.
  * 

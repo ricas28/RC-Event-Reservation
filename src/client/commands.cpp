@@ -123,7 +123,8 @@ void handle_list(char *args, CLArgs *client){
 void handle_show(char *args, CLArgs *client){
     string eid;
     if (parse_show(args, eid)){
-        er_show(*client, eid);
+        if(er_show(*client, eid) == -1)
+            cerr << "Failure to exeute 'show' command..." << endl;
     }
 }
 
@@ -133,9 +134,8 @@ void handle_reserve(char *args, CLArgs *client){
     string eid;
     int seats;
     if (parse_reserve(args, eid, seats)){
-        if(er_reserve(*client, eid, seats) == -1){
+        if(er_reserve(*client, eid, seats) == -1)
             cerr << "Failure to execute 'reserve' command..." << endl;
-        }
     }
 }
 

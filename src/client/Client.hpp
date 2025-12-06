@@ -42,6 +42,17 @@ char *client_udp_request(CLArgs *client, const char *msg);
  */
 string client_tcp_request_line(CLArgs* client, const string &msg);
 
+/** 
+ * Opens a tcp connection for the client.
+ * 
+ * @param client Client.
+ * 
+ * @returns fd for writing messages to the server.
+ * 
+ * Note: After using the returned fd, close(fd) needs to be executed.
+ */
+int client_connect_tcp(CLArgs &client);
+
 /**
  * Initializes the main client's attributes.
  * 

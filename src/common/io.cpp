@@ -8,9 +8,6 @@ using namespace std;
 
 #include "constants.hpp"
 
-// Global variable for storing rests from TCP stream.
-string _message_rest;
-
 void clean_up_fd(int fd){
     int c;
     while (read(fd, &c, 1) == 1 && c != '\n');
@@ -84,27 +81,6 @@ ssize_t write_all(int fd, const void *buf, size_t size){
         total_written += (size_t)n;
     }
     return (ssize_t)total_written;
-}
-
-string read_message(int fd){
-    char buf[TCP_READING_SIZE];
-
-    while (true) {
-        // Checks if there's a ready message on _message_rest
-        size_t pos = _message_rest.find('\n');
-        if (pos != string::npos) {
-            string line = _message_rest.substr(0, pos + 1);
-            // Keep the rest for future readings.
-            _message_rest.erase(0, pos + 1); 
-            return line;
-        }
-        // Read from fd
-        ssize_t n = read_all(fd, buf, sizeof(buf));
-        if (n <= 0) {
-            return ""; // fd closed or error reading.
-        }
-        _message_rest.append(buf, (size_t)n);
-    }
 }
 
 char *read_file_to_buffer(const char *fileName, size_t *out_size) {

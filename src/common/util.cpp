@@ -46,11 +46,11 @@ bool file_exists(char *file_name){
 
 bool is_valid_date_time(int day, int month, int year, int hour, int minute){
     DateTime date_time(day, month, year, hour, minute);
-    return !date_time.invalidDateTime() and !date_time.isPast();
+    return !date_time.invalidDateTime() && !date_time.isPast();
 }
 
 bool is_valid_num_attendees(int num_attendees){
-    return num_attendees >= 10 and num_attendees <= 999;
+    return num_attendees >= 10 && num_attendees <= MAX_SEATS;
 }
 
 bool is_valid_eid(char *s){
@@ -60,20 +60,48 @@ bool is_valid_eid(char *s){
     return true;
 }
 
-bool is_valid_seats(char *s) {
-    // Can't be empty or start with '-', '+' or '0'
-    if (!s || *s == '\0' || s[0] == '-' || s[0] == '+' || s[0] == 0) 
+/** 
+ * Checks if a given string is an integer (has option for allowing 0 or not)
+ * 
+ * @param s String.
+ * @param allow_zero Bool that allows 0 to be considered or not.
+ * @param out_value Pointer to converted integer.
+ * 
+ * @returns true if it's a valid integer, false otherwise.
+ */
+bool is_integer_internal(const char* s, bool allow_zero, int* out_value) {
+    if (!s || *s == '\0' || s[0] == '-' || s[0] == '+') 
         return false;
 
     int value = 0;
-    size_t size = strlen(s);
-    for (size_t i = 0; i < size; i++){
-        // Each char must be a digit.
-        if (!isdigit(s[i]))
-            return false;
-        value = value * 10 + (s[i] - '0');
-        if (value > MAX_SEATS) return false; 
+    for (size_t i = 0; s[i] != '\0'; ++i) {
+        if (!isdigit(s[i])) return false;
+        int digit = s[i] - '0';
+        if (value > (std::numeric_limits<int>::max() - digit) / 10)
+            return false; // overflow
+        value = value * 10 + digit;
     }
+
+    if (!allow_zero && value == 0) return false;
+
+    if (out_value) *out_value = value;
+    return true;
+}
+
+bool is_positive_integer(const char* s, int* out_value = nullptr) {
+    return is_integer_internal(s, false, out_value);
+}
+
+bool is_nonnegative_integer(const char* s, int* out_value = nullptr) {
+    return is_integer_internal(s, true, out_value);
+}
+
+bool is_valid_seats(char *s, int *seats = nullptr){
+    int value;
+    if (!is_positive_integer(s, &value)) return false;
+    if(value > MAX_SEATS) return false;
+
+    if(seats) *seats = value;
     return true;
 }
 

@@ -17,16 +17,6 @@ using namespace std;
 int read_line_256(int fd, char *line);
 
 /**
- * Reads the next message from the given fd. Read until seeing '\n'.
- * This function is mostly used for TCP connections.
- * 
- * @param fd File descriptor.
- * 
- * @returns Next message.
- */
-string read_message(int fd);
-
-/**
  * Does a clean up of the given fd
  */
 void clean_up_fd(int fd);

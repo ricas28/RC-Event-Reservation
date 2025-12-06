@@ -12,6 +12,7 @@
 #include "../common/io.hpp"
 #include "../common/constants.hpp"
 #include "../common/protocol.hpp"
+#include "../common/util.hpp"
 
 /**
  * Initializes a UDP socket and address.
@@ -96,20 +97,28 @@ char *client_udp_request(CLArgs *client, const char *msg){
     return NULL;  // no response after UDP_RETRIES attempts
 }
 
-string client_tcp_request_line(CLArgs* client, const string &msg){
+int client_connect_tcp(CLArgs &client){
     int fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd == -1) {
         perror("Failure to open TCP socket");
-        return "";
+        return -1;
     }
 
     // Connect to server.
-    int n = connect(fd, client->tcp_addr->ai_addr, client->tcp_addr->ai_addrlen);
+    int n = connect(fd, client.tcp_addr->ai_addr, client.tcp_addr->ai_addrlen);
     if (n == -1) {
         perror("Failure to connect to server with TCP");
         close(fd);
-        return "";
+        return -1;
     }
+    return fd;
+}
+
+string client_tcp_request_line(CLArgs* client, const string &msg){
+    int fd = client_connect_tcp(*client);
+
+    if(fd == -1)
+        return "";
 
     // Write to server.
     if(write_all(fd, msg.c_str(), msg.size()) == -1){
@@ -120,7 +129,7 @@ string client_tcp_request_line(CLArgs* client, const string &msg){
 
     // Receive response.
     string response;
-    if((response = read_message(fd)) == ""){
+    if((response = tcp_read_message(fd)) == ""){
         perror("Failure to read from server with TCP");
         close(fd);
         return "";
@@ -130,10 +139,6 @@ string client_tcp_request_line(CLArgs* client, const string &msg){
     close(fd);
     return response;
 }
-
-////////////////////////////////////////////////////////////////////
-// TODO: create client_tcp_request_file(). for commands like SHOW //
-////////////////////////////////////////////////////////////////////
 
 int client_init(CLArgs *client, string ip, string port){
     if(set_client_udp_socket(client, ip, port) == -1)

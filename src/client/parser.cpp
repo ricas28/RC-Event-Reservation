@@ -343,7 +343,7 @@ bool parse_list(char *args){
     return true;
 }
 
-bool parse_events_list(const char *response, vector<Event> &events_list){
+bool parse_events_list(const char *response, vector<Event_list> &events_list){
     string s(response);
     istringstream iss(s);
 
@@ -389,7 +389,7 @@ bool parse_events_list(const char *response, vector<Event> &events_list){
     return true;
 }
 
-bool parse_list_response(const char *response, string &status, vector<Event> &events_list){
+bool parse_list_response(const char *response, string &status, vector<Event_list> &events_list){
     char response_code[BUF_TEMP], status_temp[BUF_TEMP], extra[BUFFER_SIZE];
 
     int n = sscanf(response, "%63s %63s", response_code, status_temp);
@@ -646,6 +646,86 @@ bool parse_show(char *args, string &eid){
     }
     // Successful parse.
     eid = eid_temp;
+    return true;
+}
+
+bool parse_show_response(int fd, Event_Info &event){
+    // Read and validate UID.
+    string uid = tcp_read_word(fd);
+    if(!is_valid_userid((char *)uid.c_str())){
+        cerr << "Invalid user id received" << endl;
+        return false;
+    }
+
+    // Read and validate event name.
+    string name = tcp_read_word(fd);
+    if(!is_valid_event_name((char *)name.c_str())){
+        cerr << "Invalid event name received" << endl;
+        return false;
+    }
+
+    // Read and validate date and time.
+    string date = tcp_read_word(fd);
+    string time = tcp_read_word(fd);
+    DateTime dt;
+    if(!DateTime::fromStrings(date, time, dt))
+        // fromStrings method already prints error messages.
+        return false;
+
+    // Read and validate attendace_size.
+    string attendace_size_temp = tcp_read_word(fd);
+    int attendace_size;
+    bool valid_integer = is_positive_integer(attendace_size_temp.c_str(), &attendace_size);
+    if(!valid_integer || (valid_integer && !is_valid_num_attendees(attendace_size))){
+        cerr << "Invalid attendace size received" << endl;
+        return false;
+    }
+
+    // Read and validate seats_reserved.
+    string seats_reserved_temp = tcp_read_word(fd);
+    int seats_reserved;
+    valid_integer = is_nonnegative_integer((char *)seats_reserved_temp.c_str(), &seats_reserved);
+    if(!valid_integer || (valid_integer && seats_reserved > attendace_size)){
+        cerr << "Invalid reserved seats received" << endl;
+        return false;
+    }
+
+    // Read and validate file name.
+    string Fname = tcp_read_word(fd);
+    if(!is_valid_file_name((char *)Fname.c_str())){
+        cerr << "Invalid file name received" << endl;
+        return false;
+    }
+
+    // Read and validate Fsize.
+    string Fsize_temp = tcp_read_word(fd);
+    int Fsize;
+    valid_integer = is_nonnegative_integer(Fsize_temp.c_str(), &Fsize); 
+    if(!valid_integer || (valid_integer && Fsize > MAX_FILE_SIZE)){
+        cerr << "Invalid file size received" << endl;
+        return false;
+    }
+
+    // Read file.
+    string Fdata;
+    Fdata.resize((size_t)Fsize);
+    ssize_t size = read_all(fd, &Fdata[0], (size_t)Fsize);
+    // Didn't read the whole file.
+    if (size != Fsize){
+        cerr << "Failure to read event file" << endl;
+        return false;
+    }
+
+    // Check end of message.
+    char c; 
+    size = read(fd, &c, 1);
+    if(size == -1 || c != '\n'){
+        cerr << "Invalid protocol message received: '\\n' wasn't found." << endl;
+        return false;
+    }
+
+    // Initialize struct.
+    event = {stoi(uid), name, dt, attendace_size, seats_reserved, Fname, (size_t)Fsize, Fdata};
     return true;
 }
 

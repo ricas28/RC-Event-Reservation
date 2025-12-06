@@ -1,4 +1,8 @@
 #include <iostream>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>   
+#include <fcntl.h>      
 
 #include "Client.hpp"
 #include "parser.hpp"
@@ -346,7 +350,7 @@ int er_close(CLArgs client, string eid){
     return 0;       
 }
 
-void print_events_list(vector<Event> events_list){
+void print_events_list(vector<Event_list> events_list){
     cout << LINE_SEPARATOR << endl;
     for(auto event: events_list){
         cout << "Event id: " << event.eid << endl;
@@ -379,7 +383,7 @@ int er_list(ClLArgs client){
         cerr << "Invalid request message was sent" << endl;
         return -1;
     }
-    vector<Event> events_list = {};
+    vector<Event_list> events_list = {};
     if(code != OP_LIST_RESP || !parse_list_response(response.c_str(), status, events_list)){
         cerr << "Bad message received from server!" << endl;
         return -1;  
@@ -397,10 +401,125 @@ int er_list(ClLArgs client){
     return 0;      
 }
 
+string save_event_file(const Event_Info &event) {
+    // Absolute or relative path to api.cpp
+    string file = __FILE__;
+
+    // Convert to absolute if relative
+    if (!file.empty() && file[0] != '/') {
+        char cwd[4096];
+        if (getcwd(cwd, sizeof(cwd)))
+            file = string(cwd) + "/" + file;
+    }
+
+    // Remove the filename from the path
+    size_t pos = file.find_last_of('/');
+    if (pos == string::npos)
+        return "";
+    file = file.substr(0, pos); 
+
+    // Build path for directory (src/client/Events_Info)
+    string dir = file + "/Events_Info";
+    mkdir(dir.c_str(), 0755);
+    string path = dir + "/" + event.Fname;
+
+    // Create + write file
+    int fd = open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd == -1)
+        return "";
+    if (write_all(fd, event.Fdata.data(), event.Fsize) == -1) {
+        close(fd);
+        return "";
+    }
+
+    close(fd);
+    return path;
+}
+
+void print_event_info(Event_Info &event, const string &filepath) {
+
+    cout << "Event: " << event.name << endl;
+    cout << "Date and Time: ";
+    event.event_date.print();
+    cout << "Total seats: " << event.attendace_size << endl;
+    cout << "Reserved seats: " << event.seats_reserved << endl;
+
+    // Determine event status
+    string status;
+    if (event.seats_reserved >= event.attendace_size)
+        status = "sold-out";
+    else if (event.event_date.isPast())
+        status = "closed";
+    else
+        status = "open";
+
+    cout << "Status: " << status << "\n";
+    cout << "File name: " << event.Fname << "\n";
+    cout << "Saved to: " << filepath << "\n";
+}
+
 int er_show(CLArgs client, string &eid){
-    (void) client; // used for avoiding warnings.
-    (void) eid;    // used for avoiding warnings.
-    return 0;
+    string message = op_to_str(OP_SHOW) + " " + eid + "\n";
+    int fd = client_connect_tcp(client);
+
+    if(fd == -1)
+        return -1;
+    // Write message.
+    if(write_all(fd, message.c_str(), message.size()) == -1){
+        cerr << "Failure to write message to server" << endl;
+        close(fd);
+        return -1;
+    }
+
+    // Read code from response
+    string response_code = tcp_read_word(fd);
+    if(response_code == ""){
+        cerr << "Failure to read response code" << endl;
+        close(fd);
+        return -1;
+    }
+    // Validate code
+    OP_CODE code = str_to_op(response_code.c_str());
+    if(code == ERR){
+        cerr << "Invalid request message was sent" << endl;
+        close(fd);
+        return -1;
+    }
+    // Read and validate status.
+    string status = tcp_read_word(fd);
+    if(status != "OK" && status != "NOK"){
+        cerr << "Invalid status received" << endl;
+        close(fd);
+        return -1;
+    }
+
+    Event_Info event = {};
+    if(status == "OK" && !parse_show_response(fd, event)){
+        cerr << "Bad message received from server!" << endl;
+        close(fd);
+        return -1;  
+    }
+
+    // Print message according to the status value
+    if(status == "OK"){
+        string path = save_event_file(event);
+        if(path == ""){
+            cerr << "Failure to store event file" << endl;
+            close(fd);
+            return -1;
+        }
+        print_event_info(event, path);
+    }
+    else if(status == "NOK") cout << "no file to be sent, event does not exist, or other problems" << endl;
+    else if(status == "ERR") 
+        cerr<< "Syntax of request message is incorrect or parameter values take invalid values" << endl;
+    else {
+        cerr << "[API] Invalid status message passed through" << endl;
+        close(fd);
+        return -1;
+    }
+    close(fd);
+    return 0;       
 }
 
 int er_reserve(CLArgs client, string &eid, int people){
