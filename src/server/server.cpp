@@ -108,3 +108,10 @@ void destroy_server(SVArgs &server){
     close(server.tcp_socket);
     close(server.udp_socket);
 }
+
+void handle_tcp_request(int fd){
+
+}
+void handle_udp_request(int fd){
+    
+}

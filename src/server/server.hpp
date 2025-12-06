@@ -25,4 +25,18 @@ int server_init(SVArgs &server, string port, bool verbose);
 /** Closes file descriptors for TCP and UDP messages.*/
 void destroy_server(SVArgs &server);
 
+/**
+ * Handles a TCP request.
+ * 
+ * @param fd TCP socket.
+ */
+void handle_tcp_request(int fd);
+
+/**
+ * Handles a UDP request.
+ * 
+ * @param fd UDP socket.
+ */
+void handle_udp_request(int udp_fd);
+
 #endif
