@@ -2,6 +2,7 @@
 #include <string>
 #include <cstring>
 #include <unistd.h>
+#include <signal.h>
 
 #include "../common/constants.hpp"
 #include "../common/io.hpp"
@@ -76,6 +77,7 @@ int main(int argc, char** argv){
     string port, ip;
     CLArgs client;
 
+    signal(SIGPIPE, SIG_IGN); // Ignore broken pipe.
     if(!parse_args(port, ip, argv, argc)){
         cerr << "Usage: " << argv[0] <<  " [-n ESIP] [-p ESport]" << endl;
         exit(EXIT_FAILURE);
