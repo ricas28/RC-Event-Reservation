@@ -1,5 +1,5 @@
-#ifndef __PARSER__HPP__
-#define __PARSER__HPP__
+#ifndef __C_PARSER__HPP__
+#define __C_PARSER__HPP__
 
 #include <string>
 #include <vector>
