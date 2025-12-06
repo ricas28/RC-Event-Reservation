@@ -115,8 +115,7 @@ string tcp_read_message(int fd);
 string tcp_read_word(int fd, bool *end_line = nullptr);
 
 /**
- * Closes a socket connection by freeing memory allocated to adressing
- * and closing the socket.
+ * Closes a socket connection and frees memory allocated to adresses.
  * 
  * @param socket Fd for socket.
  * @param addr Pointer to an adress.

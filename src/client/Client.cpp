@@ -36,6 +36,7 @@ int set_client_udp_socket(CLArgs *client, string ip, string port){
     tv.tv_sec = UDP_TIMEOUT;
     tv.tv_usec = 0;
     if (setsockopt(client->udp_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+        close(client->udp_socket);
         perror("Failed to set socket receive timeout");
         return -1;
     }
@@ -46,6 +47,7 @@ int set_client_udp_socket(CLArgs *client, string ip, string port){
 
     int errcode = getaddrinfo(ip.c_str(), port.c_str(), &hints, &client->udp_addr);
     if (errcode != 0) {
+        close(client->udp_socket);
         perror("Failure executing getaddrinfo for UDP socket");
         return -1;
     }
@@ -143,8 +145,11 @@ string client_tcp_request_line(CLArgs* client, const string &msg){
 int client_init(CLArgs *client, string ip, string port){
     if(set_client_udp_socket(client, ip, port) == -1)
         return -1;
-    if(set_client_tcp(client, ip, port) == -1)
+    if(set_client_tcp(client, ip, port) == -1){
+        freeaddrinfo(client->udp_addr);
+        close(client->udp_socket);
         return -1;
+    }
     return 0;
 }
 

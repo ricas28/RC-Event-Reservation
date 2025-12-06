@@ -17,7 +17,7 @@ using namespace std;
  * 
  * @param client Pointer to client arguments.
  */
-void process_commands(ClLArgs *client){
+void process_commands(CLArgs *client){
     bool quit = false;
     char *args, line[BUFFER_SIZE];
 
@@ -81,7 +81,10 @@ int main(int argc, char** argv){
         exit(EXIT_FAILURE);
     }    
 
-    client_init(&client, ip, port);
+    if(client_init(&client, ip, port) == -1){
+        cerr << "Failure to initialize client parameters" << endl;
+        exit(EXIT_FAILURE);
+    }
     process_commands(&client);
     destroy_client(&client);
     return EXIT_SUCCESS;

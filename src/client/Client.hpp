@@ -4,7 +4,7 @@
 #include <iostream>
 using namespace std;
 
-typedef struct ClLArgs{
+struct CLArgs{
     int uid = -1;
     string pass = "";
 
@@ -14,7 +14,7 @@ typedef struct ClLArgs{
     struct addrinfo *tcp_addr = NULL;
 
     bool logged_in = false;
-}CLArgs;
+};
 
 /**
  * Makes a request to the server sending a message and returning the response,
