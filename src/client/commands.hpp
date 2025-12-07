@@ -1,5 +1,5 @@
-#ifndef __COMMANDS__HPP__
-#define __COMMANDS__HPP__
+#ifndef __C__COMMANDS__HPP__
+#define __C__COMMANDS__HPP__
 
 #include "Client.hpp"
 

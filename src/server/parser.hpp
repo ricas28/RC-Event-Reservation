@@ -1,5 +1,5 @@
-#ifndef __S_PARSER__HPP__
-#define __S_PARSER__HPP__
+#ifndef __S__PARSER__HPP__
+#define __S__PARSER__HPP__
 
 #include <iostream>
 #include <string>

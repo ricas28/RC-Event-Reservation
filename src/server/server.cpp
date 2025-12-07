@@ -10,6 +10,7 @@
 #include <signal.h>
 
 #include "server.hpp"
+#include "command_handler.hpp"
 #include "parser.hpp"
 #include "../common/protocol.hpp"
 #include "../common/constants.hpp"
@@ -124,21 +125,31 @@ int server_init(string port, int &tcp_socket, int &udp_socket){
     return 0;
 }
 
-void print_verbose(OP_CODE code, const char *request, struct sockaddr_in client_addr){
-    char ip[INET_ADDRSTRLEN], port[16], code_str[BUF_TEMP], uid[BUF_TEMP];
+int print_verbose(OP_CODE code, const char *request, struct sockaddr_in client_addr){
+    char ip[INET_ADDRSTRLEN], port[16];
 
     // Extract ip and port from address.
     extract_ip_port_in(&client_addr, ip, sizeof(ip), port, sizeof(port));
+
+    string code_str = op_to_str(code);
     
     if(has_uid(code)){
-        sscanf(request, "%63s %63s", code_str, uid);    
-        cout << "[VERBOSE] UID: " << uid << " | REQUEST: " << code_str;
+        char extracted_uid[BUF_TEMP];
+        int n = sscanf(request, "%*s %63s", extracted_uid);
+
+        if(n != 1){
+            cout << "[VERBOSE] ERROR: missing UID " << " | REQUEST TYPE: " << code_str;
+            cout << " | FROM: " << ip << ":" << port << endl;
+            return -1;
+        }  
+        cout << "[VERBOSE] UID: " << extracted_uid << " | REQUEST TYPE: " << code_str;
         cout << " | FROM: " << ip << ":" << port << endl;
     }
     else{
-        cout << "[VERBOSE] REQUEST: " << op_to_str(code);
+        cout << "[VERBOSE] REQUEST TYPE: " << op_to_str(code);
         cout << " | FROM: " << ip << ":" << port << endl;
     }
+    return 0;
 }   
 
 void destroy_server(int tcp_socket, int udp_socket){
@@ -152,9 +163,11 @@ int handle_tcp_request(int fd, struct sockaddr_in client_addr, bool verbose){
     if(request == "")
         return -1;
 
-    int n = sscanf(request.c_str(), "%63s ", request_code);
+    int n = sscanf(request.c_str(), "%63s", request_code);
     if(n != 1){
-        cerr << "Failure to parse request code" << endl;
+        cerr << "Failure to parse request code: '" << request_code << "'" << endl;
+        if(write_all(fd, "ERR\n", 4) == -1)
+            cerr << "Failure to write 'ERR' message to client" << endl;
         return -1;
     }
     OP_CODE code = get_tcp_command(request_code);
@@ -163,9 +176,15 @@ int handle_tcp_request(int fd, struct sockaddr_in client_addr, bool verbose){
             cerr << "Failure to write 'ERR' message to client" << endl;
         return -1;
     }
-    if(verbose)
-        print_verbose(code, request.c_str(), client_addr);
-    //string response = process_command(command, request.c_str());
+    if(verbose){
+        if(print_verbose(code, request.c_str(), client_addr) == -1){
+            cerr << "Wrong protocol message received: \""  << request << "\"" << endl;
+            if(write_all(fd, "ERR\n", 4) == -1)
+                cerr << "Failure to write 'ERR' message to client" << endl;
+            return -1;
+        }
+    }
+    handle_request(fd, code, request.c_str());
 
     return 0;
 }
@@ -190,10 +209,15 @@ int handle_udp_request(int fd, bool verbose){
             cerr << "Failure to write 'ERR' message to client" << endl;
         return -1;
     }
-    if(verbose)
-        print_verbose(code, request, client_addr);
-    
-    // process_command(command, request);
+    if(verbose){
+        if(print_verbose(code, request, client_addr) == -1){
+            cerr << "Wrong protocol message received" << endl;
+            if(write_all(fd, "ERR\n", 4) == -1)
+                cerr << "Failure to write 'ERR' message to client" << endl;
+            return -1;
+        }
+    }
+    handle_request(fd, code, request);
 
     free(request);
     return 0;
