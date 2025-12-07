@@ -123,4 +123,36 @@ bool is_valid_event_state(int state);
  */
 void print_event_state(int state);
 
+/**
+ * Extracts the ip and port from a struct sockaddr_storage struct.
+ * 
+ * @param addr sockaddr_storage struct with address info.
+ * @param addrlen Size of address.
+ * @param ip String that will contain the ip of the address.
+ * @param ip_size Size of the ip string.
+ * @param port String that will contain the port of the address
+ * @param port_size Size of the port string.
+ */
+void extract_ip_port_storage(const struct sockaddr_storage *addr,
+                             socklen_t addrlen,
+                             char *ip,
+                             size_t ip_size,
+                             char *port,
+                             size_t port_size);
+
+/**
+ * Extracts the ip and port from a struct sockaddr_in struct.
+ * 
+ * @param addr sockaddr_in struct with address info.
+ * @param ip String that will contain the ip of the address.
+ * @param ip_size Size of the string.
+ * @param port String that will contain the port of the address
+ * @param port_size Size of the port string.
+ */
+void extract_ip_port_in(const struct sockaddr_in *addr,
+                        char *ip,
+                        size_t ip_size,
+                        char *port,
+                        size_t port_size);
+
 #endif

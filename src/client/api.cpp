@@ -161,7 +161,7 @@ void print_myevents_list(vector<pair<string, int>> &events_list){
     }
 }
 
-int er_myevents(ClLArgs client){
+int er_myevents(CLArgs client){
     char *response, response_code[BUF_TEMP];
     string message = op_to_str(OP_MYEVENTS) + " " + to_string(client.uid) + 
                                             " " + client.pass + "\n";
@@ -215,7 +215,7 @@ void print_myreservations_list(vector<Reservation> reservations_list){
     }
 }
 
-int er_myreservations(ClLArgs client){
+int er_myreservations(CLArgs client){
     char *response, response_code[BUF_TEMP];
     string message = op_to_str(OP_MYRESERVATIONS) + " " + to_string(client.uid) + 
                                             " " + client.pass + "\n";
@@ -363,7 +363,7 @@ void print_events_list(vector<Event_list> events_list){
     }
 }
 
-int er_list(ClLArgs client){
+int er_list(CLArgs client){
     char response_code[BUF_TEMP];
     string message = op_to_str(OP_LIST) + "\n";
 
@@ -566,7 +566,7 @@ int er_reserve(CLArgs client, string &eid, int people){
     return 0;       
 }
 
-int er_changePass(ClLArgs &client, string old_pass, string new_pass){
+int er_changePass(CLArgs &client, string old_pass, string new_pass){
     char response_code[BUF_TEMP];
     string message = op_to_str(OP_CHANGE_PASS) + " " + to_string(client.uid) +  
                         " " + old_pass + " " + new_pass + "\n";

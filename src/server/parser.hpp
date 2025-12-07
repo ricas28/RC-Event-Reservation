@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 
+#include "../common/protocol.hpp"
+
 using namespace std;
 
 /**
@@ -18,5 +20,29 @@ using namespace std;
  * @return true for successful parse, false otherwise.
  */
 bool parse_args(string &port, bool &verbose, char** argv, int argc);
+
+/**
+ * Receives a string with the code for a request and returns 
+ * it's OP_CODE form.
+ * This function validates if the given command is a command
+ * that is handled with TCP or not.
+ * 
+ * @param command String with code for request.
+ * 
+ * @return OP_CODE form of code or ERR for invalid code.
+ */
+OP_CODE get_tcp_command(const char *command);
+
+/**
+ * Receives a string with the code for a request and returns 
+ * it's OP_CODE form.
+ * This function validates if the given command is a command
+ * that is handled with UDP or not.
+ * 
+ * @param command String with code for request.
+ * 
+ * @return OP_CODE form of code or ERR for invalid code.
+ */
+OP_CODE get_udp_command(const char *command);
 
 #endif

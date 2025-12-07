@@ -7,8 +7,14 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <signal.h>
 
 #include "server.hpp"
+#include "parser.hpp"
+#include "../common/protocol.hpp"
+#include "../common/constants.hpp"
+#include "../common/util.hpp"
+#include "../common/io.hpp"
 
 using namespace std;
 
@@ -36,6 +42,13 @@ int set_server_tcp_socket(string port){
     int errcode = getaddrinfo(NULL, port.c_str(), &hints, &res);
     if ((errcode) != 0) {
         perror("Failure to do DNS lookup for TCP socket");
+        close(fd);
+        return -1;
+    }
+    int opt = 1;
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        perror("setsockopt(SO_REUSEADDR) failed on TCP");
+        freeaddrinfo(res);
         close(fd);
         return -1;
     }
@@ -81,6 +94,13 @@ int set_server_udp_socket(string port){
         close(fd);
         return -1;
     }
+    int opt = 1;
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        perror("setsockopt(SO_REUSEADDR) failed on UDP");
+        freeaddrinfo(res);
+        close(fd);
+        return -1;
+    }
     int n = bind(fd, res->ai_addr, res->ai_addrlen);
     if (n == -1) {
         freeaddrinfo(res);
@@ -92,26 +112,89 @@ int set_server_udp_socket(string port){
     return fd;
 }
 
-int server_init(SVArgs &server, string port, bool verbose){
-    if((server.tcp_socket = set_server_tcp_socket(port)) == -1)
+int server_init(string port, int &tcp_socket, int &udp_socket){
+    if((tcp_socket = set_server_tcp_socket(port)) == -1)
         return -1;
-    
-    if((server.udp_socket = set_server_udp_socket(port)) == -1){
-        close(server.tcp_socket);
+
+    if((udp_socket = set_server_udp_socket(port)) == -1){
+        close(tcp_socket);
         return -1;
     }
-    server.verbose = verbose;
+
     return 0;
 }
 
-void destroy_server(SVArgs &server){
-    close(server.tcp_socket);
-    close(server.udp_socket);
-}
+void print_verbose(OP_CODE code, const char *request, struct sockaddr_in client_addr){
+    char ip[INET_ADDRSTRLEN], port[16], code_str[BUF_TEMP], uid[BUF_TEMP];
 
-void handle_tcp_request(int fd){
-
-}
-void handle_udp_request(int fd){
+    // Extract ip and port from address.
+    extract_ip_port_in(&client_addr, ip, sizeof(ip), port, sizeof(port));
     
+    if(has_uid(code)){
+        sscanf(request, "%63s %63s", code_str, uid);    
+        cout << "[VERBOSE] UID: " << uid << " | REQUEST: " << code_str;
+        cout << " | FROM: " << ip << ":" << port << endl;
+    }
+    else{
+        cout << "[VERBOSE] REQUEST: " << op_to_str(code);
+        cout << " | FROM: " << ip << ":" << port << endl;
+    }
+}   
+
+void destroy_server(int tcp_socket, int udp_socket){
+    close(tcp_socket);
+    close(udp_socket);
+}
+
+int handle_tcp_request(int fd, struct sockaddr_in client_addr, bool verbose){
+    char request_code[BUF_TEMP];
+    string request = tcp_read_message(fd);
+    if(request == "")
+        return -1;
+
+    int n = sscanf(request.c_str(), "%63s ", request_code);
+    if(n != 1){
+        cerr << "Failure to parse request code" << endl;
+        return -1;
+    }
+    OP_CODE code = get_tcp_command(request_code);
+    if(code == ERR){
+        if(write_all(fd, "ERR\n", 4) == -1)
+            cerr << "Failure to write 'ERR' message to client" << endl;
+        return -1;
+    }
+    if(verbose)
+        print_verbose(code, request.c_str(), client_addr);
+    //string response = process_command(command, request.c_str());
+
+    return 0;
+}
+
+int handle_udp_request(int fd, bool verbose){
+    struct sockaddr_in client_addr;
+    socklen_t addrlen = sizeof(client_addr);
+    char request_code[BUF_TEMP];
+
+    char *request = receive_udp_message(fd, (struct sockaddr*)&client_addr, &addrlen);
+    if(!request)
+        return -1;
+
+    int n = sscanf(request, "%63s ", request_code);
+    if(n != 1){
+        cerr << "Failure to parse request code" << endl;
+        return -1;
+    }
+    OP_CODE code = get_udp_command(request_code);
+    if(code == ERR){
+        if(write_all(fd, "ERR\n", 4) == -1)
+            cerr << "Failure to write 'ERR' message to client" << endl;
+        return -1;
+    }
+    if(verbose)
+        print_verbose(code, request, client_addr);
+    
+    // process_command(command, request);
+
+    free(request);
+    return 0;
 }

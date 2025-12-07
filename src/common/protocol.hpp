@@ -72,6 +72,8 @@ struct Event_Info{
 string op_to_str(OP_CODE code);
 /** Converts a string representation of an operation to its OP_CODE enum value */
 OP_CODE str_to_op(const char *str);
+/** Checks if the given command has a UID on the request */
+bool has_uid(OP_CODE code);
 
 /**
  * Sends a message with UDP.
@@ -79,20 +81,22 @@ OP_CODE str_to_op(const char *str);
  * @param socket Fd for socket.
  * @param message Message being sent.
  * @param addr Pointer do address where we send the message.
+ * @param addr_len Size of address.
  * 
  * @returns 0 on success, -1 on failure.
  */
-int send_udp_message(int socket, const char *message, const struct addrinfo *addr);
+int send_udp_message(int socket, const char *message, struct sockaddr *addr, socklen_t addr_len);
 
 /**
  * Receives a message with UDP.
  * 
  * @param socket Fd for socket.
- * @param addr Pointer to adress where we receive the message from.
+ * @param addr Pointer to address where we receive the message from.
+ * @param socklen_t Pointer to size of address.
  * 
  * @returns pointer to buffer with content on success, NULL on failure.
  */
-char *receive_udp_message(int socket, struct addrinfo *addr);
+char *receive_udp_message(int socket,  struct sockaddr *addr, socklen_t *addr_len);
 
 /**
  * Reads the next message from a TCP socket. Read until seeing '\n'.

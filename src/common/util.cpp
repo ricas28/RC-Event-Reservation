@@ -1,6 +1,13 @@
 #include <iostream>
 #include <string.h>
 #include <filesystem>
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 
 #include "constants.hpp"
 #include "DateTime.hpp"
@@ -127,4 +134,16 @@ void print_event_state(int state){
         default:
             cerr << "Invalid state" << endl;
     }
+}
+
+void extract_ip_port_in(const struct sockaddr_in *addr,
+                        char *ip,
+                        size_t ip_size,
+                        char *port,
+                        size_t port_size){
+    // IP
+    inet_ntop(AF_INET, &(addr->sin_addr), ip, (socklen_t)ip_size);
+
+    // PORT
+    snprintf(port, port_size, "%u", ntohs(addr->sin_port));
 }

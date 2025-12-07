@@ -68,8 +68,12 @@ OP_CODE str_to_op(const char *str){
     return OP_INVALID;
 }
 
-int send_udp_message(int socket, const char *message, const struct addrinfo *addr){
-    ssize_t n = sendto(socket, message, strlen(message), 0, addr->ai_addr, addr->ai_addrlen);
+bool has_uid(OP_CODE code){
+    return code != OP_SHOW && code != OP_LIST;
+}
+
+int send_udp_message(int socket, const char *message, struct sockaddr *addr, socklen_t addr_len){
+    ssize_t n = sendto(socket, message, strlen(message), 0, addr, addr_len);
     if (n == -1) {
         perror("Failure to send message with UDP");
         return -1;
@@ -116,12 +120,11 @@ string tcp_read_word(int fd, bool *end_line){
     return word;
 }
 
-char *receive_udp_message(int socket, struct addrinfo *addr) {
+char *receive_udp_message(int socket,  struct sockaddr *addr, socklen_t *addr_len){
     char *buffer = (char *)malloc(UDP_BUFFER_SIZE);
     if (!buffer) return NULL;
-    
-    socklen_t addrlen = addr->ai_addrlen;
-    ssize_t n = recvfrom(socket, buffer, UDP_BUFFER_SIZE, 0, addr->ai_addr, &addrlen);
+
+    ssize_t n = recvfrom(socket, buffer, UDP_BUFFER_SIZE, 0, addr, addr_len);
 
     if (n == -1) {
         perror("Failure to receive message with UDP");
@@ -131,9 +134,4 @@ char *receive_udp_message(int socket, struct addrinfo *addr) {
     
     buffer[n] = '\0';
     return buffer;
-}
-
-void close_socket_connection(int socket, struct addrinfo *addr){
-    free(addr);
-    close(socket);
 }

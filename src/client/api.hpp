@@ -39,7 +39,7 @@ int er_unregister(CLArgs *client);
  * 
  * @return 0 for successful execution, -1 on failure.  
 */ 
-int er_myevents(ClLArgs client);
+int er_myevents(CLArgs client);
 
 /**
  * Executes the 'myreservations' command.
@@ -48,7 +48,7 @@ int er_myevents(ClLArgs client);
  * 
  * @return 0 for successful execution, -1 on failure.  
 */ 
-int er_myreservations(ClLArgs client);
+int er_myreservations(CLArgs client);
 
 /**
  * Executes the 'create' command.
@@ -83,7 +83,7 @@ int er_close(CLArgs client, string eid);
  * 
  * @returns 0 for successful execution, -1 on failure.
  */
-int er_list(ClLArgs client);
+int er_list(CLArgs client);
 
 /**
  * Executes the 'show' command.
@@ -115,6 +115,6 @@ int er_reserve(CLArgs client, string &eid, int people);
  * 
  * @returns 0 for successful execetion, -1 on failure.
  */
-int er_changePass(ClLArgs &client, string old_pass, string new_pass);
+int er_changePass(CLArgs &client, string old_pass, string new_pass);
 
 #endif

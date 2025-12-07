@@ -5,38 +5,38 @@
  
 using namespace std;
 
-struct SVArgs{
-    int tcp_socket = -1;
-    int udp_socket = -1;
-    bool verbose = false;
-};
-
 /**
  * Initializes the parameters for a SVArgs struct.
  * 
- * @param server Struct being initialized.
- * @param port Port where the server is running.
- * @param verbose Bool to indicate server's verbose mode.
+ * @param port Where the server is running.
+ * @param tcp_socket Int that will contain a TCP socket.
+ * @param udp_socket Int that will contain a UDP socket.
  * 
  * @return 0 on success, -1 on failure.
  */
-int server_init(SVArgs &server, string port, bool verbose);
+int server_init(string port, int &tcp_socket, int &udp_socket);
 
 /** Closes file descriptors for TCP and UDP messages.*/
-void destroy_server(SVArgs &server);
+void destroy_server(int tcp_socket, int udp_socket);
 
 /**
  * Handles a TCP request.
  * 
  * @param fd TCP socket.
+ * @param client_addr Client address.
+ * @param verbose Bool to activate server verbose mode.
+ * 
+ * @returns 0 on success, -1 on failure.
  */
-void handle_tcp_request(int fd);
+int handle_tcp_request(int fd, struct sockaddr_in client_addr, bool verbose);
 
 /**
  * Handles a UDP request.
  * 
  * @param fd UDP socket.
+ * @param verbose (Optional) Bool to activate server verbose mode.
+ * @returns 0 on success, -1 on failure.
  */
-void handle_udp_request(int udp_fd);
+int handle_udp_request(int udp_fd, bool verbose= false);
 
 #endif

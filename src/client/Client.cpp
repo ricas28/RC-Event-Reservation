@@ -78,10 +78,17 @@ int set_client_tcp(CLArgs *client, string ip, string port){
 }
 
 char *client_udp_request(CLArgs *client, const char *msg){
+    // Optional structs for receiving the server's ip.
+    struct sockaddr_storage reply_addr;
+    socklen_t reply_len = sizeof(reply_addr);
+
     for (int attempt = 1; attempt <= UDP_RETRIES; attempt++) {
-        if (send_udp_message(client->udp_socket, msg, client->udp_addr) == -1)
+        if (send_udp_message(client->udp_socket, msg, 
+                                        client->udp_addr->ai_addr,
+                                        client->udp_addr->ai_addrlen) == -1)
             return NULL;
-        char *resp = receive_udp_message(client->udp_socket, client->udp_addr);
+        char *resp = receive_udp_message(client->udp_socket, (struct sockaddr*)&reply_addr,
+                                                                            &reply_len);
         if (resp != NULL)
             return resp;
         
