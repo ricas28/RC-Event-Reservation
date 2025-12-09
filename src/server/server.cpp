@@ -7,7 +7,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <signal.h>
 
 #include "server.hpp"
 #include "command_handler.hpp"
@@ -184,7 +183,7 @@ int handle_tcp_request(int fd, struct sockaddr_in client_addr, bool verbose){
             return -1;
         }
     }
-    handle_request(fd, code, request.c_str());
+    process_TCP_request(fd, code, request.c_str());
 
     return 0;
 }
@@ -198,26 +197,26 @@ int handle_udp_request(int fd, bool verbose){
     if(!request)
         return -1;
 
-    int n = sscanf(request, "%63s ", request_code);
+    int n = sscanf(request, "%63s", request_code);
     if(n != 1){
         cerr << "Failure to parse request code" << endl;
         return -1;
     }
     OP_CODE code = get_udp_command(request_code);
     if(code == ERR){
-        if(write_all(fd, "ERR\n", 4) == -1)
+        if(send_udp_message(fd, "ERR\n", (struct sockaddr*)&client_addr, addrlen) == -1)
             cerr << "Failure to write 'ERR' message to client" << endl;
         return -1;
     }
     if(verbose){
         if(print_verbose(code, request, client_addr) == -1){
             cerr << "Wrong protocol message received" << endl;
-            if(write_all(fd, "ERR\n", 4) == -1)
+            if(send_udp_message(fd, "ERR\n", (struct sockaddr*)&client_addr, addrlen) == -1)
                 cerr << "Failure to write 'ERR' message to client" << endl;
             return -1;
         }
     }
-    handle_request(fd, code, request);
+    process_UDP_request({fd, client_addr, addrlen}, code, request);
 
     free(request);
     return 0;

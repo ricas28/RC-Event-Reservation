@@ -125,7 +125,6 @@ char *receive_udp_message(int socket,  struct sockaddr *addr, socklen_t *addr_le
     if (!buffer) return NULL;
 
     ssize_t n = recvfrom(socket, buffer, UDP_BUFFER_SIZE, 0, addr, addr_len);
-
     if (n == -1) {
         perror("Failure to receive message with UDP");
         free(buffer);

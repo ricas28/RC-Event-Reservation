@@ -85,8 +85,9 @@ char *client_udp_request(CLArgs *client, const char *msg){
     for (int attempt = 1; attempt <= UDP_RETRIES; attempt++) {
         if (send_udp_message(client->udp_socket, msg, 
                                         client->udp_addr->ai_addr,
-                                        client->udp_addr->ai_addrlen) == -1)
+                                        client->udp_addr->ai_addrlen) == -1){                                       
             return NULL;
+        }
         char *resp = receive_udp_message(client->udp_socket, (struct sockaddr*)&reply_addr,
                                                                             &reply_len);
         if (resp != NULL)

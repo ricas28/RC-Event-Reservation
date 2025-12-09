@@ -22,7 +22,6 @@ int er_login(CLArgs *client, int uid, string pass){
                         to_string(uid) + " " + pass + "\n";
 
     if((response = client_udp_request(client, message.c_str())) == NULL){
-        cerr << "Failure to request/receive message to server" << endl;
         free(response);
         return -1;
     }
