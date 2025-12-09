@@ -26,6 +26,8 @@ void handle_login(UDPSender &sender, const char *request){
         return;
     }
     cout << uid << endl << password << endl;
+
+    // TODO: DO ACTUAL LOGIN FUNCTION.
     send_udp_message(sender.fd, "TESTEEEEEEEEEEE", (struct sockaddr*)&sender.client_addr,
                                                                             sender.addrlen);
     /*
