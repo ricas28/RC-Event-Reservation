@@ -155,4 +155,13 @@ void extract_ip_port_in(const struct sockaddr_in *addr,
                         char *port,
                         size_t port_size);
 
+/**
+ * Creates a directory and handles possible errors.
+ * 
+ * @param path Path of the directory.
+ * 
+ * @return true if creation is successful, false otherwise.
+*/ 
+bool safe_create_dir(const std::string &path);
+
 #endif

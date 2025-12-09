@@ -1,5 +1,9 @@
-#include "Database.hpp"
+#include <iostream>
 #include <filesystem>
+
+#include "../common/util.hpp"
+
+#include "Database.hpp"
 
 using std::string;
 namespace fs = std::filesystem;
@@ -8,19 +12,21 @@ namespace fs = std::filesystem;
 #define USERS_FOLDER "USERS"
 #define EVENTS_FOLDER "EVENTS"
 
-Database::Database() {
+Database::Database(): ok(true) {
     base_path   = "./" + string(DATABASE_FOLDER) + "/";
     users_path  = base_path + string(USERS_FOLDER) + "/";
     events_path = base_path + string(EVENTS_FOLDER) + "/";
 
-    fs::create_directories(users_path);
-    fs::create_directories(events_path);
+    if(!safe_create_dir(users_path) || !safe_create_dir(events_path))
+        ok = false;
 }
 
 Database& Database::instance() {
     static Database db;
     return db;
 }
+
+bool Database::is_ok() { return ok; }
 
 // ----------------- USERS -----------------
 string Database::user_dir(const string& uid) const {
@@ -45,13 +51,13 @@ string Database::user_reserved_dir(const string& uid) const {
 
 // Ensure structure: USERS/<uid>/(pass/login/CREATED/RESERVED)
 bool Database::ensure_user_dirs(const string& uid) {
-    try {
-        fs::create_directories(user_created_dir(uid));
-        fs::create_directories(user_reserved_dir(uid));
-        fs::create_directories(user_dir(uid));
-    } catch (...) {
-        return false;
-    }
+    // Create USER dir.
+    if (!safe_create_dir(user_dir(uid))) return false;
+
+    // Create CREATED and RESERVED subdirs.
+    if (!safe_create_dir(user_created_dir(uid)))  return false;
+    if (!safe_create_dir(user_reserved_dir(uid))) return false;
+
     return true;
 }
 
@@ -90,12 +96,12 @@ string Database::event_reservation_file(const string& eid,
 }
 
 bool Database::ensure_event_dirs(const string& eid) {
-    try {
-        fs::create_directories(event_desc_dir(eid));
-        fs::create_directories(event_reservations_dir(eid));
-        fs::create_directories(event_dir(eid));
-    } catch (...) {
-        return false;
-    }
+    // Create EVENTS dir
+    if (!safe_create_dir(event_dir(eid))) return false;
+
+    // Create DESCRIPTION and RESERVATIONS subdirs.
+    if (!safe_create_dir(event_desc_dir(eid)))          return false;
+    if (!safe_create_dir(event_reservations_dir(eid)))  return false;
+
     return true;
 }

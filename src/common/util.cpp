@@ -147,3 +147,19 @@ void extract_ip_port_in(const struct sockaddr_in *addr,
     // PORT
     snprintf(port, port_size, "%u", ntohs(addr->sin_port));
 }
+
+bool safe_create_dir(const std::string &path){
+    try {
+        std::error_code ec;
+        if (!fs::create_directories(path, ec) && ec) {
+            cerr << "[ERROR] Failed to create directory: " << path
+                 << " — " << ec.message() << endl;
+            return false;
+        }
+        return true;
+    } catch (std::exception &e) {
+        cerr << "[EXCEPTION] Creating directory: " << path
+             << " — " << e.what() << endl;
+        return false;
+    }
+}

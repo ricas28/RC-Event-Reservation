@@ -3,11 +3,15 @@
 
 #include <string>
 
+using namespace std;
+
 class Database {
 private:
-    std::string base_path;   // Folder ./ES_DB/
-    std::string users_path;  // Folder ./ES_DB/USERS/
-    std::string events_path; // Folder ./ES_DB/EVENTS/
+    string base_path;   // Folder ./ES_DB/
+    string users_path;  // Folder ./ES_DB/USERS/
+    string events_path; // Folder ./ES_DB/EVENTS/
+
+    bool ok = false; // Bool for bd initialization
 
     // Private constructor for Singleton pattern.
     Database();
@@ -66,6 +70,7 @@ public:
     // ---------- UTILITIES ----------
     bool ensure_user_dirs(const std::string& uid);
     bool ensure_event_dirs(const std::string& eid);
+    bool Database::is_ok();
 };
 
 

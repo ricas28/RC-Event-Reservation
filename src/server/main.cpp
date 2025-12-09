@@ -7,6 +7,7 @@
 
 #include "parser.hpp"
 #include "server.hpp"
+#include "operation.hpp"
 
 using namespace std;
 
@@ -75,6 +76,9 @@ int main(int argc, char **argv){
     signal(SIGPIPE, SIG_IGN); // Ignore broken pipe.
     signal(SIGCHLD, SIG_IGN); // Avoid zombie processes.
     signal(SIGINT, handle_sigint); // End program softly.
+
+    if(db_init() == -1)
+        exit(EXIT_FAILURE);    
 
     if(!parse_args(port, verbose, argv, argc)){
         cerr << "Usage: " << argv[0] <<  " [-p ESport] [-v]" << endl;
