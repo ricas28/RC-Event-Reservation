@@ -1,8 +1,12 @@
 #include <iostream>
 #include <filesystem>
+#include <fstream>
+#include <stdlib.h>
+#include <fcntl.h>           
+#include <unistd.h>
+
 
 #include "../common/util.hpp"
-
 #include "Database.hpp"
 
 using std::string;
@@ -104,4 +108,64 @@ bool Database::ensure_event_dirs(const string& eid) {
     if (!safe_create_dir(event_reservations_dir(eid)))  return false;
 
     return true;
+}
+
+bool Database::user_exists(const string &uid){
+    return fs::exists(user_dir(uid));
+}
+
+bool Database::user_registered(const string &uid){
+    return fs::exists(user_pass_file(uid));
+}
+
+bool Database::user_logged_in(const string &uid){
+    return fs::exists(user_login_file(uid));
+}
+
+bool Database::login_user(const string &uid){
+    const string login_file = user_login_file(uid);
+    ofstream out(login_file);
+    if (!out.is_open())
+        return false;
+    out.close();
+    return true;
+}
+
+bool Database::register_user(const string &uid, const string &password) {
+    if (!ensure_user_dirs(uid)) return false;
+
+    // Create password file.
+    string pass_file = user_pass_file(uid);
+    ofstream out(pass_file);
+    if (!out.is_open())
+        return false;
+    out << password << "\n";
+
+    // Create login file.
+    if(!login_user(uid))
+        return false;
+   
+    return true;
+}
+
+bool Database::check_password(const string &uid, const string &password){
+    string pass_file = user_pass_file(uid);
+
+    ifstream in(pass_file);
+    if (!in.is_open()) return false;
+
+    string stored;
+    getline(in, stored);
+
+    return stored == password;
+}
+
+bool Database::logout_user(const string &uid){
+    if (unlink(user_login_file(uid).c_str()) == -1) {
+        if (errno != ENOENT) {     // ENOENT = file does not exist → OK
+            perror("unlink failed");
+            return false;
+        }
+    }
+    return true;   
 }

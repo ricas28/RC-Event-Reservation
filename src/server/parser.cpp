@@ -89,3 +89,18 @@ bool parse_login_request(const char *request, string &uid, string &password){
     password = password_temp;
     return true;
 }
+
+bool parse_logout_request(const char *request, string &uid, string &password){
+    char code[BUF_TEMP], uid_temp[BUF_TEMP], password_temp[BUF_TEMP], extra[BUFFER_SIZE];
+    
+    int n = sscanf(request, "%63s %63s %63s %255s", code, uid_temp, password_temp, extra);
+
+    if(n != 3 || str_to_op(code) != OP_LOGOUT || !is_valid_userid(uid_temp) ||
+                                                !is_valid_password(password_temp)){
+        return false;
+    }
+
+    uid = uid_temp;
+    password = password_temp;
+    return true;
+}

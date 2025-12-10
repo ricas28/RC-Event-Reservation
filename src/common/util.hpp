@@ -1,6 +1,9 @@
 #ifndef __UTIL__HPP__
 #define __UTIL__HPP__
 
+#include <sys/types.h>
+#include <sys/socket.h>
+
 /**
  * Checks if the content of a string represents a valid user id.
  * 

@@ -11,6 +11,7 @@
 #include "../common/protocol.hpp"
 #include "command_handler.hpp"
 #include "parser.hpp"
+#include "operations.hpp"
 
 using namespace std;
 
@@ -19,27 +20,63 @@ void handle_login(UDPSender &sender, const char *request){
 
     if(!parse_login_request(request, uid, password)){
         string message = op_to_str(OP_LOGIN_RESP) + " ERR\n";
-        if(send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr,
-                                                                            sender.addrlen) == -1){
-            cerr << "Failure to send error message to client" << endl;
-        }
+        send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
         return;
     }
-    cout << uid << endl << password << endl;
-
-    // TODO: DO ACTUAL LOGIN FUNCTION.
-    send_udp_message(sender.fd, "TESTEEEEEEEEEEE", (struct sockaddr*)&sender.client_addr,
-                                                                            sender.addrlen);
-    /*
-    if(login() == -1)
-        cerr << "Failure to execute login command" << endl;
-    */
+    
+    string message;
+    switch(login(uid, password)){
+        case LoginResult::IO_ERROR:
+            cerr << "Failute to execute 'login' command" << endl;
+            send_udp_message(sender.fd, "NOK\n", (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case LoginResult::SUCCESS:
+            message = op_to_str(OP_LOGIN_RESP) + " OK\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case LoginResult::REGISTERED:
+            message = op_to_str(OP_LOGIN_RESP) + " REG\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case LoginResult::WRONG_PASS:
+            message = op_to_str(OP_LOGIN_RESP) + " NOK\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+    }   
 }
 
 void handle_logout(UDPSender sender, const char *request){
-    (void)sender;
-    (void)request;
-    cout << "LOGOUT" << endl;
+    string uid, password;
+
+    if(!parse_logout_request(request, uid, password)){
+        string message = op_to_str(OP_LOGOUT_RESP) + " ERR\n";
+        send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+        return;
+    }
+    
+    string message;
+    switch(logout(uid, password)){
+        case LogoutResult::IO_ERROR:
+            cerr << "Failute to execute 'login' command" << endl;
+            send_udp_message(sender.fd, "NOK\n", (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case LogoutResult::SUCCESS:
+            message = op_to_str(OP_LOGOUT_RESP) + " OK\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case LogoutResult::WRONG_PASS:
+            message = op_to_str(OP_LOGOUT_RESP) + " WRP\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case LogoutResult::NOT_LOGGED_IN:
+            message = op_to_str(OP_LOGOUT_RESP) + " NOK\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case LogoutResult::NOT_REGISTERED:
+            message = op_to_str(OP_LOGOUT_RESP) + " UNR\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+    }   
 }
 
 void handle_unregister(UDPSender sender, const char *request){

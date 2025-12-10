@@ -49,7 +49,10 @@ int er_login(CLArgs *client, int uid, string pass){
         client ->pass = pass;
     }
     else if(status == "NOK") cout << "incorrect login attempt" << endl;
-    else if(status == "REG") cout << "new user registered" << endl;
+    else if(status == "REG"){
+        cout << "new user registered" << endl;
+        client->logged_in = true;
+    }
     else if(status == "ERR") 
         cerr<< "Syntax of request message is incorrect or parameter values take invalid values" << endl;
     else {

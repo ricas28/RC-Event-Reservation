@@ -124,7 +124,7 @@ int server_init(string port, int &tcp_socket, int &udp_socket){
     return 0;
 }
 
-int print_verbose(OP_CODE code, const char *request, struct sockaddr_in client_addr){
+void print_verbose(OP_CODE code, const char *request, struct sockaddr_in client_addr){
     char ip[INET_ADDRSTRLEN], port[16];
 
     // Extract ip and port from address.
@@ -139,7 +139,7 @@ int print_verbose(OP_CODE code, const char *request, struct sockaddr_in client_a
         if(n != 1){
             cout << "[VERBOSE] ERROR: missing UID " << " | REQUEST TYPE: " << code_str;
             cout << " | FROM: " << ip << ":" << port << endl;
-            return -1;
+            return;
         }  
         cout << "[VERBOSE] UID: " << extracted_uid << " | REQUEST TYPE: " << code_str;
         cout << " | FROM: " << ip << ":" << port << endl;
@@ -148,7 +148,6 @@ int print_verbose(OP_CODE code, const char *request, struct sockaddr_in client_a
         cout << "[VERBOSE] REQUEST TYPE: " << op_to_str(code);
         cout << " | FROM: " << ip << ":" << port << endl;
     }
-    return 0;
 }   
 
 void destroy_server(int tcp_socket, int udp_socket){
@@ -176,12 +175,7 @@ int handle_tcp_request(int fd, struct sockaddr_in client_addr, bool verbose){
         return -1;
     }
     if(verbose){
-        if(print_verbose(code, request.c_str(), client_addr) == -1){
-            cerr << "Wrong protocol message received: \""  << request << "\"" << endl;
-            if(write_all(fd, "ERR\n", 4) == -1)
-                cerr << "Failure to write 'ERR' message to client" << endl;
-            return -1;
-        }
+        print_verbose(code, request.c_str(), client_addr);
     }
     process_TCP_request(fd, code, request.c_str());
 
@@ -209,12 +203,7 @@ int handle_udp_request(int fd, bool verbose){
         return -1;
     }
     if(verbose){
-        if(print_verbose(code, request, client_addr) == -1){
-            cerr << "Wrong protocol message received" << endl;
-            if(send_udp_message(fd, "ERR\n", (struct sockaddr*)&client_addr, addrlen) == -1)
-                cerr << "Failure to write 'ERR' message to client" << endl;
-            return -1;
-        }
+       print_verbose(code, request, client_addr);
     }
     process_UDP_request({fd, client_addr, addrlen}, code, request);
 
