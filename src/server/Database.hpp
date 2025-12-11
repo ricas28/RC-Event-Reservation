@@ -72,6 +72,8 @@ public:
     bool check_password(const string &uid, const string &password);
     // Logout a user.
     bool logout_user(const string &uid); 
+    // Unregister a uer.
+    bool unregister_user(const string &uid);
 };
 
 

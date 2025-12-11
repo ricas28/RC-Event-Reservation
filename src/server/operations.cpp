@@ -48,7 +48,26 @@ LogoutResult logout(string &uid, string &password){
         }
         return LogoutResult::WRONG_PASS;
     }
-    // User is not not logged in
+    // User is not logged in
     return LogoutResult::NOT_LOGGED_IN;
+}
+
+UnregisterResult unregister(string &uid, string &password){
+    // Check if user is registered
+    if(!db->user_registered(uid))
+        return UnregisterResult::NOT_REGISTERED;
+
+    // Check if user is logged in
+    if(db->user_logged_in(uid)){
+        // Check if  password is correct.
+        if(db->check_password(uid, password)){
+            if(!db->unregister_user(uid))
+                return UnregisterResult::IO_ERROR;
+            return UnregisterResult::SUCCESS;
+        }
+        return UnregisterResult::WRONG_PASS;
+    }
+    // User is not logged in
+    return UnregisterResult::NOT_LOGGED_IN;
 }
 

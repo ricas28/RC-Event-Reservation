@@ -16,4 +16,12 @@ enum class LogoutResult{
     IO_ERROR
 };
 
+enum class UnregisterResult{
+    SUCCESS,
+    NOT_LOGGED_IN,
+    NOT_REGISTERED,
+    WRONG_PASS,
+    IO_ERROR
+};
+
 #endif

@@ -58,12 +58,21 @@ OP_CODE get_udp_command(const char *command);
 bool parse_login_request(const char *request, string &uid, string &password);
 
 /**
- * Parses a request to the 'login' command.
+ * Parses a request to the 'logout' command.
  * 
  * @param request Request that was received.
  * @param uid String that will contain the UID sent on the request.
  * @param password String that will contain the password sent on the request.
  */
 bool parse_logout_request(const char *request, string &uid, string &password);
+
+/**
+ * Parses a request to the 'unregister' command.
+ * 
+ * @param request Request that was received.
+ * @param uid String that will contain the UID sent on the request.
+ * @param password String that will contain the password sent on the request.
+ */
+bool parse_unregister_request(const char *request, string &uid, string &password);
 
 #endif

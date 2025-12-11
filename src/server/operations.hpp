@@ -34,4 +34,14 @@ LoginResult login(string &uid, string &password);
  */
 LogoutResult logout(string &uid, string &password);
 
+/**
+ * Executes a 'unregister' command
+ * 
+ * @param uid UID received on the request.
+ * @param password Password received on the request.
+ * 
+ * @return UnregisterResult enum.
+ */
+UnregisterResult unregister(string &uid, string &password);
+
 #endif

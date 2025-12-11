@@ -80,9 +80,37 @@ void handle_logout(UDPSender sender, const char *request){
 }
 
 void handle_unregister(UDPSender sender, const char *request){
-    (void)sender;
-    (void)request;
-    cout << "UNR" << endl;
+    string uid, password;
+
+    if(!parse_unregister_request(request, uid, password)){
+        string message = op_to_str(OP_UNREGISTER_RESP) + " ERR\n";
+        send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+        return;
+    }
+    
+    string message;
+    switch(unregister(uid, password)){
+        case UnregisterResult::IO_ERROR:
+            cerr << "Failute to execute 'login' command" << endl;
+            send_udp_message(sender.fd, "NOK\n", (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case UnregisterResult::SUCCESS:
+            message = op_to_str(OP_UNREGISTER_RESP) + " OK\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case UnregisterResult::WRONG_PASS:
+            message = op_to_str(OP_UNREGISTER_RESP) + " WRP\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case UnregisterResult::NOT_LOGGED_IN:
+            message = op_to_str(OP_UNREGISTER_RESP) + " NOK\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case UnregisterResult::NOT_REGISTERED:
+            message = op_to_str(OP_UNREGISTER_RESP) + " UNR\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+    }   
 }
 
 void handle_myevents(UDPSender sender, const char *request){

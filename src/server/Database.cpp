@@ -163,9 +163,25 @@ bool Database::check_password(const string &uid, const string &password){
 bool Database::logout_user(const string &uid){
     if (unlink(user_login_file(uid).c_str()) == -1) {
         if (errno != ENOENT) {     // ENOENT = file does not exist → OK
-            perror("unlink failed");
+            perror("unlink for 'logout' failed");
             return false;
         }
     }
     return true;   
+}
+
+bool Database::unregister_user(const string &uid){
+    // Remove pass file.
+    if (unlink(user_pass_file(uid).c_str()) == -1) {
+        if (errno != ENOENT) {     // ENOENT = file does not exist → OK
+            perror("unlink for 'logout' failed");
+            return false;
+        }
+    }
+
+    // Remove login file.
+    if(!logout_user(uid))
+        return false;
+    
+    return true;
 }
