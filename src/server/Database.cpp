@@ -4,9 +4,12 @@
 #include <stdlib.h>
 #include <fcntl.h>           
 #include <unistd.h>
-
+#include <vector>
 
 #include "../common/util.hpp"
+#include "../common/DateTime.hpp"
+#include "../common/protocol.hpp"
+#include "server.hpp"
 #include "Database.hpp"
 
 using std::string;
@@ -38,11 +41,11 @@ string Database::user_dir(const string& uid) const {
 }
 
 string Database::user_pass_file(const string& uid) const {
-    return user_dir(uid) + uid + "-pass.txt";
+    return user_dir(uid) + uid + "_pass.txt";
 }
 
 string Database::user_login_file(const string& uid) const {
-    return user_dir(uid) + uid + "-login.txt";
+    return user_dir(uid) + uid + "_login.txt";
 }
 
 string Database::user_created_dir(const string& uid) const {
@@ -71,11 +74,11 @@ string Database::event_dir(const string& eid) const {
 }
 
 string Database::event_start_file(const string& eid) const {
-    return event_dir(eid) + "START" + eid + ".txt";
+    return event_dir(eid) + "START_" + eid + ".txt";
 }
 
 string Database::event_res_file(const string& eid) const {
-    return event_dir(eid) + "RES" + eid + ".txt";
+    return event_dir(eid) + "RES_" + eid + ".txt";
 }
 
 string Database::event_desc_dir(const string& eid) const {
@@ -87,7 +90,7 @@ string Database::event_desc_file(const string& eid, const string& fname) const {
 }
 
 string Database::event_end_file(const string& eid) const {
-    return event_dir(eid) + "END" + eid + ".txt";
+    return event_dir(eid) + "END_" + eid + ".txt";
 }
 
 string Database::event_reservations_dir(const string& eid) const {
@@ -120,6 +123,10 @@ bool Database::user_registered(const string &uid){
 
 bool Database::user_logged_in(const string &uid){
     return fs::exists(user_login_file(uid));
+}
+
+bool Database::is_event_closed(const string &eid){
+    return fs::exists(event_end_file(eid));
 }
 
 bool Database::login_user(const string &uid){
@@ -184,4 +191,83 @@ bool Database::unregister_user(const string &uid){
         return false;
     
     return true;
+}
+
+bool Database::close_event(const std::string &eid, DateTime &dt){
+    string end_file_path = event_end_file(eid);
+
+    ofstream end_file(end_file_path);
+    if (!end_file.is_open()) {
+        std::cerr << "Failed to create END file for event " << eid << endl;
+        return false;
+    }
+
+    // Write close date to file.
+    end_file << dt.toString(true) << endl;
+
+    end_file.close();
+    return true;
+}
+
+int Database::get_reserved_seats(const string &eid){
+    string reservations_file = event_res_file(eid);
+
+    ifstream file(reservations_file);
+    if (!file.is_open()) {
+        cerr << "Failed to open reservations file for event " << eid << endl;
+        return -1; 
+    }
+
+    int reservations = 0;
+    if (!(file >> reservations)) {
+        cerr << "Failed to read reservations from file for event " << eid << endl;
+        return -1; 
+    }
+
+    return reservations;
+}
+
+void Database::get_user_events(const string &uid,  vector<pair<string, int>> &events){
+    string user_events_path = user_created_dir(uid);
+
+    // Iterate through files on the CREATED dir.
+    for (const auto& entry : fs::directory_iterator(user_events_path)) {
+        // Extract the eid of the event for each file.
+        string eid = entry.path().stem().string();
+
+        // Check if event is closed.
+        if(is_event_closed(eid)){
+            events.push_back({eid, EVENT_CLOSED});
+            continue;
+        }
+
+        // Search for the START file.
+        string start_file = event_start_file(eid);
+        
+        // Extract info from START file.
+        StartFileData data = extract_start_file_data(start_file);
+        // Check for invalid values (extraction failed).
+        if(data.uid == -1){
+            // Push event corrupted.
+            events.push_back({eid, EVENT_CORRUPTED});
+            continue;
+        }
+
+        // Check if event already occured.
+        if(data.start_date_time.isPast()){
+            // Close event
+            close_event(eid, data.start_date_time);
+            events.push_back({eid, EVENT_IN_PAST});
+            continue;
+        }
+
+        // Check if event is sold out or not.
+        int reserved = get_reserved_seats(eid);
+        if(reserved == -1){
+            events.push_back({eid, EVENT_CORRUPTED});
+            continue;
+        }
+        int event_status = (reserved >= data.event_attend) ? EVENT_SOLD_OUT : EVENT_ACCEPTING;
+        events.push_back({eid, event_status});
+    }
 }

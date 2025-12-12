@@ -129,7 +129,10 @@ void print_event_state(int state){
             cout << "Event is sold out" << endl;
             break;
         case EVENT_CLOSED:
-            cout << "Event is closed" << endl;
+            cout << "Event was closed by the user" << endl;
+            break;
+        case EVENT_CORRUPTED:
+            cout << "Event information is corrupted" << endl;
             break;
         default:
             cerr << "Invalid state" << endl;

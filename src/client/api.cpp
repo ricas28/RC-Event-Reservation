@@ -213,7 +213,7 @@ void print_myreservations_list(vector<Reservation> reservations_list){
     for(auto reservation: reservations_list){
         cout << "Event id: " << reservation.eid << endl;
         cout << "Reservation date and time: ";
-        reservation.datetime.print();
+        reservation.datetime.print(true);
         cout << "Places reserved: " << reservation.value << endl;
         cout << LINE_SEPARATOR << endl;
     }

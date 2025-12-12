@@ -75,4 +75,22 @@ bool parse_logout_request(const char *request, string &uid, string &password);
  */
 bool parse_unregister_request(const char *request, string &uid, string &password);
 
+/**
+ * Parses a request to the 'myevents' command.
+ * 
+ * @param request Request that was received.
+ * @param uid String that will contain the UID sent on the request.
+ * @param password String that will contain the password sent on the request.
+ */
+bool parse_myevents_request(const char *request, string &uid, string &password);
+
+/**
+ * Parses a request to the 'myreservations' command.
+ * 
+ * @param request Request that was received.
+ * @param uid String that will contain the UID sent on the request.
+ * @param password String that will contain the password sent on the request.
+ */
+bool parse_myreservations_request(const char *request, string &uid, string &password);
+
 #endif

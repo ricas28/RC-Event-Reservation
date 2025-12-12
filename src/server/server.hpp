@@ -3,7 +3,17 @@
 
 #include <iostream>
  
+#include "../common/DateTime.hpp"
+
 using namespace std;
+
+struct StartFileData{
+    int uid;
+    string event_name;
+    string desc_fname;
+    int event_attend;
+    DateTime start_date_time;
+};
 
 /**
  * Initializes the parameters for a SVArgs struct.
@@ -38,5 +48,14 @@ int handle_tcp_request(int fd, struct sockaddr_in client_addr, bool verbose);
  * @returns 0 on success, -1 on failure.
  */
 int handle_udp_request(int udp_fd, bool verbose= false);
+
+/**
+ * Extracts information of a START file into a StartFileData.
+ * 
+ * @param filepath Filepath of the START file.
+ * 
+ * @returns StartFileData on success, struct with invalid values on failure.
+ */
+StartFileData extract_start_file_data(const string &filepath);
 
 #endif

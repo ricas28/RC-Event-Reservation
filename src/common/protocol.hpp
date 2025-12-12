@@ -13,6 +13,7 @@ using namespace std;
 #define EVENT_ACCEPTING 1
 #define EVENT_SOLD_OUT 2
 #define EVENT_CLOSED 3
+#define EVENT_CORRUPTED -1
 
 typedef enum {
     OP_LOGIN,

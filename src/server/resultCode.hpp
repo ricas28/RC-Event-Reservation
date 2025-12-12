@@ -24,4 +24,11 @@ enum class UnregisterResult{
     IO_ERROR
 };
 
+enum class MyEventsResult{
+    SUCCESS,
+    NO_EVENTS_CREATED,
+    NOT_LOGGED_IN,
+    WRONG_PASS,
+};
+
 #endif

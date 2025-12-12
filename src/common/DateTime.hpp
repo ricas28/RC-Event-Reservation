@@ -10,56 +10,42 @@ private:
     int year;
     int hour;
     int minute;
+    int second;
 
-    // Returns how many days are on a month.
     int daysInMonth(int m, int y);
-
-    // Checks if date is valid.
     bool isValidDate(int d, int m, int y);
-
-    // Checks if time is valid.
-    bool isValidTime(int h, int min);
+    bool isValidTime(int h, int min, int sec);
 
 public:
-    // Constructor
     DateTime(int d = 1, int m = 1, int y = 2000,
-             int h = 0, int min = 0);
+             int h = 0, int min = 0, int sec = 0);
 
-    // Getters
     int getDay();
     int getMonth();
     int getYear();
     int getHour();
     int getMinute();
+    int getSecond();
 
-    // Setters
     void setDay(int d);
     void setMonth(int m);
     void setYear(int y);
     void setHour(int h);
     void setMinute(int min);
+    void setSecond(int sec);
 
-    // Methods
-
-    // Checks if datetime is invalid
     bool invalidDateTime();
 
-    // Advances the datetime by one minute
-    void nextMinute();  
+    void nextMinute();
+    void nextSecond();
 
-    // Prints the datetime (DD-MM-YYYY HH:MM)
-    void print();  
-    
-    // Returns string representation (DD-MM-YYYY HH:MM)
-    string toString();
+    void print(bool showSeconds= false);
+    string toString(bool showSeconds= false);
 
-    // Parse a Datetime object from a string
     static bool fromStrings(const string &date, const string &time, DateTime &out);
 
-    // Compares this datetime to another (true if this > other)
     bool isAfter(DateTime& other);
 
-    // Checks if datetime is in the past
     bool isPast();
 };
 

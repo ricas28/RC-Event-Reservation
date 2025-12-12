@@ -7,6 +7,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <vector>
+#include <utility>
+#include <sstream>
 
 #include "../common/protocol.hpp"
 #include "command_handler.hpp"
@@ -113,10 +116,48 @@ void handle_unregister(UDPSender sender, const char *request){
     }   
 }
 
+string events_to_string(const vector<std::pair<std::string,int>> &events) {
+    std::ostringstream oss;
+    bool first = true;
+
+    for (const auto &e : events) {
+        if (!first) oss << " ";
+        oss << e.first << " " << e.second; 
+        first = false;
+    }
+
+    return oss.str();
+}
+
 void handle_myevents(UDPSender sender, const char *request){
-    (void)sender;
-    (void)request;
-    cout << "MYE" << endl;
+    string uid, password;
+
+    if(!parse_myevents_request(request, uid, password)){
+        string message = op_to_str(OP_MYEVENTS_RESP) + " ERR\n";
+        send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+        return;
+    }
+    
+    vector<pair<string, int>> events;
+    string message;
+    switch(myevents(uid, password, events)){
+        case MyEventsResult::SUCCESS:
+            message = op_to_str(OP_MYEVENTS_RESP) + " OK " + events_to_string(events) + "\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case MyEventsResult::WRONG_PASS:
+            message = op_to_str(OP_MYEVENTS_RESP) + " WRP\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case MyEventsResult::NOT_LOGGED_IN:
+            message = op_to_str(OP_MYEVENTS_RESP) + " NLG\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case MyEventsResult::NO_EVENTS_CREATED:
+            message = op_to_str(OP_MYEVENTS_RESP) + " NOK\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+    }   
 }
 
 void handle_myreservations(UDPSender sender, const char *request){

@@ -2,6 +2,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -15,6 +18,7 @@
 #include "../common/constants.hpp"
 #include "../common/util.hpp"
 #include "../common/io.hpp"
+#include "../common/DateTime.hpp"
 
 using namespace std;
 
@@ -209,4 +213,68 @@ int handle_udp_request(int fd, bool verbose){
 
     free(request);
     return 0;
+}
+
+bool validateStartFileData(string filepath,
+                            string uid, 
+                            string event_name, 
+                            string desc_fname, 
+                            string start_date, 
+                            string start_time,
+                            DateTime &dt,
+                            int event_attend){
+    // Validate info
+    if(!is_valid_userid((char *)uid.c_str())){
+        cerr << "Invalid UID on file  '" << filepath << "': " << uid << endl;
+        return false;;
+    }
+    if(!is_valid_event_name((char *)event_name.c_str())){
+        cerr << "Invalid event name on file: '" << filepath << "': " << event_name << endl;
+        return false;
+    }
+    if(!is_valid_file_name((char *)desc_fname.c_str())){
+        cerr << "Invalid file name on file: '" << filepath << "': " << desc_fname << endl;
+        return false;
+    }
+    if(!is_valid_num_attendees(event_attend)){
+        cerr << "Invalid number of attendees no file '" << filepath << "': " << event_attend << endl;
+        return false;
+    }
+    if(!DateTime::fromStrings(start_date, start_time, dt)){
+        // fromStrings already prints error messages.
+        return false;
+    }
+    return true;
+}
+
+StartFileData extract_start_file_data(const std::string &filepath){
+    ifstream file(filepath);
+    if (!file.is_open()) {
+        cerr << "Cannot open file: " << filepath << endl;
+        return { -1, "", "", -1, DateTime() };
+    }
+    string line;
+    if (!getline(file, line)) {
+        cerr << "Start file is empty: " << filepath << endl;
+        return { -1, "", "", -1, DateTime() };
+    }
+
+    istringstream iss(line);
+    // Validation for uid uses string so it needs to be read as such.
+    string uid, event_name, desc_fname, start_date, start_time;
+    int event_attend;
+
+    // Extract info
+    if (!(iss >> uid >> event_name >> desc_fname >> event_attend >> start_date >> start_time)) {
+        cerr << "Invalid start file format: " << filepath << endl;
+        return { -1, "", "", -1, DateTime() };
+    }
+
+    DateTime dt;
+    if(!validateStartFileData(filepath, uid, event_name, 
+                                        desc_fname, start_date, start_time, dt, event_attend)){
+        return { -1, "", "", -1, DateTime() };                                       
+    }
+
+    return {atoi(uid.c_str()), event_name, desc_fname, event_attend, dt};
 }

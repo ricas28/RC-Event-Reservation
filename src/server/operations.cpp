@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 #include "Database.hpp"
 #include "resultCode.hpp"
@@ -69,5 +70,21 @@ UnregisterResult unregister(string &uid, string &password){
     }
     // User is not logged in
     return UnregisterResult::NOT_LOGGED_IN;
+}
+
+MyEventsResult myevents(string &uid, string &password, vector<pair<string, int>> &events){
+    // Check if user is logged in.
+    if(!db->user_logged_in(uid))
+        return MyEventsResult::NOT_LOGGED_IN;
+
+    // Check if password is correct.
+    if(!db->check_password(uid, password))
+        return MyEventsResult::WRONG_PASS;
+
+    // Get user events.
+    db->get_user_events(uid, events); 
+    if(events.empty())
+        return MyEventsResult::NO_EVENTS_CREATED;
+    return MyEventsResult::SUCCESS;
 }
 

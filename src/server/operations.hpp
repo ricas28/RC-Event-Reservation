@@ -2,6 +2,7 @@
 #define __OPERATIONS__HPP__
 
 #include <iostream>
+#include <vector>
 
 #include "resultCode.hpp"
 
@@ -43,5 +44,17 @@ LogoutResult logout(string &uid, string &password);
  * @return UnregisterResult enum.
  */
 UnregisterResult unregister(string &uid, string &password);
+
+/**
+ * Executes a 'myevents' command
+ * 
+ * @param uid UID received on the request.
+ * @param password Password received on the request.
+ * @param events Vector that will contain the events the user created and
+ *  their state if they have created any events.
+ * 
+ * @return MyEventsResult enum.
+ */
+MyEventsResult myevents(string &uid, string &password, vector<pair<string, int>> &events);
 
 #endif

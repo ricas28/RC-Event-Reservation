@@ -25,24 +25,26 @@ bool DateTime::isValidDate(int d, int m, int y){
     return true;
 }
 
-bool DateTime::isValidTime(int h, int min){
+bool DateTime::isValidTime(int h, int min, int sec){
     if (h < 0 || h > 23) return false;
     if (min < 0 || min > 59) return false;
+    if (sec < 0 || sec > 59) return false;
     return true;
 }
 
 
 // --- Constructor ---
 
-DateTime::DateTime(int d, int m, int y, int h, int min) {
-    if (isValidDate(d, m, y) && isValidTime(h, min)) {
+DateTime::DateTime(int d, int m, int y, int h, int min, int sec) {
+    if (isValidDate(d, m, y) && isValidTime(h, min, sec)) {
         day = d;
         month = m;
         year = y;
         hour = h;
         minute = min;
+        second = sec;
     } else {
-        day = month = year = hour = minute = -1;
+        day = month = year = hour = minute = second = -1;
     }
 }
 
@@ -54,6 +56,7 @@ int DateTime::getMonth() { return month; }
 int DateTime::getYear() { return year; }
 int DateTime::getHour() { return hour; }
 int DateTime::getMinute() { return minute; }
+int DateTime::getSecond() { return second; }
 
 
 // --- Setters ---
@@ -71,11 +74,15 @@ void DateTime::setYear(int y) {
 }
 
 void DateTime::setHour(int h) {
-    if (isValidTime(h, minute)) hour = h;
+    if (isValidTime(h, minute, second)) hour = h;
 }
 
 void DateTime::setMinute(int min) {
-    if (isValidTime(hour, min)) minute = min;
+    if (isValidTime(hour, min, second)) minute = min;
+}
+
+void DateTime::setSecond(int sec) {
+    if (isValidTime(hour, minute, sec)) second = sec;
 }
 
 
@@ -86,44 +93,66 @@ bool DateTime::invalidDateTime(){
 }
 
 void DateTime::nextMinute() {
-    minute++;
-    if (minute > 59) {
-        minute = 0;
-        hour++;
-        if (hour > 23) {
-            hour = 0;
-            day++;
-            if (day > daysInMonth(month, year)) {
-                day = 1;
-                month++;
-                if (month > 12) {
-                    month = 1;
-                    year++;
+    nextSecond();
+    // ignore detailed second handling here
+}
+
+void DateTime::nextSecond() {
+    second++;
+    if (second > 59) {
+        second = 0;
+        minute++;
+        if (minute > 59) {
+            minute = 0;
+            hour++;
+            if (hour > 23) {
+                hour = 0;
+                day++;
+                if (day > daysInMonth(month, year)) {
+                    day = 1;
+                    month++;
+                    if (month > 12) {
+                        month = 1;
+                        year++;
+                    }
                 }
             }
         }
     }
 }
 
-void DateTime::print() {
+void DateTime::print(bool showSeconds){
     cout << (day < 10 ? "0" : "") << day << "-"
          << (month < 10 ? "0" : "") << month << "-"
          << year << " "
          << (hour < 10 ? "0" : "") << hour << ":"
-         << (minute < 10 ? "0" : "") << minute << endl;
+         << (minute < 10 ? "0" : "") << minute;
+
+    if (showSeconds) {
+        cout << ":" << (second < 10 ? "0" : "") << second;
+    }
+
+    cout << endl;
 }
 
-string DateTime::toString(){
-    return (day < 10 ? "0" : "") + to_string(day) + "-" +
-            (month < 10 ? "0" : "") + to_string(month) + "-" +
-            to_string(year) + " " +
-            (hour < 10 ? "0" : "") + to_string(hour) + ":" +
-            (minute < 10 ? "0" : "") + to_string(minute);
+string DateTime::toString(bool showSeconds){
+    string s;
+    s += (day < 10 ? "0" : "") + to_string(day) + "-";
+    s += (month < 10 ? "0" : "") + to_string(month) + "-";
+    s += to_string(year) + " ";
+    s += (hour < 10 ? "0" : "") + to_string(hour) + ":";
+    s += (minute < 10 ? "0" : "") + to_string(minute);
+
+    if (showSeconds) {
+        s += ":" + string(second < 10 ? "0" : "") + to_string(second);
+    }
+
+    return s;
 }
 
 bool DateTime::fromStrings(const string &date, const string &time, DateTime &out){
-    int d, m, y, hh, mm;
-    char dash1, dash2, colon1;
+    int d, m, y, hh, mm, ss = 0;
+    char dash1, dash2, colon1, colon2;
 
     // Parse dd-mm-yyyy
     istringstream date_ss(date);
@@ -131,31 +160,38 @@ bool DateTime::fromStrings(const string &date, const string &time, DateTime &out
         cerr << "Invalid date format: " << date << endl;
         return false;
     }
-    // Parse hh:mm
+
+    // Parse hh:mm OR hh:mm:ss
     istringstream time_ss(time);
     if (!(time_ss >> hh >> colon1 >> mm) || colon1 != ':'){
         cerr << "Invalid time format: " << time << endl;
         return false;
     }
 
-    // Create DateTime e validate
-    DateTime dt(d, m, y, hh, mm);
+    if (time_ss >> colon2 >> ss) {
+        if (colon2 != ':') {
+            cerr << "Invalid seconds format: " << time << endl;
+            return false;
+        }
+    }
+
+    DateTime dt(d, m, y, hh, mm, ss);
     if (dt.invalidDateTime()) {
         cerr << "Invalid datetime: " << date << " " << time << endl;
         return false;
     }
-    // Successful parse.
+
     out = dt;
     return true;
 }
-
 
 bool DateTime::isAfter(DateTime& other) {
     if (year != other.year) return year > other.year;
     if (month != other.month) return month > other.month;
     if (day != other.day) return day > other.day;
     if (hour != other.hour) return hour > other.hour;
-    return minute > other.minute;
+    if (minute != other.minute) return minute > other.minute;
+    return second > other.second;
 }
 
 bool DateTime::isPast() {
@@ -167,15 +203,17 @@ bool DateTime::isPast() {
         now->tm_mon + 1,
         now->tm_year + 1900,
         now->tm_hour,
-        now->tm_min
+        now->tm_min,
+        now->tm_sec
     );
 
     return !isAfter(current) &&
            !(
-              day == current.getDay() &&
-              month == current.getMonth() &&
-              year == current.getYear() &&
-              hour == current.getHour() &&
-              minute == current.getMinute()
+               day == current.getDay() &&
+               month == current.getMonth() &&
+               year == current.getYear() &&
+               hour == current.getHour() &&
+               minute == current.getMinute() &&
+               second == current.getSecond()
            );
 }
