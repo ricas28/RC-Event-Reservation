@@ -450,7 +450,7 @@ bool parse_reservations_list(char *response, vector<Reservation> &reservations){
             reservations.push_back({eid, DateTime(), value});
             continue;
         }
-        
+
         // Validate EID
         if (!is_valid_eid((char *)eid.c_str())) {
             cerr << "Invalid EID in server response: " << eid << endl;
@@ -655,7 +655,7 @@ bool parse_show(char *args, string &eid){
     return true;
 }
 
-bool parse_show_response(int fd, Event_Info &event){
+bool parse_show_response(int fd, Event_show_Info &event){
     // Read and validate UID.
     string uid = tcp_read_word(fd);
     if(!is_valid_userid((char *)uid.c_str())){

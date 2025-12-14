@@ -90,6 +90,10 @@ string tcp_read_message(int fd) {
     while (true) {
         ssize_t n = read(fd, tmp, sizeof(tmp));
         if (n <= 0) {
+            if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+                // Timeout reached
+                cerr << "Timeout reached while reading TCP message" << endl;
+            }
             // EOF or error.
             return buffer.empty() ? "" : buffer;
         }
@@ -110,6 +114,10 @@ string tcp_read_word(int fd, bool *end_line){
     while (true) {
         ssize_t n = read(fd, &c, 1); 
         if (n <= 0) {
+            if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+                // Timeout reached
+                cerr << "Timeout reached while reading TCP word" << endl;
+            }
             // EOF or error
             return word;
         }

@@ -59,12 +59,22 @@ struct Reservation {
 };
 
 // Used for 'show' command.
-struct Event_Info{
+struct Event_show_Info{
     int uid;
     string name;
     DateTime event_date;
     int attendace_size;
     int seats_reserved;
+    string Fname;
+    size_t Fsize;
+    string Fdata;
+};
+
+// User for 'create' command.
+struct Event_creation_Info{
+    string name;
+    DateTime event_date;
+    int attendace_size;
     string Fname;
     size_t Fsize;
     string Fdata;

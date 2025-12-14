@@ -31,8 +31,8 @@ void process_UDP_request(UDPSender sender, OP_CODE code, const char *request);
  * 
  * @param fd TCP socket.
  * @param code Code that was sent.
- * @param request Request that was sent.
+ * @param request_so_far String that contains what was read from the request until now.
  */
-void process_TCP_request(int fd, OP_CODE code, const char *request);
+void process_TCP_request(int fd, OP_CODE code, string request_so_far);
 
 #endif

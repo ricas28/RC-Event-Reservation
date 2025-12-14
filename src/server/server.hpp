@@ -32,6 +32,8 @@ void destroy_server(int tcp_socket, int udp_socket);
 
 /**
  * Handles a TCP request.
+ * This function already reads the OP_CODE and the UID, if applicable,
+ * from the TCP stream.
  * 
  * @param fd TCP socket.
  * @param client_addr Client address.

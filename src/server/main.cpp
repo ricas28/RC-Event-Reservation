@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <errno.h>
 
+#include "../common/constants.hpp"
 #include "parser.hpp"
 #include "server.hpp"
 #include "operations.hpp"
@@ -50,6 +51,11 @@ void process_commands(int verbose) {
                 perror("Failure executing fork");
                 close(client_fd);
             } else if (pid == 0) {
+                struct timeval tv;
+                tv.tv_sec  = TCP_TIMEOUT;  
+                tv.tv_usec = 0;
+                // set timeout for reading from client.
+                setsockopt(client_fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv));
                 // Child: Handle TCP request
                 destroy_server(_udp_socket, _tcp_socket); // Child doesn't need the sockets.
                 handle_tcp_request(client_fd, client_addr, verbose);

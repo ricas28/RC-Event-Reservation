@@ -160,28 +160,29 @@ void destroy_server(int tcp_socket, int udp_socket){
 }
 
 int handle_tcp_request(int fd, struct sockaddr_in client_addr, bool verbose){
-    char request_code[BUF_TEMP];
-    string request = tcp_read_message(fd);
-    if(request == "")
+    bool end_line = false;
+    string request_code = tcp_read_word(fd, &end_line);
+    if(request_code == "")
         return -1;
 
-    int n = sscanf(request.c_str(), "%63s", request_code);
-    if(n != 1){
-        cerr << "Failure to parse request code: '" << request_code << "'" << endl;
-        if(write_all(fd, "ERR\n", 4) == -1)
-            cerr << "Failure to write 'ERR' message to client" << endl;
-        return -1;
-    }
-    OP_CODE code = get_tcp_command(request_code);
+    OP_CODE code = get_tcp_command(request_code.c_str());
     if(code == ERR){
         if(write_all(fd, "ERR\n", 4) == -1)
             cerr << "Failure to write 'ERR' message to client" << endl;
         return -1;
     }
-    if(verbose){
-        print_verbose(code, request.c_str(), client_addr);
+    string request_so_far = end_line ? request_code + "\n" : request_code + " ";
+    string uid = "";
+    // Read UID if necessary wether verbose is active or not.
+    if(has_uid(code)){
+        uid = tcp_read_word(fd);
+        request_so_far += uid + " ";
     }
-    process_TCP_request(fd, code, request.c_str());
+    if(verbose){
+        string message = request_code + " " + uid;
+        print_verbose(code, message.c_str(), client_addr);
+    }
+    process_TCP_request(fd, code, request_so_far);
 
     return 0;
 }

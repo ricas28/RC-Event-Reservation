@@ -427,7 +427,7 @@ int er_list(CLArgs client){
     return 0;      
 }
 
-string save_event_file(const Event_Info &event) {
+string save_event_file(const Event_show_Info &event) {
     // Absolute or relative path to api.cpp
     string file = __FILE__;
 
@@ -462,7 +462,7 @@ string save_event_file(const Event_Info &event) {
     return path;
 }
 
-void print_event_info(Event_Info &event, const string &filepath) {
+void print_event_info(Event_show_Info &event, const string &filepath) {
 
     cout << "Event: " << event.name << endl;
     cout << "Date and Time: ";
@@ -519,7 +519,7 @@ int er_show(CLArgs client, string &eid){
         return -1;
     }
 
-    Event_Info event = {};
+    Event_show_Info event = {};
     if(status == "OK" && !parse_show_response(fd, event)){
         cerr << "Bad message received from server!" << endl;
         close(fd);

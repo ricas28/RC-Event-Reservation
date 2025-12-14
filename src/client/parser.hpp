@@ -263,7 +263,7 @@ bool parse_show(char *args, string &eid);
  * 
  * @returns true if parse is successful, false otherwise.
  */
-bool parse_show_response(int fd, Event_Info &event);
+bool parse_show_response(int fd, Event_show_Info &event);
 
 /**
  * Parses a 'reserve' command.

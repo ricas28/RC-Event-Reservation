@@ -8,6 +8,7 @@
 #define UDP_RETRIES 3  
 #define UDP_BUFFER_SIZE 4096 // 4 KiB (safe size, if exceeded, TCP would be prefered)
 
+#define TCP_TIMEOUT 10 // 10 seconds
 #define TCP_READING_SIZE 1024
 
 #define UID_SIZE 7         //  6 + 1 for '\0'

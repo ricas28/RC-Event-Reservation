@@ -12,6 +12,7 @@
 #include <sstream>
 
 #include "../common/protocol.hpp"
+#include "../common/io.hpp"
 #include "../common/constants.hpp"
 #include "command_handler.hpp"
 #include "parser.hpp"
@@ -183,7 +184,7 @@ void handle_myreservations(UDPSender sender, const char *request){
         return;
     }
     
-    vector<Reservation> reservations ;
+    vector<Reservation> reservations;
     string message;
     switch(myreservations(uid, password, reservations)){
         case MyReservationsResult::SUCCESS:
@@ -205,39 +206,68 @@ void handle_myreservations(UDPSender sender, const char *request){
     }   
 }
 
-void handle_create(int fd, const char *request){
+void handle_create(int fd, string request_so_far){
     (void)fd;
-    (void)request;
-    cout << "CREATE" << endl;
+    (void)request_so_far;
+    /**
+    Event_creation_Info event;
+
+    if(!parse_create_request(fd, request_so_far.c_str(), event)){
+        string message = op_to_str(OP_MYRESERVATIONS_RESP) + " ERR\n";
+        write_all(fd, message.c_str(), message.size());
+        return;
+    }
+    
+    vector<Reservation> reservations;
+    string message;
+    switch(myreservations(uid, password, reservations)){
+        case MyReservationsResult::SUCCESS:
+            message = op_to_str(OP_MYRESERVATIONS_RESP) + " OK " + reservations_to_string(reservations) + "\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case MyReservationsResult::WRONG_PASS:
+            message = op_to_str(OP_MYRESERVATIONS_RESP) + " WRP\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case MyReservationsResult::NOT_LOGGED_IN:
+            message = op_to_str(OP_MYRESERVATIONS_RESP) + " NLG\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case MyReservationsResult::NO_RESERVATIONS_MADE:
+            message = op_to_str(OP_MYRESERVATIONS_RESP) + " NOK\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+    }  
+    */ 
 }
 
-void handle_close(int fd, const char *request){
+void handle_close(int fd, string request_so_far){
     (void)fd;
-    (void)request;
+    (void)request_so_far;
     cout << "CLOSE" << endl;
 }
 
-void handle_list(int fd, const char *request){
+void handle_list(int fd, string request_so_far){
     (void)fd;
-    (void)request;
+    (void)request_so_far;
     cout << "LIST" << endl;
 }
 
-void handle_show(int fd, const char *request){
+void handle_show(int fd, string request_so_far){
     (void)fd;
-    (void)request;
+    (void)request_so_far;
     cout << "SHOW" << endl;
 }
 
-void handle_reserve(int fd, const char *request){
+void handle_reserve(int fd, string request_so_far){
     (void)fd;
-    (void)request;
+    (void)request_so_far;
     cout << "RESERVE" << endl;
 }
 
-void handle_changePass(int fd, const char *request){
+void handle_changePass(int fd, string request_so_far){
     (void)fd;
-    (void)request;
+    (void)request_so_far;
     cout << "CHANGE" << endl;
 }
 
@@ -255,18 +285,18 @@ void process_UDP_request(UDPSender sender, OP_CODE code, const char *request){
     else cerr << "[HANDLER] Invalid OP_CODE passed through TCP";       
 }
 
-void process_TCP_request(int fd, OP_CODE code, const char *request){
+void process_TCP_request(int fd, OP_CODE code, string request_so_far){
     if(code == OP_CREATE) 
-        handle_create(fd, request);
+        handle_create(fd, request_so_far);
     else if(code == OP_CLOSE) 
-        handle_close(fd, request);
+        handle_close(fd, request_so_far);
     else if(code == OP_LIST) 
-        handle_list(fd, request);
+        handle_list(fd, request_so_far);
     else if(code == OP_SHOW) 
-        handle_show(fd, request);
+        handle_show(fd, request_so_far);
     else if(code == OP_RESERVE) 
-        handle_reserve(fd, request);
+        handle_reserve(fd, request_so_far);
     else if(code == OP_CHANGE_PASS) 
-        handle_changePass(fd, request);
+        handle_changePass(fd, request_so_far);
     else cerr << "[HANDLER] Invalid OP_CODE passed through TCP";    
 }

@@ -149,3 +149,10 @@ bool parse_myreservations_request(const char *request, string &uid, string &pass
     password = password_temp;
     return true;
 }
+
+bool parse_create_request(int fd, const char *request_so_far, Event_creation_Info &event){
+    (void)fd;
+    (void)request_so_far;
+    (void)event;
+    return true;
+}
