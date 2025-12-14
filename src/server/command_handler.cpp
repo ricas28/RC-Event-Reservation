@@ -12,6 +12,7 @@
 #include <sstream>
 
 #include "../common/protocol.hpp"
+#include "../common/constants.hpp"
 #include "command_handler.hpp"
 #include "parser.hpp"
 #include "operations.hpp"
@@ -116,8 +117,8 @@ void handle_unregister(UDPSender sender, const char *request){
     }   
 }
 
-string events_to_string(const vector<std::pair<std::string,int>> &events) {
-    std::ostringstream oss;
+string events_to_string(const vector<pair<string,int>> &events) {
+    ostringstream oss;
     bool first = true;
 
     for (const auto &e : events) {
@@ -160,10 +161,49 @@ void handle_myevents(UDPSender sender, const char *request){
     }   
 }
 
+string reservations_to_string(vector<Reservation> reservations){
+    ostringstream oss;
+    bool first = true;
+
+    for (auto &r : reservations) {
+        if (!first) oss << " ";
+        oss << r.eid << " " << r.datetime.toString(true) << " " << r.value; 
+        first = false;
+    }
+
+    return oss.str();
+}
+
 void handle_myreservations(UDPSender sender, const char *request){
-    (void)sender;
-    (void)request;
-    cout << "MYR" << endl;
+    string uid, password;
+
+    if(!parse_myreservations_request(request, uid, password)){
+        string message = op_to_str(OP_MYRESERVATIONS_RESP) + " ERR\n";
+        send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+        return;
+    }
+    
+    vector<Reservation> reservations ;
+    string message;
+    switch(myreservations(uid, password, reservations)){
+        case MyReservationsResult::SUCCESS:
+            message = op_to_str(OP_MYRESERVATIONS_RESP) + " OK " + reservations_to_string(reservations) + "\n";
+            cout << message << endl;
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case MyReservationsResult::WRONG_PASS:
+            message = op_to_str(OP_MYRESERVATIONS_RESP) + " WRP\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case MyReservationsResult::NOT_LOGGED_IN:
+            message = op_to_str(OP_MYRESERVATIONS_RESP) + " NLG\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case MyReservationsResult::NO_RESERVATIONS_MADE:
+            message = op_to_str(OP_MYRESERVATIONS_RESP) + " NOK\n";
+            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+    }   
 }
 
 void handle_create(int fd, const char *request){

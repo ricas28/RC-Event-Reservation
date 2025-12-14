@@ -3,6 +3,7 @@
 
 #include "Database.hpp"
 #include "resultCode.hpp"
+#include "../common/protocol.hpp"
 
 using namespace std;
 
@@ -86,5 +87,21 @@ MyEventsResult myevents(string &uid, string &password, vector<pair<string, int>>
     if(events.empty())
         return MyEventsResult::NO_EVENTS_CREATED;
     return MyEventsResult::SUCCESS;
+}
+
+MyReservationsResult myreservations(string &uid, string &password, vector<Reservation> &reservations){
+    // Check if user is logged in.
+    if(!db->user_logged_in(uid))
+        return MyReservationsResult::NOT_LOGGED_IN;
+
+    // Check if password is correct.
+    if(!db->check_password(uid, password))
+        return MyReservationsResult::WRONG_PASS;
+
+    // Get user reservations.
+    db->get_user_reservations(uid, reservations); 
+    if(reservations.empty())
+        return MyReservationsResult::NO_RESERVATIONS_MADE;
+    return MyReservationsResult::SUCCESS;
 }
 

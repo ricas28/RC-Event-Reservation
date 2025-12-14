@@ -4,6 +4,7 @@
 #include <iostream>
  
 #include "../common/DateTime.hpp"
+#include "../common/protocol.hpp"
 
 using namespace std;
 
@@ -16,7 +17,7 @@ struct StartFileData{
 };
 
 /**
- * Initializes the parameters for a SVArgs struct.
+ * Initializes the parameters for the server.
  * 
  * @param port Where the server is running.
  * @param tcp_socket Int that will contain a TCP socket.
@@ -57,5 +58,14 @@ int handle_udp_request(int udp_fd, bool verbose= false);
  * @returns StartFileData on success, struct with invalid values on failure.
  */
 StartFileData extract_start_file_data(const string &filepath);
+
+/**
+ * Extracts information of a reservation file
+ * 
+ * @param filepath Filepath of the reservation file.
+ * 
+ * @returns Reservation struct on success, struct in invalid values on failure.
+ */
+Reservation extract_reservation_file_data(const string &filepath);
 
 #endif

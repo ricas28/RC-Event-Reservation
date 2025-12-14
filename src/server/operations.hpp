@@ -57,4 +57,15 @@ UnregisterResult unregister(string &uid, string &password);
  */
 MyEventsResult myevents(string &uid, string &password, vector<pair<string, int>> &events);
 
+/**
+ * Executes a 'myreservations' command.
+ * 
+ * @param uid UID received on the request.
+ * @param password Password received on the request.
+ * @param reservations Vector that will contain the 50 most recent reservations
+ *  made by the user.
+ * 
+ * @return MyReservatiionsResult enum.
+ */
+MyReservationsResult myreservations(string &uid, string &password, vector<Reservation> &reservations);
 #endif

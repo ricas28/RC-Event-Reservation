@@ -211,10 +211,16 @@ int er_myevents(CLArgs client){
 void print_myreservations_list(vector<Reservation> reservations_list){
     cout << LINE_SEPARATOR << endl;
     for(auto reservation: reservations_list){
-        cout << "Event id: " << reservation.eid << endl;
-        cout << "Reservation date and time: ";
-        reservation.datetime.print(true);
-        cout << "Places reserved: " << reservation.value << endl;
+        // Error on server.
+        if(reservation.value == -1){
+            cout << "Unknown reservation or corrupted file" << endl;
+        }
+        else{
+            cout << "Event id: " << reservation.eid << endl;
+            cout << "Reservation date and time: ";
+            reservation.datetime.print(true);
+            cout << "Places reserved: " << reservation.value << endl;
+        }
         cout << LINE_SEPARATOR << endl;
     }
 }
@@ -249,7 +255,8 @@ int er_myreservations(CLArgs client){
 
     // Print message according to the status value
     if(status == "OK") print_myreservations_list(reservations_list);
-    else if(status == "NOK") cout << "user has not made any reservations" << endl;
+    else if(status == "NOK") cout << "User has not made any reservations"
+                            << "or all reservation files are corrupted." << endl;
     else if(status == "NLG") cerr << "[API] user not logged in" << endl;
     else if(status == "WRP") cerr << "[API] wrong password sent on the request" << endl;
     else if(status == "ERR") 

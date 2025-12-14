@@ -31,4 +31,11 @@ enum class MyEventsResult{
     WRONG_PASS,
 };
 
+enum class MyReservationsResult{
+    SUCCESS,
+    NO_RESERVATIONS_MADE,
+    NOT_LOGGED_IN,
+    WRONG_PASS
+};
+
 #endif

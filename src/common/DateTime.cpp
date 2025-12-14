@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <ctime>
+#include <iomanip>
 
 #include "DateTime.hpp"
 
@@ -44,10 +45,9 @@ DateTime::DateTime(int d, int m, int y, int h, int min, int sec) {
         minute = min;
         second = sec;
     } else {
-        day = month = year = hour = minute = second = -1;
+        day = month = year = hour = minute = second = 0;
     }
 }
-
 
 // --- Getters ---
 
@@ -122,32 +122,21 @@ void DateTime::nextSecond() {
 }
 
 void DateTime::print(bool showSeconds){
-    cout << (day < 10 ? "0" : "") << day << "-"
-         << (month < 10 ? "0" : "") << month << "-"
-         << year << " "
-         << (hour < 10 ? "0" : "") << hour << ":"
-         << (minute < 10 ? "0" : "") << minute;
-
-    if (showSeconds) {
-        cout << ":" << (second < 10 ? "0" : "") << second;
-    }
-
-    cout << endl;
+    cout << toString(showSeconds) << endl;
 }
 
 string DateTime::toString(bool showSeconds){
-    string s;
-    s += (day < 10 ? "0" : "") + to_string(day) + "-";
-    s += (month < 10 ? "0" : "") + to_string(month) + "-";
-    s += to_string(year) + " ";
-    s += (hour < 10 ? "0" : "") + to_string(hour) + ":";
-    s += (minute < 10 ? "0" : "") + to_string(minute);
-
-    if (showSeconds) {
-        s += ":" + string(second < 10 ? "0" : "") + to_string(second);
-    }
-
-    return s;
+    ostringstream oss;
+    oss << setfill('0')
+        << setw(2) << day << "-"
+        << setw(2) << month << "-"
+        << setw(4) << year << " "
+        << setw(2) << hour << ":"
+        << setw(2) << minute;
+    
+    if(showSeconds)
+       oss << ":" << setw(2) << second;
+    return oss.str();
 }
 
 bool DateTime::fromStrings(const string &date, const string &time, DateTime &out){

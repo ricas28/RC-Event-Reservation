@@ -17,9 +17,9 @@ private:
     bool isValidTime(int h, int min, int sec);
 
 public:
-    DateTime(int d = 1, int m = 1, int y = 2000,
+    DateTime(int d = 0, int m = 0, int y = 0,
              int h = 0, int min = 0, int sec = 0);
-
+             
     int getDay();
     int getMonth();
     int getYear();

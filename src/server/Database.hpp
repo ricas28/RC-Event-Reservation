@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "../common/DateTime.hpp"
+#include "../common/protocol.hpp"
 
 using namespace std;
 
@@ -90,6 +91,8 @@ public:
     bool close_event(const std::string &eid, DateTime &dt);
     // Get user events.
     void get_user_events(const string &uid,  vector<pair<string, int>> &events);
+    // Get user reservations.
+    void get_user_reservations(const string &uid, vector<Reservation> &reservations);
 };
 
 

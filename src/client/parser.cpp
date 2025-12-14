@@ -445,6 +445,12 @@ bool parse_reservations_list(char *response, vector<Reservation> &reservations){
     int value;
 
     while (iss >> eid >> datepart >> timepart >> value){
+        // Check for corrupted reservation from server.
+        if(eid == "-1" && datepart == "00-00-0000" && timepart == "00:00:00" && value == -1){
+            reservations.push_back({eid, DateTime(), value});
+            continue;
+        }
+        
         // Validate EID
         if (!is_valid_eid((char *)eid.c_str())) {
             cerr << "Invalid EID in server response: " << eid << endl;

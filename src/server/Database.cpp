@@ -5,6 +5,7 @@
 #include <fcntl.h>           
 #include <unistd.h>
 #include <vector>
+#include <algorithm>
 
 #include "../common/util.hpp"
 #include "../common/DateTime.hpp"
@@ -232,6 +233,8 @@ void Database::get_user_events(const string &uid,  vector<pair<string, int>> &ev
 
     // Iterate through files on the CREATED dir.
     for (const auto& entry : fs::directory_iterator(user_events_path)) {
+        if (!entry.is_regular_file())
+            continue;
         // Extract the eid of the event for each file.
         string eid = entry.path().stem().string();
 
@@ -269,5 +272,24 @@ void Database::get_user_events(const string &uid,  vector<pair<string, int>> &ev
         }
         int event_status = (reserved >= data.event_attend) ? EVENT_SOLD_OUT : EVENT_ACCEPTING;
         events.push_back({eid, event_status});
+    }
+}
+
+void Database::get_user_reservations(const string &uid, vector<Reservation> &reservations){
+    string reservations_path = user_reserved_dir(uid);
+
+    vector<string> files;
+    for (const auto &entry : fs::directory_iterator(reservations_path)) {
+        if (!entry.is_regular_file())
+            continue;
+        files.push_back(entry.path().string());
+    }
+
+    // Sort by name.
+    sort(files.begin(), files.end(), greater<string>());
+
+    for (size_t i = 0; i < 50 && i < files.size(); i++) {
+        Reservation r = extract_reservation_file_data(files[i]);
+        reservations.push_back(r);
     }
 }

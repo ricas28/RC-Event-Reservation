@@ -241,7 +241,8 @@ bool validateStartFileData(string filepath,
         return false;
     }
     if(!DateTime::fromStrings(start_date, start_time, dt)){
-        // fromStrings already prints error messages.
+        cerr << "Invalid date or time on file '" << filepath << "': " 
+                                    << start_date << " " << start_time << endl;
         return false;
     }
     return true;
@@ -277,4 +278,38 @@ StartFileData extract_start_file_data(const std::string &filepath){
     }
 
     return {atoi(uid.c_str()), event_name, desc_fname, event_attend, dt};
+}
+
+Reservation extract_reservation_file_data(const string &filepath){
+    ifstream file(filepath);
+    if (!file.is_open()) {
+        cerr << "Cannot open file: " << filepath << endl;
+        return {"-1",  DateTime(), -1};
+    }
+
+    string eid, date_str, time_str, num_seats_str;
+    int num_seats;
+
+    if (!(file >> eid >> num_seats_str >> date_str >> time_str)) {
+        cerr << "Invalid format on file: " << filepath << endl;
+        return {"-1",  DateTime(), -1};
+    }
+
+    if(!is_valid_eid((char *)eid.c_str())){
+        cerr << "Invalid EID on file '" << filepath  << "': "<< eid << endl;
+        return {"-1",  DateTime(), -1};
+    }
+    DateTime dt;
+    if (!DateTime::fromStrings(date_str, time_str, dt)) {
+        cerr << "Invalid date or time on file: '" << filepath << "': " << 
+                                                date_str << " " << time_str << endl;
+        return {"-1",  DateTime(), -1};
+    }
+    if(!is_valid_seats((char *)num_seats_str.c_str(), &num_seats)){
+        cerr << "Invalid number of reserved seats on file '" << filepath << 
+                                                    "': " << num_seats_str << endl;
+        return {"-1",  DateTime(), -1};
+    }
+
+    return { eid, dt, num_seats};
 }
