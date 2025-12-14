@@ -188,7 +188,6 @@ void handle_myreservations(UDPSender sender, const char *request){
     switch(myreservations(uid, password, reservations)){
         case MyReservationsResult::SUCCESS:
             message = op_to_str(OP_MYRESERVATIONS_RESP) + " OK " + reservations_to_string(reservations) + "\n";
-            cout << message << endl;
             send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
             return;
         case MyReservationsResult::WRONG_PASS:
