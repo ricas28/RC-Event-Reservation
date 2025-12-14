@@ -5,6 +5,7 @@
 #include "../common/constants.hpp"
 #include "../common/protocol.hpp"
 #include "../common/util.hpp"
+#include "../common/io.hpp"
 
 using namespace std;
 
@@ -150,9 +151,57 @@ bool parse_myreservations_request(const char *request, string &uid, string &pass
     return true;
 }
 
-bool parse_create_request(int fd, const char *request_so_far, Event_creation_Info &event){
-    (void)fd;
-    (void)request_so_far;
-    (void)event;
+bool parse_create_request(int fd, const char *request_so_far, 
+                            string &uid, string &password, Event_creation_Info &event){
+    // On handling of TCP request we already read OP_CODE and UID
+    char code[BUF_TEMP], uid_temp[BUF_TEMP], extra[BUFFER_SIZE];
+    bool end_line = false;
+
+    // Validate OP_CODE and UID.
+    int n = sscanf(request_so_far, "%63s %63s %255s", code, uid_temp, extra);
+    if(n != 2 || str_to_op(code) != OP_CREATE || !is_valid_userid(uid_temp)){
+        return false;
+    }
+
+    // Read values one by one and validate.
+    string password_temp = tcp_read_word(fd, &end_line);
+    if(!is_valid_password((char *)password_temp.c_str())) return false;
+    
+    string name = tcp_read_word(fd, &end_line);
+    if(!is_valid_event_name((char *)name.c_str())) return false;
+
+    string date = tcp_read_word(fd, &end_line);
+    if(date == "") return false;
+    string time = tcp_read_word(fd, &end_line);
+    if(time == "") return false;
+    DateTime dt;
+    if(!DateTime::fromStrings(date, time, dt)) return false;
+
+    string attendace_size_str = tcp_read_word(fd, &end_line);
+    int attendace_size;
+    bool valid = is_positive_integer(attendace_size_str.c_str(), &attendace_size);
+    if(!valid || (valid && !is_valid_num_attendees(attendace_size))) return false;
+
+    string Fname = tcp_read_word(fd, &end_line);
+    if(!is_valid_file_name((char *)Fname.c_str())) return false;
+
+    string Fsize_str = tcp_read_word(fd);
+    int Fsize;
+    valid = is_nonnegative_integer(Fsize_str.c_str(), &Fsize);
+    if(!valid || (valid && Fsize >= MAX_FILE_SIZE)) return false;
+
+    // Read file.
+    string Fdata;
+    Fdata.resize((size_t)Fsize);
+    ssize_t size = read_all(fd, &Fdata[0], (size_t)Fsize);
+    if(size != Fsize) return false;
+
+    char c;
+    if(read_all(fd, &c, 1) <= 0) return false;
+    if(c != '\n') return false;
+
+    uid = uid_temp;
+    password = password_temp;
+    event = {name, dt, attendace_size, Fname, (size_t)Fsize, Fdata};
     return true;
 }

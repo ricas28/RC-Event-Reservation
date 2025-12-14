@@ -3,6 +3,10 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <iostream>
+#include <string>
+
+using namespace std;
 
 /**
  * Checks if the content of a string represents a valid user id.
@@ -165,6 +169,9 @@ void extract_ip_port_in(const struct sockaddr_in *addr,
  * 
  * @return true if creation is successful, false otherwise.
 */ 
-bool safe_create_dir(const std::string &path);
+bool safe_create_dir(const string &path);
+
+/** Receives an integer representation of an EID and returns its string format.*/
+string format_eid(int eid);
 
 #endif

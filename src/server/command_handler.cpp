@@ -207,38 +207,37 @@ void handle_myreservations(UDPSender sender, const char *request){
 }
 
 void handle_create(int fd, string request_so_far){
-    (void)fd;
-    (void)request_so_far;
-    /**
+    string uid, password;
     Event_creation_Info event;
 
-    if(!parse_create_request(fd, request_so_far.c_str(), event)){
-        string message = op_to_str(OP_MYRESERVATIONS_RESP) + " ERR\n";
+    if(!parse_create_request(fd, request_so_far.c_str(), uid, password, event)){
+        string message = op_to_str(OP_CREATE_RESP) + " ERR\n";
         write_all(fd, message.c_str(), message.size());
         return;
     }
     
-    vector<Reservation> reservations;
-    string message;
-    switch(myreservations(uid, password, reservations)){
-        case MyReservationsResult::SUCCESS:
-            message = op_to_str(OP_MYRESERVATIONS_RESP) + " OK " + reservations_to_string(reservations) + "\n";
-            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+    string message, eid;
+    switch(create(uid, password, event, eid)){
+        case CreateResult::SUCCESS:
+            message = op_to_str(OP_CREATE_RESP) + " OK " + eid + "\n";
+            write_all(fd, message.c_str(), message.size());
             return;
-        case MyReservationsResult::WRONG_PASS:
-            message = op_to_str(OP_MYRESERVATIONS_RESP) + " WRP\n";
-            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+        case CreateResult::WRONG_PASS:
+            message = op_to_str(OP_CREATE_RESP) + " WRP\n";
+            write_all(fd, message.c_str(), message.size());
             return;
-        case MyReservationsResult::NOT_LOGGED_IN:
-            message = op_to_str(OP_MYRESERVATIONS_RESP) + " NLG\n";
-            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+        case CreateResult::NOT_LOGGED_IN:
+            message = op_to_str(OP_CREATE_RESP) + " NLG\n";
+            write_all(fd, message.c_str(), message.size());
             return;
-        case MyReservationsResult::NO_RESERVATIONS_MADE:
-            message = op_to_str(OP_MYRESERVATIONS_RESP) + " NOK\n";
-            send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+        case CreateResult::FAILED_CREATE:
+            message = op_to_str(OP_CREATE_RESP) + " NOK\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case CreateResult::IO_ERROR:
+            write_all(fd, "NOK\n", 4);
             return;
     }  
-    */ 
 }
 
 void handle_close(int fd, string request_so_far){

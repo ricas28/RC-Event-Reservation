@@ -93,4 +93,15 @@ bool parse_myevents_request(const char *request, string &uid, string &password);
  */
 bool parse_myreservations_request(const char *request, string &uid, string &password);
 
+/**
+ * Parses a request to the 'create' command.
+ * 
+ * @param request_so_far What has already been read from the TCP stream.
+ * @param uid String that will contain the UID sent on the request.
+ * @param password String that will contain the password sent on the request.
+ * @param event Struct that will contain data for event creation.
+ */
+bool parse_create_request(int fd, const char *request_so_far, 
+                            string &uid, string &password, Event_creation_Info &event);
+
 #endif

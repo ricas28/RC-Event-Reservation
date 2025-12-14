@@ -68,4 +68,16 @@ MyEventsResult myevents(string &uid, string &password, vector<pair<string, int>>
  * @return MyReservatiionsResult enum.
  */
 MyReservationsResult myreservations(string &uid, string &password, vector<Reservation> &reservations);
+
+/**
+ * Executes a 'create' command.
+ * 
+ * @param uid UID received on the request.
+ * @param password Password received on the request.
+ * @param event Struct with info for creating event.
+ * @param eid EID of the new created event.
+ * 
+ * @return CreateResult enum.
+ */
+CreateResult create(string &uid, string &password, Event_creation_Info &event, string &eid);
 #endif

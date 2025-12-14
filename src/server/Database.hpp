@@ -33,8 +33,11 @@ private:
     string user_login_file(const string& uid) const;
     // USERS/<uid>/CREATED/
     string user_created_dir(const string& uid) const;
+    // USERS/<uid>/CREATED/<eid>.txt
+    string user_created_file(const string &uid, const string &eid) const;
     // USERS/<uid>/RESERVED/
     string user_reserved_dir(const string& uid) const;
+
     // EVENTS/<eid>/
     string event_dir(const string& eid) const;
     // EVENTS/<eid>/START_(eid).txt
@@ -55,12 +58,29 @@ private:
     // ---------- UTILITIES ----------
     bool ensure_user_dirs(const std::string& uid);
     bool ensure_event_dirs(const std::string& eid);
+    // Returns the current eid.
+    int read_eid();
+    // Increments the current eid.
+    bool increment_eid();
+    // Creates a simple file with no text inside.
+    bool create_file(const string &path);
+    // Deletes a file from the db.
+    bool delete_file(const string &path);
+    // Writes the content file of the start file.
+    bool write_start_file(const string &start_path, const string &uid, Event_creation_Info &event);
+    // Writes number of reservations made to the RES file.
+    bool write_res_file(const string &end_path, int reservations);
+    // Writes content to description file.
+    bool write_description_file(const string &description_path, string &Fdata);
 
 public:
     // Get the only instance
     static Database& instance();
 
     bool is_ok();
+
+    // ------ GETTERS -------
+    size_t get_events_created();
 
     // ------ HELPERS -------
 
@@ -93,6 +113,13 @@ public:
     void get_user_events(const string &uid,  vector<pair<string, int>> &events);
     // Get user reservations.
     void get_user_reservations(const string &uid, vector<Reservation> &reservations);
+    /**
+     * Creates an event.
+     * 
+     * If the event can't be created due to max events reached (999), function
+     * returns true and sets 'eid' to '-1'.
+     */
+    bool create_event(const string &uid, Event_creation_Info &event, string &eid);
 };
 
 

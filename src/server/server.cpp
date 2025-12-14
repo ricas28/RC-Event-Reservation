@@ -172,10 +172,11 @@ int handle_tcp_request(int fd, struct sockaddr_in client_addr, bool verbose){
         return -1;
     }
     string request_so_far = end_line ? request_code + "\n" : request_code + " ";
-    string uid = "";
+    string uid;
     // Read UID if necessary wether verbose is active or not.
     if(has_uid(code)){
-        uid = tcp_read_word(fd);
+        // Force uid with invalid value for bad message.
+        uid = end_line ? "" : tcp_read_word(fd);
         request_so_far += uid + " ";
     }
     if(verbose){

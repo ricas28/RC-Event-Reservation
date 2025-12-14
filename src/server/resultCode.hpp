@@ -38,4 +38,12 @@ enum class MyReservationsResult{
     WRONG_PASS
 };
 
+enum class CreateResult{
+    SUCCESS,
+    FAILED_CREATE,
+    NOT_LOGGED_IN,
+    WRONG_PASS,
+    IO_ERROR
+};
+
 #endif

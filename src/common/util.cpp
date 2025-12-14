@@ -32,7 +32,7 @@ bool is_valid_password(char *s){
 
 bool is_valid_event_name(char *s){
     size_t size = strlen(s);
-    if (size > EVENT_NAME_SIZE - 1) return false;
+    if (size == 0 || size > EVENT_NAME_SIZE - 1) return false;
     for(size_t i = 0; i < size - 1; i++)
         if (!isalnum(s[i])) return false;
     return true;
@@ -40,7 +40,7 @@ bool is_valid_event_name(char *s){
 
 bool is_valid_file_name(char *s){
     size_t size = strlen(s);
-    if (size > FILE_NAME_SIZE - 1) return false;
+    if (size == 0 || size > FILE_NAME_SIZE - 1) return false;
     for(size_t i = 0; i < size - 1; i++)
         if (!isalnum(s[i]) && s[i] != '.' && s[i] != '-' && s[i] != '_')
             return false;
@@ -165,4 +165,10 @@ bool safe_create_dir(const std::string &path){
              << " — " << e.what() << endl;
         return false;
     }
+}
+
+string format_eid(int eid){
+    ostringstream oss;
+    oss << setw(3) << setfill('0') << eid;
+    return oss.str();
 }

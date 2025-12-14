@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <vector>
 #include <algorithm>
+#include <cstring>   
+#include <cerrno>
 
 #include "../common/util.hpp"
 #include "../common/DateTime.hpp"
@@ -20,6 +22,7 @@ namespace fs = std::filesystem;
 #define DATABASE_FOLDER "ES_DB"
 #define USERS_FOLDER "USERS"
 #define EVENTS_FOLDER "EVENTS"
+#define EID_COUNTER "eid_counter.txt"
 
 Database::Database(): ok(true) {
     base_path   = "./" + string(DATABASE_FOLDER) + "/";
@@ -28,6 +31,19 @@ Database::Database(): ok(true) {
 
     if(!safe_create_dir(users_path) || !safe_create_dir(events_path))
         ok = false;
+
+    string counter_file = base_path + EID_COUNTER;
+    ifstream infile(counter_file);
+    if (!infile.is_open()) {
+        // File does not exist → create it with 0
+        ofstream outfile(counter_file);
+        if (!outfile.is_open()) {
+            cerr << "Failed to create counter file: " << counter_file << endl;
+        } else {
+            outfile << 0 << endl;
+            outfile.close();
+        }
+    }
 }
 
 Database& Database::instance() {
@@ -52,6 +68,10 @@ string Database::user_login_file(const string& uid) const {
 
 string Database::user_created_dir(const string& uid) const {
     return user_dir(uid) + "CREATED/";
+}
+
+string Database::user_created_file(const string &uid, const string &eid) const {
+    return user_created_dir(uid) + eid + ".txt";
 }
 
 string Database::user_reserved_dir(const string& uid) const {
@@ -115,6 +135,109 @@ bool Database::ensure_event_dirs(const string& eid) {
     return true;
 }
 
+bool Database::increment_eid(){
+    const string path = base_path + "eid_counter.txt";
+    int eid = read_eid();
+
+    ofstream out(path, ios::trunc);
+    if (!out.is_open()) {
+        cerr << "Failed to open EID counter file for writing" << endl;
+        return false;
+    }
+    out << eid + 1;
+    out.close();
+    return true;
+}
+
+int Database::read_eid(){
+    const string path = base_path + "/eid_counter.txt";
+    int eid = 0;
+
+    ifstream in(path);
+    if (in.is_open()) {
+        in >> eid;
+        in.close();
+    }
+    return eid;
+}
+
+bool Database::create_file(const string &path){
+    ofstream out(path);
+    if (!out.is_open())
+        return false;
+    out.close();
+    return true;
+}
+
+bool Database::delete_file(const string &path){
+    if (unlink(path.c_str()) == -1) {
+        if (errno != ENOENT) {     // ENOENT = file does not exist → OK
+            fprintf(stderr,
+                "unlink failed for file '%s': %s\n",
+                path.c_str(),
+                strerror(errno));
+            return false;
+        }
+    }
+    return true;
+}
+
+bool Database::write_start_file(const string &start_path, const string &uid, Event_creation_Info &event){
+    ofstream start_fd(start_path);
+    if (!start_fd.is_open()){
+        cerr << "Failure to open START file" << endl;
+        return false;
+    }
+
+    if(!(start_fd << uid << " " 
+            << event.name << " " 
+            << event.Fname << " "
+            << event.attendace_size << " "
+            << event.event_date.toString() << endl)){
+        cerr << "Failure to write to START file" << endl;
+        start_fd.close();
+        delete_file(start_path);
+        return false;
+    }
+    return true;
+}
+
+bool Database::write_res_file(const string &res_path, int reservations){
+    ofstream file(res_path, ios::trunc);
+    if (!file.is_open()) {
+        cerr << "Failure to open RES file for writing: " << res_path << endl;
+        return false;
+    }
+
+    if (!(file << reservations << endl)) {
+        cerr << "Failure to write to RES file: " << res_path << endl;
+        file.close();
+        delete_file(res_path);
+        return false;
+    }
+
+    file.close();
+    return true;
+}
+
+bool Database::write_description_file(const string &description_path, string &Fdata){
+    ofstream file(description_path, ios::trunc);
+    if (!file.is_open()) {
+        cerr << "Failure to open description file for writing: " << description_path << endl;
+        return false;
+    }
+
+    if (!(file << Fdata << endl)) {
+        cerr << "Failure to write to description file: " << description_path << endl;
+        file.close();
+        delete_file(description_path);
+        return false;
+    }
+
+    file.close();
+    return true;
+}
+
 bool Database::user_exists(const string &uid){
     return fs::exists(user_dir(uid));
 }
@@ -133,11 +256,7 @@ bool Database::is_event_closed(const string &eid){
 
 bool Database::login_user(const string &uid){
     const string login_file = user_login_file(uid);
-    ofstream out(login_file);
-    if (!out.is_open())
-        return false;
-    out.close();
-    return true;
+    return create_file(login_file);
 }
 
 bool Database::register_user(const string &uid, const string &password) {
@@ -200,12 +319,16 @@ bool Database::close_event(const std::string &eid, DateTime &dt){
 
     ofstream end_file(end_file_path);
     if (!end_file.is_open()) {
-        std::cerr << "Failed to create END file for event " << eid << endl;
+        cerr << "Failed to create END file for event " << eid << endl;
         return false;
     }
 
     // Write close date to file.
-    end_file << dt.toString(true) << endl;
+    if(!(end_file << dt.toString(true) << endl)){
+        cerr << "Failute to write closing date to END file";
+        end_file.close();
+        return false;
+    }
 
     end_file.close();
     return true;
@@ -294,3 +417,50 @@ void Database::get_user_reservations(const string &uid, vector<Reservation> &res
         reservations.push_back(r);
     }
 }
+
+bool Database::create_event(const string &uid, Event_creation_Info &event, string &eid){
+    int events_created = read_eid();
+    if(events_created == MAX_EVENTS){
+        eid = "-1";
+        return false;
+    }
+
+    eid = format_eid(events_created + 1);
+    if(!ensure_event_dirs(eid))
+        return false;
+    string event_file = user_created_file(uid, eid);
+    if(!create_file(event_file)){
+        cerr << "Failure to open file on CREATED dir" << endl;
+        return false;
+    } 
+
+    string start_path = event_start_file(eid);
+    string res_path = event_res_file(eid);
+    string description_path = event_desc_file(eid, event.Fname);
+
+    if(!write_start_file(start_path, uid, event)){
+        delete_file(event_file);
+        return false;
+    }
+
+    if(!write_res_file(res_path, 0)){
+        delete_file(event_file);
+        delete_file(start_path);
+        return false;
+    }
+
+    if(!write_description_file(description_path, event.Fdata)){
+        delete_file(event_file);
+        delete_file(start_path);
+        delete_file(res_path);
+        return false;
+    }
+    // Increase EID counter.
+    if(!increment_eid()){
+        delete_file(event_file);
+        delete_file(start_path);
+        delete_file(res_path);
+        return false;
+    }
+    return true;
+ }

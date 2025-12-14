@@ -114,6 +114,11 @@ int client_connect_tcp(CLArgs &client){
         return -1;
     }
 
+    struct timeval tv;
+    tv.tv_sec  = TCP_TIMEOUT;   
+    tv.tv_usec = 0;
+    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv));
+
     // Connect to server.
     int n = connect(fd, client.tcp_addr->ai_addr, client.tcp_addr->ai_addrlen);
     if (n == -1) {
