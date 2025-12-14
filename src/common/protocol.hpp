@@ -39,7 +39,8 @@ typedef enum {
     OP_MYRESERVATIONS,
     OP_MYRESERVATIONS_RESP,
     OP_INVALID,
-    ERR
+    ERR,
+    INTERNAL_ERROR,
 } OP_CODE;
 
 // Used for 'list' command.

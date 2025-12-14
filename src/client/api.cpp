@@ -35,6 +35,11 @@ int er_login(CLArgs *client, int uid, string pass){
         free(response);
         return -1;
     }
+    if(code == INTERNAL_ERROR){
+        cerr << "Internal error occured on the server" << endl;
+        free(response);
+        return -1;
+    }
     if(code != OP_LOGIN_RESP || !parse_login_response(response, status)){
         cerr << "Bad message received from server!" << endl;
         free(response);
@@ -86,6 +91,11 @@ int er_logout(CLArgs *client){
         free(response);
         return -1;
     }
+    if(code == INTERNAL_ERROR){
+        cerr << "Internal error occured on the server" << endl;
+        free(response);
+        return -1;
+    }
     if(code != OP_LOGOUT_RESP || !parse_logout_response(response, status)){
         cerr << "Bad message received from server!" << endl;
         free(response);
@@ -128,6 +138,11 @@ int er_unregister(CLArgs *client){
     OP_CODE code = str_to_op(response_code);
     if(code == ERR){
         cerr << "Invalid request message was sent" << endl;
+        free(response);
+        return -1;
+    }
+    if(code == INTERNAL_ERROR){
+        cerr << "Internal error occured on the server" << endl;
         free(response);
         return -1;
     }

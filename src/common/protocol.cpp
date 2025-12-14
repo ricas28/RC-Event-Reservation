@@ -38,6 +38,7 @@ string op_to_str(OP_CODE code){
     if(code == OP_MYRESERVATIONS) return "LMR";
     if(code == OP_MYRESERVATIONS_RESP) return "RMR";
     if(code == ERR) return "ERR";
+    if(code == INTERNAL_ERROR) return "NOK";
     return "INV";
 }
 
@@ -65,6 +66,7 @@ OP_CODE str_to_op(const char *str){
     if(strcmp(str, "LMR") == 0) return OP_MYRESERVATIONS;
     if(strcmp(str, "RMR") == 0) return OP_MYRESERVATIONS_RESP;
     if(strcmp(str, "ERR") == 0) return ERR;
+    if(strcmp(str, "NOK") == 0) return INTERNAL_ERROR;
     return OP_INVALID;
 }
 
