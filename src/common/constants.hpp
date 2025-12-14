@@ -17,7 +17,7 @@
 #define FILE_NAME_SIZE 25  // 24 + 1 for '\0'
 #define MAX_FILE_SIZE 10 * 1000000 // 10 MB
 #define MAX_SEATS 999
-#define MAX_RESERVATIONS 50
+#define MAX_RESERVATIONS_SEND 50
 
 #define BUFFER_SIZE 256
 #define BUF_TEMP 64  

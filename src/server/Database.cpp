@@ -10,6 +10,7 @@
 #include "../common/util.hpp"
 #include "../common/DateTime.hpp"
 #include "../common/protocol.hpp"
+#include "../common/constants.hpp"
 #include "server.hpp"
 #include "Database.hpp"
 
@@ -288,7 +289,7 @@ void Database::get_user_reservations(const string &uid, vector<Reservation> &res
     // Sort by name.
     sort(files.begin(), files.end(), greater<string>());
 
-    for (size_t i = 0; i < 50 && i < files.size(); i++) {
+    for (size_t i = 0; i < MAX_RESERVATIONS_SEND && i < files.size(); i++) {
         Reservation r = extract_reservation_file_data(files[i]);
         reservations.push_back(r);
     }
