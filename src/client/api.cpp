@@ -213,7 +213,7 @@ void print_myreservations_list(vector<Reservation> reservations_list){
     for(auto reservation: reservations_list){
         // Error on server.
         if(reservation.value == -1){
-            cout << "Unknown reservation or corrupted file" << endl;
+            cout << "ERROR fetching reservation" << endl;
         }
         else{
             cout << "Event id: " << reservation.eid << endl;
