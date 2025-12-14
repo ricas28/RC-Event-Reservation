@@ -241,9 +241,37 @@ void handle_create(int fd, string request_so_far){
 }
 
 void handle_close(int fd, string request_so_far){
-    (void)fd;
-    (void)request_so_far;
-    cout << "CLOSE" << endl;
+     string uid, password;
+    Event_creation_Info event;
+
+    if(!parse_create_request(fd, request_so_far.c_str(), uid, password, event)){
+        string message = op_to_str(OP_CREATE_RESP) + " ERR\n";
+        write_all(fd, message.c_str(), message.size());
+        return;
+    }
+    
+    string message, eid;
+    switch(create(uid, password, event, eid)){
+        case CreateResult::SUCCESS:
+            message = op_to_str(OP_CREATE_RESP) + " OK " + eid + "\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case CreateResult::WRONG_PASS:
+            message = op_to_str(OP_CREATE_RESP) + " WRP\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case CreateResult::NOT_LOGGED_IN:
+            message = op_to_str(OP_CREATE_RESP) + " NLG\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case CreateResult::FAILED_CREATE:
+            message = op_to_str(OP_CREATE_RESP) + " NOK\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case CreateResult::IO_ERROR:
+            write_all(fd, "NOK\n", 4);
+            return;
+    }  
 }
 
 void handle_list(int fd, string request_so_far){

@@ -175,7 +175,7 @@ bool parse_create_request(int fd, const char *request_so_far,
     string time = tcp_read_word(fd, &end_line);
     if(time == "") return false;
     DateTime dt;
-    if(!DateTime::fromStrings(date, time, dt)) return false;
+    if(!DateTime::fromStrings(date, time, dt) || dt.isPast()) return false;
 
     string attendace_size_str = tcp_read_word(fd, &end_line);
     int attendace_size;
