@@ -252,14 +252,12 @@ bool Database::write_res_file(const string &res_path, int reservations){
     return true;
 }
 
-bool Database::write_description_file(const string &description_path, const string &Fdata){
+bool Database::write_description_file(int &sock, const string &description_path, const ssize_t Fsize){
     int fd;
     if(!open_and_lock(description_path, O_WRONLY | O_CREAT | O_TRUNC, LOCK_EX, fd))
         return false;
 
-    string content = Fdata;
-
-    if(write_all(fd, content.c_str(), content.size()) != (ssize_t)content.size()){
+    if(stream_file_TCP(sock, fd, (size_t)Fsize) != Fsize){
         perror(("write_all: " + description_path).c_str());
         unlink(description_path.c_str());
         close(fd);
@@ -643,7 +641,7 @@ void Database::get_user_reservations(const string &uid, vector<Reservation> &res
     }
 }
 
-bool Database::create_event(const string &uid, Event_creation_Info &event, string &eid){
+bool Database::create_event(int sock, const string &uid, Event_creation_Info &event, string &eid){
     const string counter_path = base_path + EID_COUNTER;
     int fd;
 
@@ -692,7 +690,7 @@ bool Database::create_event(const string &uid, Event_creation_Info &event, strin
         return false;
     }
 
-    if(!write_description_file(description_path, event.Fdata)){
+    if(!write_description_file(sock, description_path, event.Fsize)){
         delete_file(event_file);
         delete_file(start_path);
         delete_file(res_path);

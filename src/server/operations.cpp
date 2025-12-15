@@ -122,7 +122,7 @@ MyReservationsResult myreservations(string &uid, string &password, vector<Reserv
     return MyReservationsResult::SUCCESS;
 }
 
-CreateResult create(string &uid, string &password, Event_creation_Info &event, string &eid){
+CreateResult create(int &sock, string &uid, string &password, Event_creation_Info &event, string &eid){
     // Check if user is logged in.
     if(!db->user_logged_in(uid)){
         return CreateResult::NOT_LOGGED_IN;
@@ -136,7 +136,7 @@ CreateResult create(string &uid, string &password, Event_creation_Info &event, s
         return CreateResult::WRONG_PASS;
 
     // Create event
-    if(!db->create_event(uid, event, eid)){
+    if(!db->create_event(sock, uid, event, eid)){
         if(eid == "-1") 
             return CreateResult::FAILED_CREATE;
         return CreateResult::IO_ERROR;

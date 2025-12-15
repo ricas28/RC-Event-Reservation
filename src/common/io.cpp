@@ -7,7 +7,8 @@
 #include <sys/file.h>
 #include <cerrno>
 #include <cstring>
-
+#include <sys/stat.h>
+#include <stdbool.h>
 
 using namespace std;
 
@@ -104,50 +105,6 @@ ssize_t write_all(int fd, const void *buf, size_t size){
     return (ssize_t)total_written;
 }
 
-char *read_file_to_buffer(const char *fileName, size_t *out_size) {
-    FILE *f = fopen(fileName, "rb");
-    if (!f) {
-        perror("Failure to open file");
-        return NULL;
-    }
-
-    if (fseek(f, 0, SEEK_END) != 0) {
-        perror("Failure to go to end of file");
-        fclose(f);
-        return NULL;
-    }
-
-    long file_size = ftell(f);
-    if (file_size < 0) {
-        perror("Failure to check size of file");
-        fclose(f);
-        return NULL;
-    }
-
-    rewind(f);
-
-    // Conversion to size_t
-    size_t size = (size_t)file_size;
-    char *buffer = (char*)malloc(size);
-    if (!buffer) {
-        perror("Failure to allocate memory for buffer");
-        fclose(f);
-        return NULL;
-    }
-
-    size_t n = fread(buffer, 1, size, f);
-    fclose(f);
-
-    if (n != size) {
-        cerr << "Whole file wasn't read" << endl;
-        free(buffer);
-        return NULL;
-    }
-
-    *out_size = size;
-    return buffer;
-}
-
 int write_buffer_to_file(const char *filename, const void *buffer, size_t size) {
     FILE *file = fopen(filename, "wb");
     if (!file) {
@@ -166,3 +123,16 @@ int write_buffer_to_file(const char *filename, const void *buffer, size_t size) 
     return 0;  // success.
 }
 
+bool get_file_size(const char *filename, size_t *size){
+    struct stat st;
+
+    if (stat(filename, &st) != 0)
+        return false;
+
+    // GMake sure it's a regular file.
+    if (!S_ISREG(st.st_mode))
+        return false;
+
+    *size = (size_t) st.st_size;
+    return true;
+}

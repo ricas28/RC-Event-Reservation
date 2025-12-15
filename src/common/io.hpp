@@ -54,16 +54,6 @@ ssize_t write_all(int fd, const void *buf, size_t size);
 ssize_t read_all(int fd, void *buf, size_t size);
 
 /**
- * Reads the content of a file to a buffer.
- * 
- * @param fileName Name of the file.
- * @param out_size Pointer to size of the file that was read.
- * 
- * @returns Pointer to buffer with content that was read.
- */
-char *read_file_to_buffer(const char *fileName, size_t *out_size);
-
-/**
  * Writes the content of a buffer to a file.
  * 
  * @param filename Name of the file.
@@ -73,5 +63,15 @@ char *read_file_to_buffer(const char *fileName, size_t *out_size);
  * @returns 0 on success, -1 on failure.
  */
 int write_buffer_to_file(const char *filename, const void *buffer, size_t size);
+
+/**
+ * Gets the size of a file in bytes.
+ * 
+ * @param filename Path of the file
+ * @param size Pointer to file size.
+ * 
+ * @returns true if get is successful, false otherwise.
+ */
+bool get_file_size(const char *filename, size_t *size);
 
 #endif

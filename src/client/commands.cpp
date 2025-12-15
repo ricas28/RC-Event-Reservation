@@ -80,12 +80,11 @@ void handle_create(char *args, CLArgs *client){
 
     string name, event_fname;
     DateTime event_date;
-    size_t Fsize;
-    char *Fdata;
+    ssize_t Fsize;
     int num_attendees;
 
-    if (parse_create(args, &name, &event_fname, &Fsize, &Fdata, &event_date, &num_attendees)){
-        if(er_create(*client, name, event_fname, Fsize, Fdata, event_date, num_attendees) == -1){
+    if (parse_create(args, &name, &event_fname, &Fsize, &event_date, &num_attendees)){
+        if(er_create(*client, name, event_fname, Fsize, event_date, num_attendees) == -1){
             cerr << "Failure to execute 'create' command..." << endl;
         }
     }

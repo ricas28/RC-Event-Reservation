@@ -187,17 +187,11 @@ bool parse_create_request(int fd, const char *request_so_far,
     string Fsize_str = tcp_read_word(fd);
     int Fsize;
     valid = is_nonnegative_integer(Fsize_str.c_str(), &Fsize);
-    if(!valid || (valid && Fsize >= MAX_FILE_SIZE)) return false;
-
-    // Read file.
-    string Fdata;
-    Fdata.resize((size_t)Fsize);
-    ssize_t size = read_all(fd, &Fdata[0], (size_t)Fsize);
-    if(size != Fsize) return false;
+    if(!valid || (valid && Fsize > MAX_FILE_SIZE)) return false;
 
     uid = uid_temp;
     password = password_temp;
-    event = {name, dt, attendace_size, Fname, (size_t)Fsize, Fdata};
+    event = {name, dt, attendace_size, Fname, (ssize_t)Fsize};
     return true;
 }
 

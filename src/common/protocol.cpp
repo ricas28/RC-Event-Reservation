@@ -130,6 +130,30 @@ string tcp_read_word(int fd, bool *end_line){
     return word;
 }
 
+ssize_t stream_file_TCP(int sendingfd, int receivingfd, size_t Fsize){
+    size_t remaining = Fsize;
+    ssize_t total_sent = 0;
+    char buffer[TCP_CHUNK];
+
+    while (remaining > 0) {
+        ssize_t n = read(sendingfd, buffer,
+                         remaining < sizeof(buffer) ? remaining : sizeof(buffer));
+        if (n <= 0) {
+            // erro reading file
+            return -1;
+        }
+        ssize_t sent = write_all(receivingfd, buffer, (size_t)n);
+        if (sent <= 0) {
+            // error writing to socket.
+            return -1;
+        }
+        remaining -= (size_t)n;
+        total_sent += n;
+    }
+    return total_sent;
+}
+
+
 char *receive_udp_message(int socket,  struct sockaddr *addr, socklen_t *addr_len){
     char *buffer = (char *)malloc(UDP_BUFFER_SIZE);
     if (!buffer) return NULL;

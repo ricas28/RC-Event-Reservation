@@ -77,7 +77,7 @@ private:
     // Writes number of reservations made to the RES file.
     bool write_res_file(const string &end_path, int reservations);
     // Writes content to description file.
-    bool write_description_file(const string &description_path, const string &Fdata);
+    bool write_description_file(int &sock, const string &description_path, const ssize_t Fsize);
 
 public:
     // Get the only instance
@@ -141,7 +141,7 @@ public:
      * If the event can't be created due to max events reached (999), function
      * returns true and sets 'eid' to '-1'.
      */
-    bool create_event(const string &uid, Event_creation_Info &event, string &eid);
+    bool create_event(int sock, const string &uid, Event_creation_Info &event, string &eid);
     // Returns all of the events on the server.
     bool get_all_events(vector<Event_list> &events);
     // Makes a reservation.

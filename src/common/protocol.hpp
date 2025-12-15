@@ -76,8 +76,7 @@ struct Event_creation_Info{
     DateTime event_date;
     int attendace_size;
     string Fname;
-    size_t Fsize;
-    string Fdata;
+    ssize_t Fsize;
 };
 
 /** Converts the OP_CODE enum value to its string representation. */
@@ -131,11 +130,14 @@ string tcp_read_message(int fd);
 string tcp_read_word(int fd, bool *end_line = nullptr);
 
 /**
- * Closes a socket connection and frees memory allocated to adresses.
+ * Streams the content of a file with TCP
  * 
- * @param socket Fd for socket.
- * @param addr Pointer to an adress.
+ * @param sendingfd Fd of the sender.
+ * @param receivingfd Fd that is receiving content.
+ * @param Fsize Size of the file.
+ * 
+ * @returns Bytes that were sent.
  */
-void close_socket_connection(int socket, struct addrinfo *addr);
+ssize_t stream_file_TCP(int sendingfd, int receivingfd, size_t Fsize);
 
 #endif

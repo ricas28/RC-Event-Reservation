@@ -72,6 +72,7 @@ MyReservationsResult myreservations(string &uid, string &password, vector<Reserv
 /**
  * Executes a 'create' command.
  * 
+ * @param fd TCP socket.
  * @param uid UID received on the request.
  * @param password Password received on the request.
  * @param event Struct with info for creating event.
@@ -79,7 +80,7 @@ MyReservationsResult myreservations(string &uid, string &password, vector<Reserv
  * 
  * @return CreateResult enum.
  */
-CreateResult create(string &uid, string &password, Event_creation_Info &event, string &eid);
+CreateResult create(int &fd, string &uid, string &password, Event_creation_Info &event, string &eid);
 
 /**
  * Executes a 'close' command.

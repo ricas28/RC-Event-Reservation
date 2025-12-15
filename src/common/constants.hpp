@@ -10,6 +10,7 @@
 
 #define TCP_TIMEOUT 10 // 10 seconds
 #define TCP_READING_SIZE 1024
+#define TCP_CHUNK 4096
 
 #define UID_SIZE 7         //  6 + 1 for '\0'
 #define PASS_SIZE 9        //  8 + 1 for '\0'

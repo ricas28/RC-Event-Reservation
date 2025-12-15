@@ -222,7 +222,7 @@ void handle_create(int fd, string request_so_far){
     }
     
     string message, eid;
-    switch(create(uid, password, event, eid)){
+    switch(create(fd, uid, password, event, eid)){
         case CreateResult::SUCCESS:
             message = op_to_str(OP_CREATE_RESP) + " OK " + eid + "\n";
             write_all(fd, message.c_str(), message.size());

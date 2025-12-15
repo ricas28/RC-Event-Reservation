@@ -299,39 +299,62 @@ int er_myreservations(CLArgs client){
 /* ----------------------------------------------- */
 
 /* -------------- TCP COMMANDS ------------------- */
-int er_create(CLArgs client, string name, string event_fname, size_t Fsize,
-                        char *Fdata, DateTime event_date, int num_attendees){
+int er_create(CLArgs client, string name, string event_fname, ssize_t Fsize,
+                        DateTime event_date, int num_attendees){
     char response_code[BUF_TEMP];
     string message = op_to_str(OP_CREATE) + " " + to_string(client.uid) + " " + client.pass +
                         " " + name + " " + event_date.toString() + " " + to_string(num_attendees) +
-                        " " + event_fname + " " + to_string(Fsize) + " " + Fdata + "\n";
+                        " " + event_fname + " " + to_string(Fsize) + " ";
 
-    string response;
-    if((response = client_tcp_request_line(&client, message)) == ""){
-        cerr << "Failure to request/receive message to server" << endl;
-        free(Fdata);
+    int sock = client_connect_tcp(client);
+    if(sock == -1)
+        return -1;
+
+    if(write_all(sock, message.c_str(), message.size()) != (ssize_t)message.size()){
+        cerr << "Failure to write beginning of message to 'create' command";
+        close(sock);
         return -1;
     }
+    int filefd = open(event_fname.c_str(), O_RDONLY);
+    if (filefd < 0) {
+        perror("open file on 'create' command");
+        close(sock);
+        return -1;;
+    }
+    if(stream_file_TCP(filefd, sock, (size_t)Fsize) != Fsize){
+        perror("Falure streaming file on 'create' command");
+        close(sock);
+        close(filefd);
+        return -1;
+    }
+    string response = tcp_read_message(sock);
+    if(response == ""){
+        cerr << "Failute to read response from server" << endl;
+        close(sock);
+        close(filefd);
+        return -1;
+    }
+    close(sock);
+    close(filefd);
 
     // Read response code.
     int n = sscanf(response.c_str(), "%63s", response_code);
-    if(n != 1) cerr << "Failure to read response code to 'create' command" << endl;
-
+    if(n != 1){
+        cerr << "Failure to read response code to 'create' command" << endl;
+        return -1;
+    }
     string status = "", eid = "";
     OP_CODE code = str_to_op(response_code);
     if(code == ERR){
         cerr << "Invalid request message was sent" << endl;
-        free(Fdata);
         return -1;
     }
     if(code == INTERNAL_ERROR){
         cerr << "Internal error occured on the server" << endl;
-        free(Fdata);
         return -1;
     }
     if(code != OP_CREATE_RESP || !parse_create_response(response.c_str(), status, eid)){
         cerr << "Bad message received from server!" << endl;
-        free(Fdata);
         return -1;  
     }
 
@@ -343,10 +366,8 @@ int er_create(CLArgs client, string name, string event_fname, size_t Fsize,
         cerr<< "Syntax of request message is incorrect or parameter values take invalid values" << endl;
     else {
         cerr << "[API] Invalid status message passed through" << endl;
-        free(Fdata);
         return -1;
     }
-    free(Fdata);
     return 0;       
 }
 
