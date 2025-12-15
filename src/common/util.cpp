@@ -123,13 +123,13 @@ void print_event_state(int state){
             cout << "Event still accepting" << endl;
             break;
         case EVENT_IN_PAST:
-            cout << "Event has already occured" << endl;
+            cout << "Event already occured" << endl;
             break;
         case EVENT_SOLD_OUT:
             cout << "Event is sold out" << endl;
             break;
         case EVENT_CLOSED:
-            cout << "Event was closed by the user" << endl;
+            cout << "Event closed by the user" << endl;
             break;
         case EVENT_CORRUPTED:
             cout << "Event information is corrupted" << endl;

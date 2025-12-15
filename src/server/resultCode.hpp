@@ -64,4 +64,16 @@ enum class ListResult{
     IO_ERROR
 };
 
+enum class ReserveResult{
+    SUCCESS,
+    EVENT_NOT_ACTIVE,
+    NOT_LOGGED_IN,
+    ALREADY_CLOSED,
+    SOLD_OUT,
+    TOO_MANY_SEATS,
+    EVENT_PASSED,
+    WRONG_PASS,
+    IO_ERROR
+};
+
 #endif

@@ -209,7 +209,8 @@ int er_myevents(CLArgs client){
 
     // Print message according to the status value
     if(status == "OK") print_myevents_list(events_list);
-    else if(status == "NOK") cout << "user has not created any events" << endl;
+    else if(status == "NOK") cout << "user has not created any events" 
+                                << " or all events files are corrupted." << endl;
     else if(status == "NLG") cerr << "[API] user not logged in" << endl;
     else if(status == "WRP") cerr << "[API] wrong password sent on the request" << endl;
     else if(status == "ERR") 
@@ -271,7 +272,7 @@ int er_myreservations(CLArgs client){
     // Print message according to the status value
     if(status == "OK") print_myreservations_list(reservations_list);
     else if(status == "NOK") cout << "User has not made any reservations"
-                            << "or all reservation files are corrupted." << endl;
+                            << " or all reservation files are corrupted." << endl;
     else if(status == "NLG") cerr << "[API] user not logged in" << endl;
     else if(status == "WRP") cerr << "[API] wrong password sent on the request" << endl;
     else if(status == "ERR") 
@@ -607,6 +608,8 @@ int er_reserve(CLArgs client, string &eid, int people){
     if(status == "ACC") cout << "reservation accepted" << endl;
     else if(status == "NOK") cout << "event is not active" << endl;
     else if(status == "NLG") cerr << "[API] user not logged in" << endl;
+    else if(status == "WRP") cerr << "[API] wrong password sent on the request" << endl;
+    else if(status == "PST") cerr << "event already occured" << endl;
     else if(status == "CLS") cout << "event is closed" << endl;
     else if(status == "SLD") cout << "reservation refused: event is sold out" << endl;
     else if(status == "REJ"){

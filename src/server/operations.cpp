@@ -178,3 +178,39 @@ ListResult list(vector<Event_list> &events){
         return ListResult::NO_EVENT_CREATED;
     return ListResult::SUCCESS;
 }
+
+ReserveResult reserve(string &uid, string &password, string &eid, int &people, int &remaining_seats){
+    // Check if user is logged in.
+    if(!db->user_logged_in(uid))
+        return ReserveResult::NOT_LOGGED_IN;
+
+    // Check if password is correct.
+    if(!db->check_password(uid, password))
+        return ReserveResult::WRONG_PASS;
+
+    // Check if event exists.
+    if(!db->event_exists(eid))
+        return ReserveResult::EVENT_NOT_ACTIVE;
+
+    StartFileData data = db->extract_start_file_data(eid);
+    int status = db->get_event_status(eid, data);
+
+    switch(status){
+        case EVENT_CORRUPTED:
+            return ReserveResult::IO_ERROR;
+        case EVENT_CLOSED:
+            return ReserveResult::ALREADY_CLOSED;
+        case EVENT_SOLD_OUT:
+            return ReserveResult::SOLD_OUT;
+        case EVENT_IN_PAST:
+            return ReserveResult::EVENT_PASSED;
+        case EVENT_ACCEPTING:
+            if(!db->reserve(uid, eid, people, data, remaining_seats))
+                return ReserveResult::IO_ERROR;
+            if(remaining_seats > 0)
+                return ReserveResult::TOO_MANY_SEATS;
+            return ReserveResult::SUCCESS;
+        default:
+            return ReserveResult::IO_ERROR;
+    }
+}

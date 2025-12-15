@@ -97,7 +97,7 @@ bool is_valid_eid(char *s);
 bool is_valid_seats(char *s, int *seats = nullptr);
 
 /** 
- * Checks if a given string is a positiv integer.
+ * Checks if a given string is a positive integer.
  * 
  * @param s String.
  * @param out_value (Optional) Stores the value if it's a positive integer.

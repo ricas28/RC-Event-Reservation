@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cstring>   
 #include <cerrno>
+#include <sys/stat.h>
 
 #include "../common/util.hpp"
 #include "../common/io.hpp"
@@ -79,6 +80,10 @@ string Database::user_reserved_dir(const string& uid) const {
     return user_dir(uid) + "RESERVED/";
 }
 
+string Database::user_reservation_file(const string &uid,  DateTime now) const {
+    return user_reserved_dir(uid) + reservation_file(uid, now);
+}
+
 // Ensure structure: USERS/<uid>/(pass/login/CREATED/RESERVED)
 bool Database::ensure_user_dirs(const string& uid) {
     // Create USER dir.
@@ -120,9 +125,12 @@ string Database::event_reservations_dir(const string& eid) const {
     return event_dir(eid) + "RESERVATIONS/";
 }
 
-string Database::event_reservation_file(const string& eid,
-                                        const string& filename) const {
-    return event_reservations_dir(eid) + filename;
+string Database::event_reservation_file(const string& eid, const string& uid, DateTime now) const {
+    return event_reservations_dir(eid) + reservation_file(uid, now);
+}
+
+string Database::reservation_file(const string &uid, DateTime now) const {
+    return "R-" + uid + "-" + now.DatetoString(true) + "-" + now.TimetoString(true) + ".txt";
 }
 
 bool Database::ensure_event_dirs(const string& eid) {
@@ -283,9 +291,7 @@ bool Database::event_exists(const string &eid){
 }
 
 bool Database::get_event_creator(const string &eid, string &creator){
-    string start_path = event_start_file(eid);
-
-    StartFileData data = extract_start_file_data(start_path);
+    StartFileData data = extract_start_file_data(eid);
     if(data.uid == -1)
         return false;
 
@@ -294,9 +300,7 @@ bool Database::get_event_creator(const string &eid, string &creator){
 }
 
 bool Database::event_passed(const string &eid, bool &in_past){
-    string start_file = event_start_file(eid);
-
-    StartFileData data = extract_start_file_data(start_file);
+    StartFileData data = extract_start_file_data(eid);
     if(data.uid == -1)
         return false;
 
@@ -305,10 +309,7 @@ bool Database::event_passed(const string &eid, bool &in_past){
 }
 
 bool Database::is_event_sold_out(const string &eid, bool &sold_out){
-    string start_file = event_start_file(eid);
-    string res_file = event_res_file(eid);
-
-    StartFileData data = extract_start_file_data(start_file);
+    StartFileData data = extract_start_file_data(eid);
     if(data.uid == -1)
         return false;
 
@@ -321,14 +322,8 @@ bool Database::is_event_sold_out(const string &eid, bool &sold_out){
 }
 
 int Database::get_event_status(const string &eid, StartFileData data){
-    // Check if event is closed.
-    if(is_event_closed(eid)){
-        return EVENT_CLOSED;
-    }
-
     // Check for invalid values (extraction failed).
     if(data.uid == -1){
-        // Push event corrupted.
         return EVENT_CORRUPTED;
     }
 
@@ -339,6 +334,11 @@ int Database::get_event_status(const string &eid, StartFileData data){
         return EVENT_IN_PAST;
     }
 
+    // Check if event is closed.
+    if(is_event_closed(eid)){
+        return EVENT_CLOSED;
+    }
+
     // Check if event is sold out or not.
     int reserved = get_reserved_seats(eid);
     if(reserved == -1){
@@ -346,6 +346,127 @@ int Database::get_event_status(const string &eid, StartFileData data){
     }
     int event_status = (reserved >= data.event_attend) ? EVENT_SOLD_OUT : EVENT_ACCEPTING;
     return event_status;
+}
+
+bool validateStartFileData(string filepath,
+                            string uid, 
+                            string event_name, 
+                            string desc_fname, 
+                            string start_date, 
+                            string start_time,
+                            DateTime &dt,
+                            int event_attend){
+    // Validate info
+    if(!is_valid_userid((char *)uid.c_str())){
+        cerr << "Invalid UID on file  '" << filepath << "': " << uid << endl;
+        return false;;
+    }
+    if(!is_valid_event_name((char *)event_name.c_str())){
+        cerr << "Invalid event name on file: '" << filepath << "': " << event_name << endl;
+        return false;
+    }
+    if(!is_valid_file_name((char *)desc_fname.c_str())){
+        cerr << "Invalid file name on file: '" << filepath << "': " << desc_fname << endl;
+        return false;
+    }
+    if(!is_valid_num_attendees(event_attend)){
+        cerr << "Invalid number of attendees no file '" << filepath << "': " << event_attend << endl;
+        return false;
+    }
+    if(!DateTime::fromStrings(start_date, start_time, dt)){
+        cerr << "Invalid date or time on file '" << filepath << "': " 
+                                    << start_date << " " << start_time << endl;
+        return false;
+    }
+    return true;
+}
+
+StartFileData Database::extract_start_file_data(const string &eid){
+    string filepath = event_start_file(eid);
+    int fd;
+    if(!open_and_lock(filepath, O_RDONLY, LOCK_SH, fd))
+        return { -1, "", "", -1, DateTime() };
+
+    // Get file size.
+    struct stat st;
+    if(fstat(fd, &st) == -1){
+        perror(("fstat: " + filepath).c_str());
+        close(fd);
+        return { -1, "", "", -1, DateTime() };
+    }
+
+    vector<char> buffer((size_t)st.st_size + 1, 0);
+    if(read_all(fd, buffer.data(), (size_t)st.st_size) != st.st_size){
+        perror(("read_all: " + filepath).c_str());
+        close(fd);
+        return { -1, "", "", -1, DateTime() };
+    }
+    close(fd); // unlock + close
+
+    istringstream iss(buffer.data());
+    string uid, event_name, desc_fname, start_date, start_time;
+    int event_attend;
+
+    if(!(iss >> uid >> event_name >> desc_fname >> event_attend >> start_date >> start_time)){
+        cerr << "Invalid start file format: " << filepath << endl;
+        return { -1, "", "", -1, DateTime() };
+    }
+
+    DateTime dt;
+    if(!validateStartFileData(filepath, uid, event_name, desc_fname, start_date, start_time, dt, event_attend)){
+        return { -1, "", "", -1, DateTime() };
+    }
+
+    return {atoi(uid.c_str()), event_name, desc_fname, event_attend, dt};
+}
+
+Reservation Database::extract_reservation_file_data(const string &filepath){
+    int fd;
+    if(!open_and_lock(filepath, O_RDONLY, LOCK_SH, fd))
+        return {"-1", DateTime(), -1};
+
+    // Get file size.
+    struct stat st;
+    if(fstat(fd, &st) == -1){
+        perror(("fstat: " + filepath).c_str());
+        close(fd);
+        return {"-1", DateTime(), -1};
+    }
+
+    vector<char> buffer((size_t)st.st_size + 1, 0);
+    if(read_all(fd, buffer.data(), (size_t)st.st_size) != st.st_size){
+        perror(("read_all: " + filepath).c_str());
+        close(fd);
+        return {"-1", DateTime(), -1};
+    }
+    close(fd); // unlock + close
+
+    istringstream iss(buffer.data());
+    string eid, date_str, time_str, num_seats_str;
+    int num_seats;
+
+    if(!(iss >> eid >> num_seats_str >> date_str >> time_str)){
+        cerr << "Invalid format on file: " << filepath << endl;
+        return {"-1", DateTime(), -1};
+    }
+
+    if(!is_valid_eid((char *)eid.c_str())){
+        cerr << "Invalid EID on file '" << filepath  << "': "<< eid << endl;
+        return {"-1", DateTime(), -1};
+    }
+
+    DateTime dt;
+    if(!DateTime::fromStrings(date_str, time_str, dt)){
+        cerr << "Invalid date or time on file: '" << filepath << "': " << date_str << " " << time_str << endl;
+        return {"-1", DateTime(), -1};
+    }
+
+    if(!is_valid_seats((char *)num_seats_str.c_str(), &num_seats)){
+        cerr << "Invalid number of reserved seats on file '" << filepath << "': " << num_seats_str << endl;
+        return {"-1", DateTime(), -1};
+    }
+
+    return { eid, dt, num_seats };
 }
 
 // ----------- OPERATIONS ---------------
@@ -483,7 +604,7 @@ void Database::get_user_events(const string &uid,  vector<pair<string, int>> &ev
         // Extract the eid of the event for each file.
         string eid = entry.path().stem().string();
 
-        StartFileData data = extract_start_file_data(event_start_file(eid));
+        StartFileData data = extract_start_file_data(eid);
 
         // Get status of events
         events.push_back({eid, get_event_status(eid, data)});
@@ -601,7 +722,7 @@ bool Database::get_all_events(vector<Event_list> &events){
         // Get EID.
         string eid = format_eid(i);
 
-        StartFileData data = extract_start_file_data(event_start_file(eid));
+        StartFileData data = extract_start_file_data(eid);
 
         int status = get_event_status(eid, data);
         if(status == EVENT_CORRUPTED){
@@ -611,5 +732,66 @@ bool Database::get_all_events(vector<Event_list> &events){
             events.push_back({eid, data.event_name, status, data.start_date_time});
         }
     }
+    return true;
+}
+
+bool Database::reserve(const string &uid, 
+                        const string &eid, 
+                        const int &people, 
+                        const StartFileData &data,
+                        int &remaining_seats){
+    DateTime dateTime = DateTime::now();
+    string events_reservations = event_reservation_file(eid, uid, dateTime);
+    string user_reservations = user_reservation_file(uid, dateTime);
+
+    string content = eid + " " + to_string(people) + " " + dateTime.toString(true);
+
+    if(data.uid == -1)
+        return false;
+
+    // check if there are enough seats
+    int reserved_seats = get_reserved_seats(eid);
+    if(reserved_seats == -1)
+        return false;
+
+    if(reserved_seats + people > data.event_attend){
+        remaining_seats = data.event_attend - reserved_seats;
+        return true;
+    }
+
+    int user_fd, event_fd;
+    // Try to open and lock user file.
+    if (!open_and_lock(user_reservations, O_WRONLY | O_CREAT | O_TRUNC, LOCK_EX, user_fd))
+        return false;
+
+    if(write_all(user_fd, content.c_str(), content.size()) != (ssize_t)content.size()){
+        cerr << "Failute to write content to user reservation file" << endl;
+        delete_file(user_reservations);
+        close(user_fd);
+        return false;
+    }
+    close(user_fd);
+
+    // Try to open and lock event file.
+    if (!open_and_lock(events_reservations, O_WRONLY | O_CREAT | O_TRUNC, LOCK_EX, event_fd)){
+        delete_file(user_reservations);
+        return false;
+    }
+
+    if(write_all(event_fd, content.c_str(), content.size()) != (ssize_t)content.size()){
+        cerr << "Failute to write content to user reservation file" << endl;
+        delete_file(user_reservations);
+        delete_file(events_reservations);
+        close(event_fd);
+        return false;
+    }
+
+    if(!write_res_file(event_res_file(eid), reserved_seats + people)){
+        delete_file(user_reservations);
+        delete_file(events_reservations);
+        close(event_fd);
+        return false;
+    }
+    close(event_fd);
     return true;
 }

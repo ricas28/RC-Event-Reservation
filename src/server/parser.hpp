@@ -137,4 +137,23 @@ bool parse_close_request(const char *request, string &uid, string &password, str
  */
 bool parse_list_request(const char *request);
 
+bool parse_show_request(void);
+
+/**
+ * Parses a request to the 'reserve' command.
+ * 
+ * @param request Request that was received.
+ * @param uid String that will contain the UID sent on the request.
+ * @param password String that will contain the password sent on the request.
+ * @param eid String that will contain the EID sent on the request
+ * @param people Int that will contain the number os seats being reserved.
+ * 
+ * @returns true if parse is successful, false otherwise.
+*/     
+bool parse_reserve_request(const char *request, 
+                            string &uid, 
+                            string &password, 
+                            string &eid,
+                            int &people);
+
 #endif

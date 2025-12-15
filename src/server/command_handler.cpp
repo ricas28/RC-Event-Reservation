@@ -334,9 +334,56 @@ void handle_show(int fd, string request_so_far){
 }
 
 void handle_reserve(int fd, string request_so_far){
-    (void)fd;
-    (void)request_so_far;
-    cout << "RESERVE" << endl;
+    string uid, password, eid;
+    int people;
+    
+    string request = request_so_far + tcp_read_message(fd);
+    if(!parse_reserve_request(request.c_str(), uid, password, eid, people)){
+        string message = op_to_str(OP_RESERVE_RESP) + " ERR\n";
+        write_all(fd, message.c_str(), message.size());
+        return;
+    }
+
+    string message;
+    int remaining_seats = 0;
+    switch(reserve(uid, password, eid, people, remaining_seats)){
+        case ReserveResult::SUCCESS:
+            message = op_to_str(OP_RESERVE_RESP) + " ACC\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case ReserveResult::EVENT_NOT_ACTIVE:
+            message = op_to_str(OP_RESERVE_RESP) + " NOK\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case ReserveResult::WRONG_PASS:
+            message = op_to_str(OP_RESERVE_RESP) + " WRP\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case ReserveResult::NOT_LOGGED_IN:
+            message = op_to_str(OP_RESERVE_RESP) + " NLG\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case ReserveResult::TOO_MANY_SEATS:
+            message = op_to_str(OP_RESERVE_RESP) + " REJ " + to_string(remaining_seats) + "\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case ReserveResult::SOLD_OUT:
+            message = op_to_str(OP_RESERVE_RESP) + " SLD\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case ReserveResult::EVENT_PASSED:
+            message = op_to_str(OP_RESERVE_RESP) + " PST\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case ReserveResult::ALREADY_CLOSED:
+            message = op_to_str(OP_RESERVE_RESP) + " CLS\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case ReserveResult::IO_ERROR:
+            write_all(fd, "NOK\n", 4);
+            return;
+    }
+
 }
 
 void handle_changePass(int fd, string request_so_far){

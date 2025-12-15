@@ -43,6 +43,8 @@ public:
     void nextSecond();
 
     void print(bool showSeconds= false);
+    string DatetoString(bool inverted= false);
+    string TimetoString(bool showSeconds = false);
     string toString(bool showSeconds= false);
 
     static bool fromStrings(const string &date, const string &time, DateTime &out);

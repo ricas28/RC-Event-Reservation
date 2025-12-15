@@ -52,22 +52,4 @@ int handle_tcp_request(int fd, struct sockaddr_in client_addr, bool verbose);
  */
 int handle_udp_request(int udp_fd, bool verbose= false);
 
-/**
- * Extracts information of a START file into a StartFileData.
- * 
- * @param filepath Filepath of the START file.
- * 
- * @returns StartFileData on success, struct with invalid values on failure.
- */
-StartFileData extract_start_file_data(const string &filepath);
-
-/**
- * Extracts information of a reservation file
- * 
- * @param filepath Filepath of the reservation file.
- * 
- * @returns Reservation struct on success, struct in invalid values on failure.
- */
-Reservation extract_reservation_file_data(const string &filepath);
-
 #endif

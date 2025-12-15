@@ -125,18 +125,36 @@ void DateTime::print(bool showSeconds){
     cout << toString(showSeconds) << endl;
 }
 
-string DateTime::toString(bool showSeconds){
+string DateTime::DatetoString(bool inverted){
+    ostringstream oss;
+    if(inverted){
+        oss << setfill('0')
+            << setw(4) << year << "-"
+            << setw(2) << month << "-"
+            << setw(2) << day;
+    }
+    else{
+        oss << setfill('0')
+            << setw(2) << day << "-"
+            << setw(2) << month << "-"
+            << setw(4) << year;
+    }
+    return oss.str();
+}
+
+string DateTime::TimetoString(bool showSeconds){
     ostringstream oss;
     oss << setfill('0')
-        << setw(2) << day << "-"
-        << setw(2) << month << "-"
-        << setw(4) << year << " "
         << setw(2) << hour << ":"
         << setw(2) << minute;
     
     if(showSeconds)
        oss << ":" << setw(2) << second;
     return oss.str();
+}
+
+string DateTime::toString(bool showSeconds){
+    return DatetoString() + " " + TimetoString(showSeconds);
 }
 
 bool DateTime::fromStrings(const string &date, const string &time, DateTime &out){

@@ -38,6 +38,8 @@ private:
     string user_created_file(const string &uid, const string &eid) const;
     // USERS/<uid>/RESERVED/
     string user_reserved_dir(const string& uid) const;
+    // USERS/<uid>/RESERVED/R-<uid>-<date>-<time>.txt
+    string user_reservation_file(const string &uid, DateTime now) const;
 
     // EVENTS/<eid>/
     string event_dir(const string& eid) const;
@@ -50,12 +52,15 @@ private:
     // EVENTS/<eid>/DESCRIPTION/<filename>
     string event_desc_file(const string& eid,
                                 const string& fname) const;
-    // EVENTS/<eid>/END_(eid).txt
+    // EVENTS/<eid>/END_<eid>.txt
     string event_end_file(const string& eid) const;
     // EVENTS/<eid>/RESERVATIONS/
     string event_reservations_dir(const string& eid) const;
-    // EVENTS/<eid>/RESERVATIONS/R-uid-date-time.txt
-    string event_reservation_file(const string& eid, const string& filename) const;
+    // EVENTS/<eid>/RESERVATIONS/R-<uid>-<date>-<time>.txt
+    string event_reservation_file(const string& eid, const string &uid, DateTime now) const;
+    //R-uid-date-time.txt
+    string reservation_file(const string &uid,  DateTime now) const;
+
     // ---------- UTILITIES ----------
     bool ensure_user_dirs(const std::string& uid);
     bool ensure_event_dirs(const std::string& eid);
@@ -105,6 +110,10 @@ public:
     bool is_event_sold_out(const string &eid, bool &sold_out);
     // Returns the status of an event.
     int get_event_status(const string &eid, StartFileData data);
+     // Extracts the info from a START file into a struct.
+    StartFileData extract_start_file_data(const string &eid);
+    // Extratcs the info from a reservation file into a struct.
+    Reservation extract_reservation_file_data(const string &filepath);
 
     // ----- OPERATIONS -------
 
@@ -133,6 +142,12 @@ public:
     bool create_event(const string &uid, Event_creation_Info &event, string &eid);
     // Returns all of the events on the server.
     bool get_all_events(vector<Event_list> &events);
+    // Makes a reservation.
+    bool reserve(const string &uid, 
+                    const string &eid, 
+                    const int &people, 
+                    const StartFileData &data,
+                    int &remaining_seats);
 };
 
 

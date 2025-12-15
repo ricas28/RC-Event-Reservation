@@ -228,3 +228,32 @@ bool parse_list_request(const char *request){
     }
     return true;
 }
+
+bool parse_show_request(void){
+    return true;
+}
+
+bool parse_reserve_request(const char *request, 
+                            string &uid, 
+                            string &password, 
+                            string &eid,
+                            int &people){
+    char code[BUF_TEMP], uid_temp[BUF_TEMP], pass_temp[BUF_TEMP];
+    char eid_temp[BUF_TEMP], people_temp[BUF_TEMP], extra[BUFFER_SIZE];
+
+    // Validate OP_CODE and UID.
+    int n = sscanf(request, "%63s %63s %63s %63s %63s %255s", code, uid_temp, pass_temp,
+                                                    eid_temp, people_temp, extra);
+    if(n != 5 || str_to_op(code) != OP_RESERVE || 
+                        !is_valid_userid(uid_temp) ||
+                        !is_valid_password(pass_temp) || 
+                        !is_valid_eid(eid_temp) || 
+                        !is_valid_seats(people_temp, &people)){
+        return false;
+    }
+
+    uid = uid_temp;
+    password = pass_temp;
+    eid = eid_temp;
+    return true;
+}

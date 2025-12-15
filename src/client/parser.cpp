@@ -290,15 +290,17 @@ bool parse_myevents_list(char *response, vector<pair<string, int>> &events_list)
     char eid[BUF_TEMP];
     int state;
     while (iss >> eid >> state) {
-        // Validate EID
-        if (!is_valid_eid(eid)){
-            cerr << "Invalid EID on server's response: " << eid << endl;  
-            return false;
-        }
-        // Validate state
-        if (!is_valid_event_state(state)){
-            cerr << "Invalid event state on server's response: " << state << endl; 
-            return false;
+        if(state != EVENT_CORRUPTED){
+            // Validate EID
+            if (!is_valid_eid(eid)){
+                cerr << "Invalid EID on server's response: " << eid << endl;  
+                return false;
+            }
+            // Validate state
+            if (!is_valid_event_state(state)){
+                cerr << "Invalid event state on server's response: " << state << endl; 
+                return false;
+            }
         }
         events_list.push_back({eid, state});
     }
@@ -793,7 +795,8 @@ bool parse_reserve_response(char *response, string &status, int &n_seats){
     // Check for status value
     if(!strcmp(status_temp, "NOK") || !strcmp(status_temp, "NLG") || 
         !strcmp(status_temp, "ACC") || !strcmp(status_temp, "CLS") ||
-        !strcmp(status_temp, "SLD") || !strcmp(status_temp, "ERR")){
+        !strcmp(status_temp, "SLD") || !strcmp(status_temp, "ERR") ||
+        !strcmp(status_temp, "PST") || !strcmp(status_temp, "WRP")){
             status = status_temp;
             return true;
     }

@@ -101,4 +101,18 @@ CloseResult close(string &uid, string &password, string &eid);
  */
 ListResult list(vector<Event_list> &events);
 
+/**
+ * Executes a 'reserve' command.
+ * 
+ * @param uid UID received on the request.
+ * @param password Password received on the request.
+ * @param eid EID of the event being reserved.
+ * @param people Number of seats being reserved.
+ * @param remaining_seats Integer that will have number of remaining seats
+ *  on the event if reservation is rejected.
+ * 
+ * @return ReserveResult enum.
+ */
+ReserveResult reserve(string &uid, string &password, string &eid, int &people, int &remaining_seats);
+
 #endif
