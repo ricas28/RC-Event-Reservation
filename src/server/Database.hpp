@@ -78,8 +78,6 @@ private:
     bool write_res_file(const string &end_path, int reservations);
     // Writes content to description file.
     bool write_description_file(const string &description_path, const string &Fdata);
-    // Writes a password to a user password file.
-    bool write_password(const string &uid, const string &pass);
 
 public:
     // Get the only instance
@@ -121,10 +119,12 @@ public:
 
     // Create login file for user.
     bool login_user(const string &uid);
+    // Writes a password to a user password file.
+    bool write_password(const string &uid, const string &pass);
     // Registers a new user
     bool register_user(const string &uid, const string &password);
     // Checks if the given password matches the user password.
-    bool check_password(const string &uid, const string &password);
+    bool check_password(const string &uid, const string &password, bool &equal);
     // Logout a user.
     bool logout_user(const string &uid); 
     // Unregister a uer.

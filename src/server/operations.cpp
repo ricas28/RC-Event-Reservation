@@ -22,7 +22,10 @@ int db_init(){
 LoginResult login(string &uid, string &password){
     // If user exists, check if password is correct.
     if(db->user_registered(uid)){
-        if(!db->check_password(uid, password))
+        bool equal = false;
+        if(!db->check_password(uid, password, equal))
+            return LoginResult::IO_ERROR;
+        if(!equal)
             return LoginResult::WRONG_PASS;
         db->login_user(uid);
         return LoginResult::SUCCESS;
@@ -43,7 +46,11 @@ LogoutResult logout(string &uid, string &password){
     // Check if user is logged in
     if(db->user_logged_in(uid)){
         // Check if  password is correct.
-        if(db->check_password(uid, password)){
+        bool equal = false;
+        if(!db->check_password(uid, password, equal)){
+            return LogoutResult::IO_ERROR;
+        }
+        if(equal){
             if(!db->logout_user(uid))
                 return LogoutResult::IO_ERROR;
             return LogoutResult::SUCCESS;
@@ -62,7 +69,11 @@ UnregisterResult unregister(string &uid, string &password){
     // Check if user is logged in
     if(db->user_logged_in(uid)){
         // Check if  password is correct.
-        if(db->check_password(uid, password)){
+        bool equal = false;
+        if(!db->check_password(uid, password, equal)){
+            return UnregisterResult::IO_ERROR;
+        }
+        if(equal){
             if(!db->unregister_user(uid))
                 return UnregisterResult::IO_ERROR;
             return UnregisterResult::SUCCESS;
@@ -79,7 +90,10 @@ MyEventsResult myevents(string &uid, string &password, vector<pair<string, int>>
         return MyEventsResult::NOT_LOGGED_IN;
 
     // Check if password is correct.
-    if(!db->check_password(uid, password))
+    bool equal = false;
+    if(!db->check_password(uid, password, equal))
+        return MyEventsResult::IO_ERROR;
+    if(!equal)
         return MyEventsResult::WRONG_PASS;
 
     // Get user events.
@@ -95,7 +109,10 @@ MyReservationsResult myreservations(string &uid, string &password, vector<Reserv
         return MyReservationsResult::NOT_LOGGED_IN;
 
     // Check if password is correct.
-    if(!db->check_password(uid, password))
+    bool equal = false;
+    if(!db->check_password(uid, password, equal))
+        return MyReservationsResult::IO_ERROR;
+    if(!equal)
         return MyReservationsResult::WRONG_PASS;
 
     // Get user reservations.
@@ -112,7 +129,10 @@ CreateResult create(string &uid, string &password, Event_creation_Info &event, s
     }
 
     // Check if password is correct.
-    if(!db->check_password(uid, password))
+    bool equal = false;
+    if(!db->check_password(uid, password, equal))
+        return CreateResult::IO_ERROR;
+    if(!equal)
         return CreateResult::WRONG_PASS;
 
     // Create event
@@ -127,8 +147,14 @@ CreateResult create(string &uid, string &password, Event_creation_Info &event, s
 
 CloseResult close(string &uid, string &password, string &eid){
     // Check if user exists.
-    bool user_exists = db->user_exists(uid);
-    if(!user_exists || (user_exists && !db->check_password(uid, password)))
+    if(!db->user_exists(uid))
+        return CloseResult::WRONG_USER_PASS;
+
+    // Check if password is correct.
+    bool equal = false;
+    if(!db->check_password(uid, password, equal))
+        return CloseResult::IO_ERROR;
+    if(!equal)
         return CloseResult::WRONG_USER_PASS;
 
     // Check if user is logged in.
@@ -185,7 +211,10 @@ ReserveResult reserve(string &uid, string &password, string &eid, int &people, i
         return ReserveResult::NOT_LOGGED_IN;
 
     // Check if password is correct.
-    if(!db->check_password(uid, password))
+    bool equal = false;
+    if(!db->check_password(uid, password, equal))
+        return ReserveResult::IO_ERROR;
+    if(!equal)
         return ReserveResult::WRONG_PASS;
 
     // Check if event exists.
@@ -213,4 +242,25 @@ ReserveResult reserve(string &uid, string &password, string &eid, int &people, i
         default:
             return ReserveResult::IO_ERROR;
     }
+}
+
+ChangePassResult changePass(string &uid, string &old_password, string &new_password){
+    // Check if user exists.
+    if(!db->user_exists(uid))
+        return ChangePassResult::NOT_REGISTERED;
+
+    // Check if user is logged in.
+    if(!db->user_logged_in(uid))
+        return ChangePassResult::NOT_LOGGED_IN;
+
+    // Check if password is correct.
+    bool equal = false;
+    if(!db->check_password(uid, old_password, equal))
+        return ChangePassResult::IO_ERROR;
+    if(!equal)
+        return ChangePassResult::WRONG_PASS;
+
+    if(!db->write_password(uid, new_password))
+        return ChangePassResult::IO_ERROR;
+    return ChangePassResult::SUCCESS;
 }

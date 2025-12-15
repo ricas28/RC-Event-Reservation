@@ -200,6 +200,11 @@ int er_myevents(CLArgs client){
         free(response);
         return -1;
     }
+    if(code == INTERNAL_ERROR){
+        cerr << "Internal error occured on the server" << endl;
+        free(response);
+        return -1;
+    }
     vector<pair<string, int>> events_list = {};
     if(code != OP_MYEVENTS_RESP || !parse_myevents_response(response, status, events_list)){
         cerr << "Bad message received from server!" << endl;
@@ -258,6 +263,11 @@ int er_myreservations(CLArgs client){
     OP_CODE code = str_to_op(response_code);
     if(code == ERR){
         cerr << "Invalid request message was sent" << endl;
+        free(response);
+        return -1;
+    }
+    if(code == INTERNAL_ERROR){
+        cerr << "Internal error occured on the server" << endl;
         free(response);
         return -1;
     }

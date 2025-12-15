@@ -29,13 +29,15 @@ enum class MyEventsResult{
     NO_EVENTS_CREATED,
     NOT_LOGGED_IN,
     WRONG_PASS,
+    IO_ERROR
 };
 
 enum class MyReservationsResult{
     SUCCESS,
     NO_RESERVATIONS_MADE,
     NOT_LOGGED_IN,
-    WRONG_PASS
+    WRONG_PASS,
+    IO_ERROR,
 };
 
 enum class CreateResult{
@@ -74,6 +76,14 @@ enum class ReserveResult{
     EVENT_PASSED,
     WRONG_PASS,
     IO_ERROR
+};
+
+enum class ChangePassResult{
+    SUCCESS,
+    NOT_LOGGED_IN,
+    WRONG_PASS,
+    NOT_REGISTERED,
+    IO_ERROR,
 };
 
 #endif

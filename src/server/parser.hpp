@@ -155,5 +155,19 @@ bool parse_reserve_request(const char *request,
                             string &password, 
                             string &eid,
                             int &people);
+/**
+ * Parses a request to the 'reserve' command.
+ * 
+ * @param request Request that was received.
+ * @param uid String that will contain the UID sent on the request.
+ * @param old_password String that will contain the original password sent on the request.
+ * @param new_password String that will contain the new password sent on the request
+ * 
+ * @returns true if parse is successful, false otherwise.
+*/     
+bool parse_changePass_request(const char *request, 
+                                string &uid, 
+                                string &old_password,
+                                string &new_password);
 
 #endif

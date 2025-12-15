@@ -115,4 +115,15 @@ ListResult list(vector<Event_list> &events);
  */
 ReserveResult reserve(string &uid, string &password, string &eid, int &people, int &remaining_seats);
 
+/**
+ * Executes a 'changePass' command.
+ * 
+ * @param uid UID received on the request.
+ * @param old_password Old password received on the request.
+ * @param new_password New password received on the request.
+ *
+ * @return ChangePassResult enum.
+ */
+ChangePassResult changePass(string &uid, string &old_password, string &new_password);
+
 #endif

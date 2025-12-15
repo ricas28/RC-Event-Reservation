@@ -159,6 +159,8 @@ void handle_myevents(UDPSender sender, const char *request){
             message = op_to_str(OP_MYEVENTS_RESP) + " NOK\n";
             send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
             return;
+        case MyEventsResult::IO_ERROR:
+            send_udp_message(sender.fd, "NOK\n", (struct sockaddr*)&sender.client_addr, sender.addrlen);
     }   
 }
 
@@ -202,6 +204,9 @@ void handle_myreservations(UDPSender sender, const char *request){
         case MyReservationsResult::NO_RESERVATIONS_MADE:
             message = op_to_str(OP_MYRESERVATIONS_RESP) + " NOK\n";
             send_udp_message(sender.fd, message.c_str(), (struct sockaddr*)&sender.client_addr, sender.addrlen);
+            return;
+        case MyReservationsResult::IO_ERROR:
+            send_udp_message(sender.fd, "NOK\n", (struct sockaddr*)&sender.client_addr, sender.addrlen);
             return;
     }   
 }
@@ -321,7 +326,7 @@ void handle_list(int fd, string request_so_far){
             message = op_to_str(OP_LIST_RESP) + " NOK\n";
             write_all(fd, message.c_str(), message.size());
             return;
-         case ListResult::IO_ERROR:
+        case ListResult::IO_ERROR:
             write_all(fd, "NOK\n", 4);
             return;
     }   
@@ -387,9 +392,37 @@ void handle_reserve(int fd, string request_so_far){
 }
 
 void handle_changePass(int fd, string request_so_far){
-    (void)fd;
-    (void)request_so_far;
-    cout << "CHANGE" << endl;
+    string uid, old_password, new_password;
+
+    string request = request_so_far + tcp_read_message(fd);
+    if(!parse_changePass_request(request.c_str(), uid, old_password, new_password)){
+        string message = op_to_str(OP_CHANGE_PASS_RESP) + " ERR\n";
+        write_all(fd, message.c_str(), message.size());
+        return;
+    }
+
+    string message;
+    switch(changePass(uid, old_password, new_password)){
+        case ChangePassResult::SUCCESS:
+            message = op_to_str(OP_CHANGE_PASS_RESP) + " OK\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case ChangePassResult::NOT_LOGGED_IN:
+            message = op_to_str(OP_CHANGE_PASS_RESP) + " NLG\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case ChangePassResult::WRONG_PASS:
+            message = op_to_str(OP_CHANGE_PASS_RESP) + " NOK\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case ChangePassResult::NOT_REGISTERED:
+            message = op_to_str(OP_CHANGE_PASS_RESP) + " NID\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case ChangePassResult::IO_ERROR:
+            write_all(fd, "NOK\n", 4);
+            return;
+    }
 }
 
 void process_UDP_request(UDPSender sender, OP_CODE code, const char *request){

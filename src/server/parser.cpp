@@ -257,3 +257,24 @@ bool parse_reserve_request(const char *request,
     eid = eid_temp;
     return true;
 }
+
+bool parse_changePass_request(const char *request, 
+                                string &uid, 
+                                string &old_password,
+                                string &new_password){
+    char code[BUF_TEMP], uid_temp[BUF_TEMP], old_password_temp[BUF_TEMP];
+    char new_password_temp[BUF_TEMP], extra[BUFFER_SIZE];
+    
+    int n = sscanf(request, "%63s %63s %63s %63s %255s", code, uid_temp, old_password_temp, 
+                                                            new_password_temp, extra);
+
+    if(n != 4 || str_to_op(code) != OP_CHANGE_PASS || !is_valid_userid(uid_temp) ||
+            !is_valid_password(old_password_temp) || !is_valid_password(new_password_temp)){
+        return false;
+    }
+
+    uid = uid_temp;
+    old_password = old_password_temp;
+    new_password = new_password_temp;
+    return true;
+}
