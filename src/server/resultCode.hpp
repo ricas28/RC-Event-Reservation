@@ -46,4 +46,16 @@ enum class CreateResult{
     IO_ERROR
 };
 
+enum class CloseResult{
+    SUCCESS,
+    WRONG_USER_PASS,
+    NOT_LOGGED_IN,
+    EVENT_DOES_NOT_EXIST,
+    NOT_CREATED_BY_USER,
+    SOLD_OUT,
+    ALREADY_PASSED,
+    ALREADY_CLOSED,
+    IO_ERROR,
+};
+
 #endif

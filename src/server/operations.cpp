@@ -125,3 +125,47 @@ CreateResult create(string &uid, string &password, Event_creation_Info &event, s
     return CreateResult::SUCCESS;
 }
 
+CloseResult close(string &uid, string &password, string &eid){
+    // Check if user exists.
+    bool user_exists = db->user_exists(uid);
+    if(!user_exists || (user_exists && !db->check_password(uid, password)))
+        return CloseResult::WRONG_USER_PASS;
+
+    // Check if user is logged in.
+    if(!db->user_logged_in(uid))
+        return CloseResult::NOT_LOGGED_IN;
+
+    // Check if the event exists.
+    if(!db->event_exists(eid))
+        return CloseResult::EVENT_DOES_NOT_EXIST;
+
+    // Check if the event was created by UID.
+    string creator;
+    if(!db->get_event_creator(eid, creator))
+        return CloseResult::IO_ERROR;
+    if(creator != uid)
+        return CloseResult::NOT_CREATED_BY_USER;
+    
+    // Check if event is sold out.
+    bool sold_out = false;
+    if(!db->is_event_sold_out(eid, sold_out))
+        return CloseResult::IO_ERROR;
+    if(sold_out)
+        return CloseResult::SOLD_OUT;
+
+    // Check if the event is on the past.
+    bool in_past = false;
+    if(!db->event_passed(eid, in_past))
+        return CloseResult::IO_ERROR;
+    if(in_past)
+        return CloseResult::ALREADY_PASSED;
+
+    // Check if the event was already closed.
+    if(db->is_event_closed(eid))
+        return CloseResult::ALREADY_CLOSED;
+    
+    
+    if(!db->close_event(eid, DateTime::now()))
+        return CloseResult::IO_ERROR;
+    return CloseResult::SUCCESS;
+}

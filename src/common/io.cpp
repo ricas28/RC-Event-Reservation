@@ -3,6 +3,11 @@
 #include <string.h>
 #include <iostream>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <sys/file.h>
+#include <cerrno>
+#include <cstring>
+
 
 using namespace std;
 
@@ -42,12 +47,28 @@ int read_line_256(int fd, char *line){
     return 1;
 }
 
+bool open_and_lock(const string &path, int flags, int lock_type, int &fd){
+    fd = open(path.c_str(), flags, 0644);
+    if (fd < 0) {
+        perror(("open: " + path).c_str());
+        return false;
+    }
+
+    if (flock(fd, lock_type) < 0) {
+        perror(("flock: " + path).c_str());
+        close(fd);
+        return false;
+    }
+
+    return true;
+}
+
 ssize_t read_all(int fd, void *buf, size_t size){
     size_t total_read = 0;
     char *p = (char *)buf;
 
     while (total_read < size) {
-        ssize_t n = read(fd,p + total_read, (size_t)(size - total_read));
+        ssize_t n = read(fd, p + total_read, (size_t)(size - total_read));
 
         if (n < 0) {
             if (errno == EINTR)
@@ -125,7 +146,6 @@ char *read_file_to_buffer(const char *fileName, size_t *out_size) {
 
     *out_size = size;
     return buffer;
-
 }
 
 int write_buffer_to_file(const char *filename, const void *buffer, size_t size) {

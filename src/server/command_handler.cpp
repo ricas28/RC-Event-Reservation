@@ -241,34 +241,50 @@ void handle_create(int fd, string request_so_far){
 }
 
 void handle_close(int fd, string request_so_far){
-     string uid, password;
-    Event_creation_Info event;
-
-    if(!parse_create_request(fd, request_so_far.c_str(), uid, password, event)){
-        string message = op_to_str(OP_CREATE_RESP) + " ERR\n";
+    string uid, password, eid;
+    
+    string request = request_so_far + tcp_read_message(fd);
+    if(!parse_close_request(request.c_str(), uid, password, eid)){
+        string message = op_to_str(OP_CLOSE_RESP) + " ERR\n";
         write_all(fd, message.c_str(), message.size());
         return;
     }
     
-    string message, eid;
-    switch(create(uid, password, event, eid)){
-        case CreateResult::SUCCESS:
-            message = op_to_str(OP_CREATE_RESP) + " OK " + eid + "\n";
+    string message;
+    switch(close(uid, password, eid)){
+        case CloseResult::SUCCESS:
+            message = op_to_str(OP_CLOSE_RESP) + " OK\n";
             write_all(fd, message.c_str(), message.size());
             return;
-        case CreateResult::WRONG_PASS:
-            message = op_to_str(OP_CREATE_RESP) + " WRP\n";
+        case CloseResult::WRONG_USER_PASS:
+            message = op_to_str(OP_CLOSE_RESP) + " NOK\n";
             write_all(fd, message.c_str(), message.size());
             return;
-        case CreateResult::NOT_LOGGED_IN:
-            message = op_to_str(OP_CREATE_RESP) + " NLG\n";
+        case CloseResult::NOT_LOGGED_IN:
+            message = op_to_str(OP_CLOSE_RESP) + " NLG\n";
             write_all(fd, message.c_str(), message.size());
             return;
-        case CreateResult::FAILED_CREATE:
-            message = op_to_str(OP_CREATE_RESP) + " NOK\n";
+        case CloseResult::EVENT_DOES_NOT_EXIST:
+            message = op_to_str(OP_CLOSE_RESP) + " NOE\n";
             write_all(fd, message.c_str(), message.size());
             return;
-        case CreateResult::IO_ERROR:
+        case CloseResult::NOT_CREATED_BY_USER:
+            message = op_to_str(OP_CLOSE_RESP) + " EOW\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case CloseResult::SOLD_OUT:
+            message = op_to_str(OP_CLOSE_RESP) + " SLD\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case CloseResult::ALREADY_PASSED:
+            message = op_to_str(OP_CLOSE_RESP) + " PST\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case CloseResult::ALREADY_CLOSED:
+            message = op_to_str(OP_CLOSE_RESP) + " CLO\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case CloseResult::IO_ERROR:
             write_all(fd, "NOK\n", 4);
             return;
     }  

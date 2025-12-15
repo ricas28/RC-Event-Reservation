@@ -59,9 +59,9 @@ private:
     bool ensure_user_dirs(const std::string& uid);
     bool ensure_event_dirs(const std::string& eid);
     // Returns the current eid.
-    int read_eid();
+    int read_eid(int fd);
     // Increments the current eid.
-    bool increment_eid();
+    bool increment_eid(int fd, int current_eid = -1);
     // Creates a simple file with no text inside.
     bool create_file(const string &path);
     // Deletes a file from the db.
@@ -71,7 +71,7 @@ private:
     // Writes number of reservations made to the RES file.
     bool write_res_file(const string &end_path, int reservations);
     // Writes content to description file.
-    bool write_description_file(const string &description_path, string &Fdata);
+    bool write_description_file(const string &description_path, const string &Fdata);
 
 public:
     // Get the only instance
@@ -92,8 +92,16 @@ public:
     bool user_logged_in(const string &uid);
     // Check if an END file exists
     bool is_event_closed(const string &eid);
+    // Check if an event exists.
+    bool event_exists(const string &eid);
     // Check how many seats were reserved for event.
     int get_reserved_seats(const string &eid);
+    // Get the creator of an event.
+    bool get_event_creator(const string &eid, string &creator);
+    // Checks if an event already happened.
+    bool event_passed(const string &eid, bool &in_past);
+    // Checks if an event is sold out.
+    bool is_event_sold_out(const string &eid, bool &sold_out);
 
     // ----- OPERATIONS -------
 
@@ -108,7 +116,7 @@ public:
     // Unregister a uer.
     bool unregister_user(const string &uid);
     // Close an event.
-    bool close_event(const std::string &eid, DateTime &dt);
+    bool close_event(const std::string &eid, DateTime dt);
     // Get user events.
     void get_user_events(const string &uid,  vector<pair<string, int>> &events);
     // Get user reservations.

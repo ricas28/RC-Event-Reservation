@@ -54,6 +54,8 @@ OP_CODE get_udp_command(const char *command);
  * @param request Request that was received.
  * @param uid String that will contain the UID sent on the request.
  * @param password String that will contain the password sent on the request.
+ * 
+ * @returns true if parse is successful, false otherwise.
  */
 bool parse_login_request(const char *request, string &uid, string &password);
 
@@ -63,6 +65,8 @@ bool parse_login_request(const char *request, string &uid, string &password);
  * @param request Request that was received.
  * @param uid String that will contain the UID sent on the request.
  * @param password String that will contain the password sent on the request.
+ * 
+ * @returns true if parse is successful, false otherwise.
  */
 bool parse_logout_request(const char *request, string &uid, string &password);
 
@@ -72,6 +76,8 @@ bool parse_logout_request(const char *request, string &uid, string &password);
  * @param request Request that was received.
  * @param uid String that will contain the UID sent on the request.
  * @param password String that will contain the password sent on the request.
+ * 
+ * @returns true if parse is successful, false otherwise.
  */
 bool parse_unregister_request(const char *request, string &uid, string &password);
 
@@ -81,6 +87,8 @@ bool parse_unregister_request(const char *request, string &uid, string &password
  * @param request Request that was received.
  * @param uid String that will contain the UID sent on the request.
  * @param password String that will contain the password sent on the request.
+ * 
+ * @returns true if parse is successful, false otherwise.
  */
 bool parse_myevents_request(const char *request, string &uid, string &password);
 
@@ -90,6 +98,8 @@ bool parse_myevents_request(const char *request, string &uid, string &password);
  * @param request Request that was received.
  * @param uid String that will contain the UID sent on the request.
  * @param password String that will contain the password sent on the request.
+ * 
+ * @returns true if parse is successful, false otherwise.
  */
 bool parse_myreservations_request(const char *request, string &uid, string &password);
 
@@ -100,8 +110,22 @@ bool parse_myreservations_request(const char *request, string &uid, string &pass
  * @param uid String that will contain the UID sent on the request.
  * @param password String that will contain the password sent on the request.
  * @param event Struct that will contain data for event creation.
+ * 
+ * @returns true if parse is successful, false otherwise.
  */
 bool parse_create_request(int fd, const char *request_so_far, 
                             string &uid, string &password, Event_creation_Info &event);
+
+/**
+ * Parses a request to the 'close' command.
+ * 
+ * @param request Request that was received.
+ * @param uid String that will contain the UID sent on the request.
+ * @param password String that will contain the password sent on the request.
+ * @param eid String that will contain the EID sent on the request
+ * 
+ * @returns true if parse is successful, false otherwise.
+*/      
+bool parse_close_request(const char *request, string &uid, string &password, string &eid);
 
 #endif

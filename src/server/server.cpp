@@ -5,11 +5,14 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <fcntl.h>           
+#include <vector>
 
 #include "server.hpp"
 #include "command_handler.hpp"
@@ -251,67 +254,88 @@ bool validateStartFileData(string filepath,
 }
 
 StartFileData extract_start_file_data(const std::string &filepath){
-    ifstream file(filepath);
-    if (!file.is_open()) {
-        cerr << "Cannot open file: " << filepath << endl;
+    int fd;
+    if(!open_and_lock(filepath, O_RDONLY, LOCK_SH, fd))
         return { -1, "", "", -1, DateTime() };
-    }
-    string line;
-    if (!getline(file, line)) {
-        cerr << "Start file is empty: " << filepath << endl;
+
+    // Get file size.
+    struct stat st;
+    if(fstat(fd, &st) == -1){
+        perror(("fstat: " + filepath).c_str());
+        close(fd);
         return { -1, "", "", -1, DateTime() };
     }
 
-    istringstream iss(line);
-    // Validation for uid uses string so it needs to be read as such.
+    vector<char> buffer((size_t)st.st_size + 1, 0);
+    if(read_all(fd, buffer.data(), (size_t)st.st_size) != st.st_size){
+        perror(("read_all: " + filepath).c_str());
+        close(fd);
+        return { -1, "", "", -1, DateTime() };
+    }
+    close(fd); // unlock + close
+
+    istringstream iss(buffer.data());
     string uid, event_name, desc_fname, start_date, start_time;
     int event_attend;
 
-    // Extract info
-    if (!(iss >> uid >> event_name >> desc_fname >> event_attend >> start_date >> start_time)) {
+    if(!(iss >> uid >> event_name >> desc_fname >> event_attend >> start_date >> start_time)){
         cerr << "Invalid start file format: " << filepath << endl;
         return { -1, "", "", -1, DateTime() };
     }
 
     DateTime dt;
-    if(!validateStartFileData(filepath, uid, event_name, 
-                                        desc_fname, start_date, start_time, dt, event_attend)){
-        return { -1, "", "", -1, DateTime() };                                       
+    if(!validateStartFileData(filepath, uid, event_name, desc_fname, start_date, start_time, dt, event_attend)){
+        return { -1, "", "", -1, DateTime() };
     }
 
     return {atoi(uid.c_str()), event_name, desc_fname, event_attend, dt};
 }
 
 Reservation extract_reservation_file_data(const string &filepath){
-    ifstream file(filepath);
-    if (!file.is_open()) {
-        cerr << "Cannot open file: " << filepath << endl;
-        return {"-1",  DateTime(), -1};
+    int fd;
+    if(!open_and_lock(filepath, O_RDONLY, LOCK_SH, fd))
+        return {"-1", DateTime(), -1};
+
+    // Get file size.
+    struct stat st;
+    if(fstat(fd, &st) == -1){
+        perror(("fstat: " + filepath).c_str());
+        close(fd);
+        return {"-1", DateTime(), -1};
     }
 
+    vector<char> buffer((size_t)st.st_size + 1, 0);
+    if(read_all(fd, buffer.data(), (size_t)st.st_size) != st.st_size){
+        perror(("read_all: " + filepath).c_str());
+        close(fd);
+        return {"-1", DateTime(), -1};
+    }
+    close(fd); // unlock + close
+
+    istringstream iss(buffer.data());
     string eid, date_str, time_str, num_seats_str;
     int num_seats;
 
-    if (!(file >> eid >> num_seats_str >> date_str >> time_str)) {
+    if(!(iss >> eid >> num_seats_str >> date_str >> time_str)){
         cerr << "Invalid format on file: " << filepath << endl;
-        return {"-1",  DateTime(), -1};
+        return {"-1", DateTime(), -1};
     }
 
     if(!is_valid_eid((char *)eid.c_str())){
         cerr << "Invalid EID on file '" << filepath  << "': "<< eid << endl;
-        return {"-1",  DateTime(), -1};
-    }
-    DateTime dt;
-    if (!DateTime::fromStrings(date_str, time_str, dt)) {
-        cerr << "Invalid date or time on file: '" << filepath << "': " << 
-                                                date_str << " " << time_str << endl;
-        return {"-1",  DateTime(), -1};
-    }
-    if(!is_valid_seats((char *)num_seats_str.c_str(), &num_seats)){
-        cerr << "Invalid number of reserved seats on file '" << filepath << 
-                                                    "': " << num_seats_str << endl;
-        return {"-1",  DateTime(), -1};
+        return {"-1", DateTime(), -1};
     }
 
-    return { eid, dt, num_seats};
+    DateTime dt;
+    if(!DateTime::fromStrings(date_str, time_str, dt)){
+        cerr << "Invalid date or time on file: '" << filepath << "': " << date_str << " " << time_str << endl;
+        return {"-1", DateTime(), -1};
+    }
+
+    if(!is_valid_seats((char *)num_seats_str.c_str(), &num_seats)){
+        cerr << "Invalid number of reserved seats on file '" << filepath << "': " << num_seats_str << endl;
+        return {"-1", DateTime(), -1};
+    }
+
+    return { eid, dt, num_seats };
 }

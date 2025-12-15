@@ -19,7 +19,10 @@ private:
 public:
     DateTime(int d = 0, int m = 0, int y = 0,
              int h = 0, int min = 0, int sec = 0);
-             
+            
+    // Get current time
+    static DateTime now();
+
     int getDay();
     int getMonth();
     int getYear();

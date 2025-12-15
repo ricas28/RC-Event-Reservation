@@ -80,4 +80,15 @@ MyReservationsResult myreservations(string &uid, string &password, vector<Reserv
  * @return CreateResult enum.
  */
 CreateResult create(string &uid, string &password, Event_creation_Info &event, string &eid);
+
+/**
+ * Executes a 'close' command.
+ * 
+ * @param uid UID received on the request.
+ * @param password Password received on the request.
+ * @param eid EID of the new created event.
+ * 
+ * @return CloseResult enum.
+ */
+CloseResult close(string &uid, string &password, string &eid);
 #endif

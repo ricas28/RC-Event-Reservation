@@ -294,6 +294,7 @@ int er_create(CLArgs client, string name, string event_fname, size_t Fsize,
     string message = op_to_str(OP_CREATE) + " " + to_string(client.uid) + " " + client.pass +
                         " " + name + " " + event_date.toString() + " " + to_string(num_attendees) +
                         " " + event_fname + " " + to_string(Fsize) + " " + Fdata + "\n";
+
     string response;
     if((response = client_tcp_request_line(&client, message)) == ""){
         cerr << "Failure to request/receive message to server" << endl;
@@ -309,6 +310,11 @@ int er_create(CLArgs client, string name, string event_fname, size_t Fsize,
     OP_CODE code = str_to_op(response_code);
     if(code == ERR){
         cerr << "Invalid request message was sent" << endl;
+        free(Fdata);
+        return -1;
+    }
+    if(code == INTERNAL_ERROR){
+        cerr << "Internal error occured on the server" << endl;
         free(Fdata);
         return -1;
     }
@@ -351,6 +357,10 @@ int er_close(CLArgs client, string eid){
     OP_CODE code = str_to_op(response_code);
     if(code == ERR){
         cerr << "Invalid request message was sent" << endl;
+        return -1;
+    }
+    if(code == INTERNAL_ERROR){
+        cerr << "Internal error occured on the server" << endl;
         return -1;
     }
     if(code != OP_CLOSE_RESP || !parse_close_response(response.c_str(), status)){
@@ -407,6 +417,10 @@ int er_list(CLArgs client){
     OP_CODE code = str_to_op(response_code);
     if(code == ERR){
         cerr << "Invalid request message was sent" << endl;
+        return -1;
+    }
+    if(code == INTERNAL_ERROR){
+        cerr << "Internal error occured on the server" << endl;
         return -1;
     }
     vector<Event_list> events_list = {};
@@ -511,6 +525,11 @@ int er_show(CLArgs client, string &eid){
         close(fd);
         return -1;
     }
+    if(code == INTERNAL_ERROR){
+        cerr << "Internal error occured on the server" << endl;
+        close(fd);
+        return -1;
+    }
     // Read and validate status.
     string status = tcp_read_word(fd);
     if(status != "OK" && status != "NOK"){
@@ -568,6 +587,10 @@ int er_reserve(CLArgs client, string &eid, int people){
         cerr << "Invalid request message was sent" << endl;
         return -1;
     }
+    if(code == INTERNAL_ERROR){
+        cerr << "Internal error occured on the server" << endl;
+        return -1;
+    }
     int n_seats;
     if(code != OP_RESERVE_RESP || !parse_reserve_response((char*)response.c_str(), status, n_seats)){
         cerr << "Bad message received from server!" << endl;
@@ -610,6 +633,10 @@ int er_changePass(CLArgs &client, string old_pass, string new_pass){
     OP_CODE code = str_to_op(response_code);
     if(code == ERR){
         cerr << "Invalid request message was sent" << endl;
+        return -1;
+    }
+    if(code == INTERNAL_ERROR){
+        cerr << "Internal error occured on the server" << endl;
         return -1;
     }
     if(code != OP_CHANGE_PASS_RESP || !parse_changePass_response((char*)response.c_str(), status)){

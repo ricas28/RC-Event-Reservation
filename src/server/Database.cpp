@@ -10,6 +10,7 @@
 #include <cerrno>
 
 #include "../common/util.hpp"
+#include "../common/io.hpp"
 #include "../common/DateTime.hpp"
 #include "../common/protocol.hpp"
 #include "../common/constants.hpp"
@@ -35,7 +36,7 @@ Database::Database(): ok(true) {
     string counter_file = base_path + EID_COUNTER;
     ifstream infile(counter_file);
     if (!infile.is_open()) {
-        // File does not exist → create it with 0
+        // File does not exist -> create it with 0
         ofstream outfile(counter_file);
         if (!outfile.is_open()) {
             cerr << "Failed to create counter file: " << counter_file << endl;
@@ -135,47 +136,70 @@ bool Database::ensure_event_dirs(const string& eid) {
     return true;
 }
 
-bool Database::increment_eid(){
-    const string path = base_path + "eid_counter.txt";
-    int eid = read_eid();
+bool Database::increment_eid(int fd, int current_eid){
+    int eid = 0;
+    // Read current eid value if necessary.
+    if(current_eid == -1){
+        eid = read_eid(fd);
+        eid++;
+    }
+    else{
+        eid = current_eid + 1;
+    }
 
-    ofstream out(path, ios::trunc);
-    if (!out.is_open()) {
-        cerr << "Failed to open EID counter file for writing" << endl;
+    // Go back to the beginning of the file.
+    lseek(fd, 0, SEEK_SET);
+    if (ftruncate(fd, 0) == -1) {
+        perror("ftruncate failed");
+        close(fd);
         return false;
     }
-    out << eid + 1;
-    out.close();
+
+    string eid_str =  to_string(eid);
+    if(write_all(fd, eid_str.c_str(), eid_str.size()) <= 0){
+        cerr << "failure to write to EID counter file" << endl;
+        return false;
+    }
+
     return true;
 }
 
-int Database::read_eid(){
-    const string path = base_path + "/eid_counter.txt";
-    int eid = 0;
+int Database::read_eid(int fd){
+    char eid_str[EID_SIZE];
 
-    ifstream in(path);
-    if (in.is_open()) {
-        in >> eid;
-        in.close();
+    if(read_all(fd, eid_str, EID_SIZE-1) <= 0){
+        cerr << "Failure to read from EID counter file" << endl;
+        return -1;
     }
-    return eid;
+
+    return atoi(eid_str);
 }
 
 bool Database::create_file(const string &path){
-    ofstream out(path);
-    if (!out.is_open())
+    int fd;
+    if(!open_and_lock(path, O_CREAT | O_WRONLY, LOCK_EX, fd))
         return false;
-    out.close();
+
+    close(fd);  // Unlock
     return true;
 }
 
 bool Database::delete_file(const string &path){
-    if (unlink(path.c_str()) == -1) {
-        if (errno != ENOENT) {     // ENOENT = file does not exist → OK
-            fprintf(stderr,
-                "unlink failed for file '%s': %s\n",
-                path.c_str(),
-                strerror(errno));
+    int fd;
+    // Optional: try to lock before deleting
+    if(open_and_lock(path, O_WRONLY, LOCK_EX, fd)){
+        if(unlink(path.c_str()) == -1){
+            if(errno != ENOENT){
+                perror(("unlink failed for file " + path).c_str());
+                close(fd);
+                return false;
+            }
+        }
+        close(fd);
+    } else {
+        // Could not lock -> maybe file doesn't exist
+        if(errno != ENOENT){
+            perror(("Failed to lock file before deleting: " + path).c_str());
             return false;
         }
     }
@@ -183,58 +207,58 @@ bool Database::delete_file(const string &path){
 }
 
 bool Database::write_start_file(const string &start_path, const string &uid, Event_creation_Info &event){
-    ofstream start_fd(start_path);
-    if (!start_fd.is_open()){
-        cerr << "Failure to open START file" << endl;
+    int fd;
+    if(!open_and_lock(start_path, O_WRONLY | O_CREAT | O_TRUNC, LOCK_EX, fd))
+        return false;
+
+    string content = uid + " " + event.name + " " + event.Fname + " " +
+                          to_string(event.attendace_size) + " " +
+                          event.event_date.toString() + "\n";
+
+    if(write_all(fd, content.c_str(), content.size()) != (ssize_t)content.size()){
+        perror(("write_all: " + start_path).c_str());
+        delete_file(start_path);
+        close(fd);
         return false;
     }
 
-    if(!(start_fd << uid << " " 
-            << event.name << " " 
-            << event.Fname << " "
-            << event.attendace_size << " "
-            << event.event_date.toString() << endl)){
-        cerr << "Failure to write to START file" << endl;
-        start_fd.close();
-        delete_file(start_path);
-        return false;
-    }
+    close(fd); // unlock + close
     return true;
 }
 
 bool Database::write_res_file(const string &res_path, int reservations){
-    ofstream file(res_path, ios::trunc);
-    if (!file.is_open()) {
-        cerr << "Failure to open RES file for writing: " << res_path << endl;
+    int fd;
+    if(!open_and_lock(res_path, O_WRONLY | O_CREAT | O_TRUNC, LOCK_EX, fd))
         return false;
-    }
 
-    if (!(file << reservations << endl)) {
-        cerr << "Failure to write to RES file: " << res_path << endl;
-        file.close();
+    string content = to_string(reservations) + "\n";
+
+    if(write_all(fd, content.c_str(), content.size()) != (ssize_t)content.size()){
+        perror(("write_all: " + res_path).c_str());
         delete_file(res_path);
+        close(fd);
         return false;
     }
 
-    file.close();
+    close(fd); // unlock + close
     return true;
 }
 
-bool Database::write_description_file(const string &description_path, string &Fdata){
-    ofstream file(description_path, ios::trunc);
-    if (!file.is_open()) {
-        cerr << "Failure to open description file for writing: " << description_path << endl;
+bool Database::write_description_file(const string &description_path, const string &Fdata){
+    int fd;
+    if(!open_and_lock(description_path, O_WRONLY | O_CREAT | O_TRUNC, LOCK_EX, fd))
+        return false;
+
+    string content = Fdata;
+
+    if(write_all(fd, content.c_str(), content.size()) != (ssize_t)content.size()){
+        perror(("write_all: " + description_path).c_str());
+        unlink(description_path.c_str());
+        close(fd);
         return false;
     }
 
-    if (!(file << Fdata << endl)) {
-        cerr << "Failure to write to description file: " << description_path << endl;
-        file.close();
-        delete_file(description_path);
-        return false;
-    }
-
-    file.close();
+    close(fd); // unlock + close
     return true;
 }
 
@@ -254,101 +278,168 @@ bool Database::is_event_closed(const string &eid){
     return fs::exists(event_end_file(eid));
 }
 
+bool Database::event_exists(const string &eid){
+    return fs::exists(event_dir(eid));
+}
+
+bool Database::get_event_creator(const string &eid, string &creator){
+    string start_path = event_start_file(eid);
+
+    StartFileData data = extract_start_file_data(start_path);
+    if(data.uid == -1)
+        return false;
+
+    creator = to_string(data.uid);
+    return true;
+}
+
+bool Database::event_passed(const string &eid, bool &in_past){
+    string start_file = event_start_file(eid);
+
+    StartFileData data = extract_start_file_data(start_file);
+    if(data.uid == -1)
+        return false;
+
+    in_past = data.start_date_time.isPast();
+    return true;
+}
+
+bool Database::is_event_sold_out(const string &eid, bool &sold_out){
+    string start_file = event_start_file(eid);
+    string res_file = event_res_file(eid);
+
+    StartFileData data = extract_start_file_data(start_file);
+    if(data.uid == -1)
+        return false;
+
+    int reserved = get_reserved_seats(eid);
+    if(reserved == -1)
+        return false;
+
+    sold_out = reserved >= data.event_attend;
+    return true;
+}
+
 bool Database::login_user(const string &uid){
     const string login_file = user_login_file(uid);
-    return create_file(login_file);
+    return create_file(login_file);  // Already locks in create_file
 }
 
 bool Database::register_user(const string &uid, const string &password) {
     if (!ensure_user_dirs(uid)) return false;
 
-    // Create password file.
     string pass_file = user_pass_file(uid);
-    ofstream out(pass_file);
-    if (!out.is_open())
+    int fd;
+    if(!open_and_lock(pass_file, O_CREAT | O_WRONLY | O_TRUNC, LOCK_EX, fd))
         return false;
-    out << password << "\n";
 
-    // Create login file.
+    string data = password + "\n";
+    if(write_all(fd, data.c_str(), data.size()) != (ssize_t)data.size()){
+        perror(("Failed to write password to " + pass_file).c_str());
+        close(fd);
+        return false;
+    }
+
+    close(fd); // Release lock
+
+    // Create login file
     if(!login_user(uid))
         return false;
-   
+
     return true;
 }
 
 bool Database::check_password(const string &uid, const string &password){
     string pass_file = user_pass_file(uid);
+    int fd;
+    if(!open_and_lock(pass_file, O_RDONLY, LOCK_SH, fd))
+        return false;
 
-    ifstream in(pass_file);
-    if (!in.is_open()) return false;
+    char buf[PASS_SIZE];  
+    ssize_t n = read_all(fd, buf, PASS_SIZE - 1);
+    close(fd);
 
-    string stored;
-    getline(in, stored);
+    if(n <= 0) return false;
+    string stored(buf, (size_t)n);
+    stored.erase(stored.find_last_not_of("\r\n")+1); // Remove newline
 
     return stored == password;
 }
 
 bool Database::logout_user(const string &uid){
-    if (unlink(user_login_file(uid).c_str()) == -1) {
-        if (errno != ENOENT) {     // ENOENT = file does not exist → OK
-            perror("unlink for 'logout' failed");
-            return false;
+    const string login_file = user_login_file(uid);
+    int fd;
+    if(open_and_lock(login_file, O_WRONLY, LOCK_EX, fd)){
+        if(unlink(login_file.c_str()) == -1){
+            if(errno != ENOENT){
+                perror(("unlink for 'logout' failed: " + login_file).c_str());
+                close(fd);
+                return false;
+            }
         }
+        close(fd);
     }
     return true;   
 }
 
 bool Database::unregister_user(const string &uid){
-    // Remove pass file.
-    if (unlink(user_pass_file(uid).c_str()) == -1) {
-        if (errno != ENOENT) {     // ENOENT = file does not exist → OK
-            perror("unlink for 'logout' failed");
-            return false;
+    const string pass_file = user_pass_file(uid);
+    int fd;
+
+    if(open_and_lock(pass_file, O_WRONLY, LOCK_EX, fd)){
+        if(unlink(pass_file.c_str()) == -1){
+            if(errno != ENOENT){
+                perror(("unlink failed for password file: " + pass_file).c_str());
+                close(fd);
+                return false;
+            }
         }
+        close(fd);
     }
 
-    // Remove login file.
+    // Remove login file
     if(!logout_user(uid))
         return false;
-    
     return true;
 }
 
-bool Database::close_event(const std::string &eid, DateTime &dt){
+bool Database::close_event(const std::string &eid, DateTime dt){
     string end_file_path = event_end_file(eid);
+    int fd;
 
-    ofstream end_file(end_file_path);
-    if (!end_file.is_open()) {
-        cerr << "Failed to create END file for event " << eid << endl;
+    // Open and exclusively lock the file
+    if(!open_and_lock(end_file_path, O_WRONLY | O_CREAT | O_TRUNC, LOCK_EX, fd))
+        return false;
+
+    string data = dt.toString(true) + "\n";
+    if(write_all(fd, data.c_str(), data.size()) != (ssize_t)data.size()){
+        cerr << "Failed to write closing date to END file: " << end_file_path << endl;
+        close(fd); // unlocks on close
         return false;
     }
 
-    // Write close date to file.
-    if(!(end_file << dt.toString(true) << endl)){
-        cerr << "Failute to write closing date to END file";
-        end_file.close();
-        return false;
-    }
-
-    end_file.close();
+    close(fd); // releases lock
     return true;
 }
 
 int Database::get_reserved_seats(const string &eid){
     string reservations_file = event_res_file(eid);
+    int fd;
 
-    ifstream file(reservations_file);
-    if (!file.is_open()) {
-        cerr << "Failed to open reservations file for event " << eid << endl;
-        return -1; 
-    }
+    // Open and shared lock for reading
+    if(!open_and_lock(reservations_file, O_RDONLY, LOCK_SH, fd))
+        return -1;
 
-    int reservations = 0;
-    if (!(file >> reservations)) {
+    char buf[64];
+    ssize_t n = read_all(fd, buf, sizeof(buf)-1);
+    close(fd); // releases lock
+
+    if(n <= 0){
         cerr << "Failed to read reservations from file for event " << eid << endl;
-        return -1; 
+        return -1;
     }
 
+    int reservations = atoi(buf);
     return reservations;
 }
 
@@ -419,18 +510,34 @@ void Database::get_user_reservations(const string &uid, vector<Reservation> &res
 }
 
 bool Database::create_event(const string &uid, Event_creation_Info &event, string &eid){
-    int events_created = read_eid();
+    const string counter_path = base_path + EID_COUNTER;
+    int fd;
+
+    // Open and lock counter file for EID.
+    if (!open_and_lock(counter_path, O_RDWR | O_CREAT, LOCK_EX, fd)) {
+        return false;
+    }
+
+    int events_created = read_eid(fd);
+    if(events_created == -1){
+        close(fd);
+        return false;
+    }
     if(events_created == MAX_EVENTS){
         eid = "-1";
+        close(fd);
         return false;
     }
 
     eid = format_eid(events_created + 1);
-    if(!ensure_event_dirs(eid))
+    if(!ensure_event_dirs(eid)){
+        close(fd);
         return false;
+    }
     string event_file = user_created_file(uid, eid);
     if(!create_file(event_file)){
         cerr << "Failure to open file on CREATED dir" << endl;
+        close(fd);
         return false;
     } 
 
@@ -440,12 +547,14 @@ bool Database::create_event(const string &uid, Event_creation_Info &event, strin
 
     if(!write_start_file(start_path, uid, event)){
         delete_file(event_file);
+        close(fd);
         return false;
     }
 
     if(!write_res_file(res_path, 0)){
         delete_file(event_file);
         delete_file(start_path);
+        close(fd);
         return false;
     }
 
@@ -453,14 +562,17 @@ bool Database::create_event(const string &uid, Event_creation_Info &event, strin
         delete_file(event_file);
         delete_file(start_path);
         delete_file(res_path);
+        close(fd);
         return false;
     }
     // Increase EID counter.
-    if(!increment_eid()){
+    if(!increment_eid(fd, events_created)){
         delete_file(event_file);
         delete_file(start_path);
         delete_file(res_path);
+        close(fd);
         return false;
     }
+    close(fd);
     return true;
  }

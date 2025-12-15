@@ -22,6 +22,16 @@ int read_line_256(int fd, char *line);
 void clean_up_fd(int fd);
 
 /**
+ * Opens a file with the given flags and locks the file.
+ * 
+ * @param path File path.
+ * @param flags Flags for opening the file.
+ * @param lock_type Type of lock.
+ * @param fd Will contain the file descriptor for the opened file.
+ */
+bool open_and_lock(const string &path, int flags, int lock_type, int &fd);
+
+/**
  * Writes size bytes from fd into buffer.
  * 
  * @param fd File descriptor.

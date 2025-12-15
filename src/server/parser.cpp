@@ -155,7 +155,6 @@ bool parse_create_request(int fd, const char *request_so_far,
                             string &uid, string &password, Event_creation_Info &event){
     // On handling of TCP request we already read OP_CODE and UID
     char code[BUF_TEMP], uid_temp[BUF_TEMP], extra[BUFFER_SIZE];
-    bool end_line = false;
 
     // Validate OP_CODE and UID.
     int n = sscanf(request_so_far, "%63s %63s %255s", code, uid_temp, extra);
@@ -164,25 +163,25 @@ bool parse_create_request(int fd, const char *request_so_far,
     }
 
     // Read values one by one and validate.
-    string password_temp = tcp_read_word(fd, &end_line);
+    string password_temp = tcp_read_word(fd);
     if(!is_valid_password((char *)password_temp.c_str())) return false;
     
-    string name = tcp_read_word(fd, &end_line);
+    string name = tcp_read_word(fd);
     if(!is_valid_event_name((char *)name.c_str())) return false;
 
-    string date = tcp_read_word(fd, &end_line);
+    string date = tcp_read_word(fd);
     if(date == "") return false;
-    string time = tcp_read_word(fd, &end_line);
+    string time = tcp_read_word(fd);
     if(time == "") return false;
     DateTime dt;
     if(!DateTime::fromStrings(date, time, dt) || dt.isPast()) return false;
 
-    string attendace_size_str = tcp_read_word(fd, &end_line);
+    string attendace_size_str = tcp_read_word(fd);
     int attendace_size;
     bool valid = is_positive_integer(attendace_size_str.c_str(), &attendace_size);
     if(!valid || (valid && !is_valid_num_attendees(attendace_size))) return false;
 
-    string Fname = tcp_read_word(fd, &end_line);
+    string Fname = tcp_read_word(fd);
     if(!is_valid_file_name((char *)Fname.c_str())) return false;
 
     string Fsize_str = tcp_read_word(fd);
@@ -196,12 +195,26 @@ bool parse_create_request(int fd, const char *request_so_far,
     ssize_t size = read_all(fd, &Fdata[0], (size_t)Fsize);
     if(size != Fsize) return false;
 
-    char c;
-    if(read_all(fd, &c, 1) <= 0) return false;
-    if(c != '\n') return false;
-
     uid = uid_temp;
     password = password_temp;
     event = {name, dt, attendace_size, Fname, (size_t)Fsize, Fdata};
+    return true;
+}
+
+bool parse_close_request(const char *request, string &uid, string &password, string &eid){
+    char code[BUF_TEMP], uid_temp[BUF_TEMP], password_temp[BUF_TEMP];
+    char eid_temp[BUF_TEMP], extra[BUFFER_SIZE];
+    
+    int n = sscanf(request, "%63s %63s %63s %63s %255s", code, uid_temp, 
+                                                        password_temp, eid_temp, extra);
+
+    if(n != 4 || str_to_op(code) != OP_CLOSE || !is_valid_userid(uid_temp) ||
+                                !is_valid_password(password_temp) || !is_valid_eid(eid_temp)){
+        return false;
+    }
+
+    uid = uid_temp;
+    password = password_temp;
+    eid = eid_temp;
     return true;
 }

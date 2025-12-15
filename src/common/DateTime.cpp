@@ -174,6 +174,20 @@ bool DateTime::fromStrings(const string &date, const string &time, DateTime &out
     return true;
 }
 
+DateTime DateTime::now(){
+    time_t t = time(nullptr);
+    tm* now = localtime(&t);
+
+    return DateTime(
+        now->tm_mday,
+        now->tm_mon + 1,
+        now->tm_year + 1900,
+        now->tm_hour,
+        now->tm_min,
+        now->tm_sec
+    );
+}
+
 bool DateTime::isAfter(DateTime& other) {
     if (year != other.year) return year > other.year;
     if (month != other.month) return month > other.month;
@@ -184,17 +198,7 @@ bool DateTime::isAfter(DateTime& other) {
 }
 
 bool DateTime::isPast() {
-    time_t t = time(nullptr);
-    tm* now = localtime(&t);
-
-    DateTime current(
-        now->tm_mday,
-        now->tm_mon + 1,
-        now->tm_year + 1900,
-        now->tm_hour,
-        now->tm_min,
-        now->tm_sec
-    );
+    DateTime current = now();
 
     return !isAfter(current) &&
            !(
