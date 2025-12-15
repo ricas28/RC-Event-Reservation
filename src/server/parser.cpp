@@ -77,9 +77,9 @@ OP_CODE get_udp_command(const char *command){
 
 /* ------------- COMMAND PARSING -------------- */
 bool parse_login_request(const char *request, string &uid, string &password){
-    char code[BUF_TEMP], uid_temp[BUF_TEMP], password_temp[BUF_TEMP], extra[BUFFER_SIZE];
+    char code[BUF_TEMP], uid_temp[BUF_TEMP], password_temp[BUF_TEMP], extra[TCP_READING_SIZE];
     
-    int n = sscanf(request, "%63s %63s %63s %255s", code, uid_temp, password_temp, extra);
+    int n = sscanf(request, "%63s %63s %63s %1023s", code, uid_temp, password_temp, extra);
 
     if(n != 3 || str_to_op(code) != OP_LOGIN || !is_valid_userid(uid_temp) ||
                                                 !is_valid_password(password_temp)){
@@ -92,9 +92,9 @@ bool parse_login_request(const char *request, string &uid, string &password){
 }
 
 bool parse_logout_request(const char *request, string &uid, string &password){
-    char code[BUF_TEMP], uid_temp[BUF_TEMP], password_temp[BUF_TEMP], extra[BUFFER_SIZE];
+    char code[BUF_TEMP], uid_temp[BUF_TEMP], password_temp[BUF_TEMP], extra[TCP_READING_SIZE];
     
-    int n = sscanf(request, "%63s %63s %63s %255s", code, uid_temp, password_temp, extra);
+    int n = sscanf(request, "%63s %63s %63s %1023s", code, uid_temp, password_temp, extra);
 
     if(n != 3 || str_to_op(code) != OP_LOGOUT || !is_valid_userid(uid_temp) ||
                                                 !is_valid_password(password_temp)){
@@ -107,9 +107,9 @@ bool parse_logout_request(const char *request, string &uid, string &password){
 }
 
 bool parse_unregister_request(const char *request, string &uid, string &password){
-    char code[BUF_TEMP], uid_temp[BUF_TEMP], password_temp[BUF_TEMP], extra[BUFFER_SIZE];
+    char code[BUF_TEMP], uid_temp[BUF_TEMP], password_temp[BUF_TEMP], extra[TCP_READING_SIZE];
     
-    int n = sscanf(request, "%63s %63s %63s %255s", code, uid_temp, password_temp, extra);
+    int n = sscanf(request, "%63s %63s %63s %1023s", code, uid_temp, password_temp, extra);
 
     if(n != 3 || str_to_op(code) != OP_UNREGISTER || !is_valid_userid(uid_temp) ||
                                                 !is_valid_password(password_temp)){
@@ -122,9 +122,9 @@ bool parse_unregister_request(const char *request, string &uid, string &password
 }
 
 bool parse_myevents_request(const char *request, string &uid, string &password){
-    char code[BUF_TEMP], uid_temp[BUF_TEMP], password_temp[BUF_TEMP], extra[BUFFER_SIZE];
+    char code[BUF_TEMP], uid_temp[BUF_TEMP], password_temp[BUF_TEMP], extra[TCP_READING_SIZE];
     
-    int n = sscanf(request, "%63s %63s %63s %255s", code, uid_temp, password_temp, extra);
+    int n = sscanf(request, "%63s %63s %63s %1023s", code, uid_temp, password_temp, extra);
 
     if(n != 3 || str_to_op(code) != OP_MYEVENTS || !is_valid_userid(uid_temp) ||
                                                 !is_valid_password(password_temp)){
@@ -137,9 +137,9 @@ bool parse_myevents_request(const char *request, string &uid, string &password){
 }
 
 bool parse_myreservations_request(const char *request, string &uid, string &password){
-    char code[BUF_TEMP], uid_temp[BUF_TEMP], password_temp[BUF_TEMP], extra[BUFFER_SIZE];
+    char code[BUF_TEMP], uid_temp[BUF_TEMP], password_temp[BUF_TEMP], extra[TCP_READING_SIZE];
     
-    int n = sscanf(request, "%63s %63s %63s %255s", code, uid_temp, password_temp, extra);
+    int n = sscanf(request, "%63s %63s %63s %1023s", code, uid_temp, password_temp, extra);
 
     if(n != 3 || str_to_op(code) != OP_MYRESERVATIONS || !is_valid_userid(uid_temp) ||
                                                 !is_valid_password(password_temp)){
@@ -154,10 +154,10 @@ bool parse_myreservations_request(const char *request, string &uid, string &pass
 bool parse_create_request(int fd, const char *request_so_far, 
                             string &uid, string &password, Event_creation_Info &event){
     // On handling of TCP request we already read OP_CODE and UID
-    char code[BUF_TEMP], uid_temp[BUF_TEMP], extra[BUFFER_SIZE];
+    char code[BUF_TEMP], uid_temp[BUF_TEMP], extra[TCP_READING_SIZE];
 
     // Validate OP_CODE and UID.
-    int n = sscanf(request_so_far, "%63s %63s %255s", code, uid_temp, extra);
+    int n = sscanf(request_so_far, "%63s %63s %1023s", code, uid_temp, extra);
     if(n != 2 || str_to_op(code) != OP_CREATE || !is_valid_userid(uid_temp)){
         return false;
     }
@@ -197,9 +197,9 @@ bool parse_create_request(int fd, const char *request_so_far,
 
 bool parse_close_request(const char *request, string &uid, string &password, string &eid){
     char code[BUF_TEMP], uid_temp[BUF_TEMP], password_temp[BUF_TEMP];
-    char eid_temp[BUF_TEMP], extra[BUFFER_SIZE];
+    char eid_temp[BUF_TEMP], extra[TCP_READING_SIZE];
     
-    int n = sscanf(request, "%63s %63s %63s %63s %255s", code, uid_temp, 
+    int n = sscanf(request, "%63s %63s %63s %63s %1023s", code, uid_temp, 
                                                         password_temp, eid_temp, extra);
 
     if(n != 4 || str_to_op(code) != OP_CLOSE || !is_valid_userid(uid_temp) ||
@@ -214,16 +214,23 @@ bool parse_close_request(const char *request, string &uid, string &password, str
 }
 
 bool parse_list_request(const char *request){
-    char code[BUF_TEMP], extra[BUFFER_SIZE];
+    char code[BUF_TEMP], extra[TCP_READING_SIZE];
     
-    int n = sscanf(request, "%63s %255s", code, extra);
+    int n = sscanf(request, "%63s %1023s", code, extra);
     if(n != 1 || str_to_op(code) != OP_LIST){
         return false;
     }
     return true;
 }
 
-bool parse_show_request(void){
+bool parse_show_request(const char *request, string &eid){
+    char code[BUF_TEMP], eid_temp[BUF_TEMP], extra[TCP_READING_SIZE];
+
+    int n = sscanf(request, "%63s %63s %1023s", code, eid_temp, extra);
+    if(n != 2 || str_to_op(code) != OP_SHOW || !is_valid_eid(eid_temp))
+        return false;
+
+    eid = eid_temp;
     return true;
 }
 
@@ -233,10 +240,10 @@ bool parse_reserve_request(const char *request,
                             string &eid,
                             int &people){
     char code[BUF_TEMP], uid_temp[BUF_TEMP], pass_temp[BUF_TEMP];
-    char eid_temp[BUF_TEMP], people_temp[BUF_TEMP], extra[BUFFER_SIZE];
+    char eid_temp[BUF_TEMP], people_temp[BUF_TEMP], extra[TCP_READING_SIZE];
 
     // Validate OP_CODE and UID.
-    int n = sscanf(request, "%63s %63s %63s %63s %63s %255s", code, uid_temp, pass_temp,
+    int n = sscanf(request, "%63s %63s %63s %63s %63s %1023s", code, uid_temp, pass_temp,
                                                     eid_temp, people_temp, extra);
     if(n != 5 || str_to_op(code) != OP_RESERVE || 
                         !is_valid_userid(uid_temp) ||
@@ -257,9 +264,9 @@ bool parse_changePass_request(const char *request,
                                 string &old_password,
                                 string &new_password){
     char code[BUF_TEMP], uid_temp[BUF_TEMP], old_password_temp[BUF_TEMP];
-    char new_password_temp[BUF_TEMP], extra[BUFFER_SIZE];
+    char new_password_temp[BUF_TEMP], extra[TCP_READING_SIZE];
     
-    int n = sscanf(request, "%63s %63s %63s %63s %255s", code, uid_temp, old_password_temp, 
+    int n = sscanf(request, "%63s %63s %63s %63s %1023s", code, uid_temp, old_password_temp, 
                                                             new_password_temp, extra);
 
     if(n != 4 || str_to_op(code) != OP_CHANGE_PASS || !is_valid_userid(uid_temp) ||

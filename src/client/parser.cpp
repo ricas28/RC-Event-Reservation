@@ -719,26 +719,8 @@ bool parse_show_response(int fd, Event_show_Info &event){
         return false;
     }
 
-    // Read file.
-    string Fdata;
-    Fdata.resize((size_t)Fsize);
-    ssize_t size = read_all(fd, &Fdata[0], (size_t)Fsize);
-    // Didn't read the whole file.
-    if (size != Fsize){
-        cerr << "Failure to read event file" << endl;
-        return false;
-    }
-
-    // Check end of message.
-    char c; 
-    size = read(fd, &c, 1);
-    if(size == -1 || c != '\n'){
-        cerr << "Invalid protocol message received: '\\n' wasn't found." << endl;
-        return false;
-    }
-
     // Initialize struct.
-    event = {stoi(uid), name, dt, attendace_size, seats_reserved, Fname, (size_t)Fsize, Fdata};
+    event = {stoi(uid), name, dt, attendace_size, seats_reserved, Fname, (size_t)Fsize};
     return true;
 }
 

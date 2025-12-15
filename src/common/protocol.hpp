@@ -67,7 +67,6 @@ struct Event_show_Info{
     int seats_reserved;
     string Fname;
     size_t Fsize;
-    string Fdata;
 };
 
 // User for 'create' command.

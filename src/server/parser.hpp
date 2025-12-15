@@ -137,7 +137,15 @@ bool parse_close_request(const char *request, string &uid, string &password, str
  */
 bool parse_list_request(const char *request);
 
-bool parse_show_request(void);
+/**
+ * Parses a request to the 'show' command.
+ * 
+ * @param request Request that was received.
+ * @param eid String that will contain the EID sent on the request.
+ * 
+ * @returns true if parse is successful, false otherwise.
+*/     
+bool parse_show_request(const char *request, string &eid);
 
 /**
  * Parses a request to the 'reserve' command.

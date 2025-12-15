@@ -479,7 +479,7 @@ int er_list(CLArgs client){
     return 0;      
 }
 
-string save_event_file(const Event_show_Info &event) {
+string save_event_file(int sock, const Event_show_Info &event) {
     // Absolute or relative path to api.cpp
     string file = __FILE__;
 
@@ -505,7 +505,7 @@ string save_event_file(const Event_show_Info &event) {
     int fd = open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (fd == -1)
         return "";
-    if (write_all(fd, event.Fdata.data(), event.Fsize) == -1) {
+    if (stream_file_TCP(sock, fd, event.Fsize) != (ssize_t)event.Fsize){
         close(fd);
         return "";
     }
@@ -563,8 +563,8 @@ int er_show(CLArgs client, string &eid){
         close(fd);
         return -1;
     }
-    if(code == INTERNAL_ERROR){
-        cerr << "Internal error occured on the server" << endl;
+    if(code != OP_SHOW_RESP){
+        cerr << "Bad message received from server!" << endl;
         close(fd);
         return -1;
     }
@@ -585,7 +585,7 @@ int er_show(CLArgs client, string &eid){
 
     // Print message according to the status value
     if(status == "OK"){
-        string path = save_event_file(event);
+        string path = save_event_file(fd, event);
         if(path == ""){
             cerr << "Failure to store event file" << endl;
             close(fd);

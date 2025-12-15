@@ -10,6 +10,8 @@
 #include <vector>
 #include <utility>
 #include <sstream>
+#include <fcntl.h>
+#include <sys/file.h>
 
 #include "../common/protocol.hpp"
 #include "../common/io.hpp"
@@ -332,10 +334,52 @@ void handle_list(int fd, string request_so_far){
     }   
 }
 
+void stream_show_response(int sock, Event_show_Info &data, string &filepath){
+    string message = op_to_str(OP_SHOW_RESP) + " OK " +  to_string(data.uid) + " " + 
+                        data.name + " " +  data.event_date.toString() + " " + 
+                        to_string(data.attendace_size) + " " + to_string(data.seats_reserved) +
+                        " " + data.Fname + " " + to_string(data.Fsize) + " ";
+    
+    if(write_all(sock, message.c_str(), message.size()) != (ssize_t)message.size()){
+        cerr << "Failure to write initial message on 'show' command";
+        return;
+    }
+
+    int fd;
+    if(!open_and_lock(filepath, O_RDONLY, LOCK_SH, fd)){
+        // Open_and_lock already has error messages.
+        return; 
+    }
+
+    if(stream_file_TCP(fd, sock, data.Fsize) != (ssize_t)data.Fsize){
+        cerr << "Failure to stream file with TCP" << endl;
+        close(fd);
+        return;
+    }
+    close(fd);
+}
+
 void handle_show(int fd, string request_so_far){
-    (void)fd;
-    (void)request_so_far;
-    cout << "SHOW" << endl;
+    string eid;
+
+    string request = request_so_far + tcp_read_message(fd);
+    if(!parse_show_request(request.c_str(), eid)){
+        string message = op_to_str(OP_SHOW_RESP) + " ERR\n";
+        write_all(fd, message.c_str(), message.size());
+        return;
+    }
+
+    Event_show_Info data;
+    string filepath, message;
+    switch(show(eid, data, filepath)){
+        case ShowResult::SUCCESS:
+            stream_show_response(fd, data, filepath);
+            return;
+        case ShowResult::ERROR:
+            message = op_to_str(OP_SHOW_RESP) + " NOK\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+    }
 }
 
 void handle_reserve(int fd, string request_so_far){

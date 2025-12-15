@@ -740,6 +740,37 @@ bool Database::get_all_events(vector<Event_list> &events){
     return true;
 }
 
+
+bool Database::show_event(string &eid, Event_show_Info &data, string &filepath){
+    // Get event data.
+    StartFileData start_data = extract_start_file_data(eid);
+    if(start_data.uid == -1)
+        return false;
+
+    // Get number of reserved seats.
+    int seats_reserved = get_reserved_seats(eid);
+    if(seats_reserved == -1)
+        return false;
+
+    // Get the file size.
+    size_t Fsize;
+    if(!get_file_size(event_desc_file(eid, start_data.desc_fname).c_str(), &Fsize))
+        return false;
+
+    // Store data.
+    filepath = event_desc_file(eid, start_data.desc_fname);
+    data = {
+        start_data.uid, 
+        start_data.event_name, 
+        start_data.start_date_time,
+        start_data.event_attend,
+        seats_reserved,
+        start_data.desc_fname,
+        Fsize
+    };
+    return true;
+}
+
 bool Database::reserve(const string &uid, 
                         const string &eid, 
                         const int &people, 

@@ -205,6 +205,13 @@ ListResult list(vector<Event_list> &events){
     return ListResult::SUCCESS;
 }
 
+ShowResult show(string &eid, Event_show_Info &data, string &filepath){
+    if(!db->show_event(eid, data, filepath)){
+        return ShowResult::ERROR;
+    }
+    return ShowResult::SUCCESS;
+}
+
 ReserveResult reserve(string &uid, string &password, string &eid, int &people, int &remaining_seats){
     // Check if user is logged in.
     if(!db->user_logged_in(uid))

@@ -66,6 +66,11 @@ enum class ListResult{
     IO_ERROR
 };
 
+enum class ShowResult{
+    SUCCESS,
+    ERROR
+};
+
 enum class ReserveResult{
     SUCCESS,
     EVENT_NOT_ACTIVE,

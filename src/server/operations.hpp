@@ -103,6 +103,17 @@ CloseResult close(string &uid, string &password, string &eid);
 ListResult list(vector<Event_list> &events);
 
 /**
+ * Executes a 'show' command.
+ * 
+ * @param eid EID of the event being shown.
+ * @param data Struct that will contain info about the event.
+ * @param filepath File path of the description file (used later for streaming).
+ * 
+ * @returns ShowResult enum.
+ */
+ShowResult show(string &eid, Event_show_Info &data, string &filepath);
+
+/**
  * Executes a 'reserve' command.
  * 
  * @param uid UID received on the request.

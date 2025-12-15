@@ -144,6 +144,8 @@ public:
     bool create_event(int sock, const string &uid, Event_creation_Info &event, string &eid);
     // Returns all of the events on the server.
     bool get_all_events(vector<Event_list> &events);
+    // Gets the info for a show event.
+    bool show_event(string &eid, Event_show_Info &data, string &filepath);
     // Makes a reservation.
     bool reserve(const string &uid, 
                     const string &eid, 
