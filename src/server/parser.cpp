@@ -218,3 +218,13 @@ bool parse_close_request(const char *request, string &uid, string &password, str
     eid = eid_temp;
     return true;
 }
+
+bool parse_list_request(const char *request){
+    char code[BUF_TEMP], extra[BUFFER_SIZE];
+    
+    int n = sscanf(request, "%63s %255s", code, extra);
+    if(n != 1 || str_to_op(code) != OP_LIST){
+        return false;
+    }
+    return true;
+}

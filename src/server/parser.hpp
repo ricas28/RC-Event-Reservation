@@ -128,4 +128,13 @@ bool parse_create_request(int fd, const char *request_so_far,
 */      
 bool parse_close_request(const char *request, string &uid, string &password, string &eid);
 
+/**
+ * Parses a request to the 'list' command.
+ * 
+ * @param request Request that was received.
+ * 
+ * @returns true if parse is successful, false otherwise.
+ */
+bool parse_list_request(const char *request);
+
 #endif

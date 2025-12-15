@@ -390,11 +390,17 @@ void print_events_list(vector<Event_list> events_list){
     cout << LINE_SEPARATOR << endl;
     for(auto event: events_list){
         cout << "Event id: " << event.eid << endl;
-        cout << "Event name: " << event.name << endl;
-        cout << "Event status: ";
-        print_event_state(event.state);
-        cout << "Event date and time: ";
-        event.datetime.print();
+        if(event.state == EVENT_CORRUPTED){
+            cout << "Event status: ";
+                print_event_state(event.state);
+        }
+        else{
+            cout << "Event name: " << event.name << endl;
+            cout << "Event status: ";
+            print_event_state(event.state);
+            cout << "Event date and time: ";
+            event.datetime.print();
+        }
         cout << LINE_SEPARATOR << endl;
     }
 }

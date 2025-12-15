@@ -320,6 +320,36 @@ bool Database::is_event_sold_out(const string &eid, bool &sold_out){
     return true;
 }
 
+int Database::get_event_status(const string &eid, StartFileData data){
+    // Check if event is closed.
+    if(is_event_closed(eid)){
+        return EVENT_CLOSED;
+    }
+
+    // Check for invalid values (extraction failed).
+    if(data.uid == -1){
+        // Push event corrupted.
+        return EVENT_CORRUPTED;
+    }
+
+    // Check if event already occured.
+    if(data.start_date_time.isPast()){
+        // Close event
+        close_event(eid, data.start_date_time);
+        return EVENT_IN_PAST;
+    }
+
+    // Check if event is sold out or not.
+    int reserved = get_reserved_seats(eid);
+    if(reserved == -1){
+        return EVENT_CORRUPTED;
+    }
+    int event_status = (reserved >= data.event_attend) ? EVENT_SOLD_OUT : EVENT_ACCEPTING;
+    return event_status;
+}
+
+// ----------- OPERATIONS ---------------
+
 bool Database::login_user(const string &uid){
     const string login_file = user_login_file(uid);
     return create_file(login_file);  // Already locks in create_file
@@ -453,41 +483,17 @@ void Database::get_user_events(const string &uid,  vector<pair<string, int>> &ev
         // Extract the eid of the event for each file.
         string eid = entry.path().stem().string();
 
-        // Check if event is closed.
-        if(is_event_closed(eid)){
-            events.push_back({eid, EVENT_CLOSED});
-            continue;
-        }
+        StartFileData data = extract_start_file_data(event_start_file(eid));
 
-        // Search for the START file.
-        string start_file = event_start_file(eid);
-        
-        // Extract info from START file.
-        StartFileData data = extract_start_file_data(start_file);
-        // Check for invalid values (extraction failed).
-        if(data.uid == -1){
-            // Push event corrupted.
-            events.push_back({eid, EVENT_CORRUPTED});
-            continue;
-        }
-
-        // Check if event already occured.
-        if(data.start_date_time.isPast()){
-            // Close event
-            close_event(eid, data.start_date_time);
-            events.push_back({eid, EVENT_IN_PAST});
-            continue;
-        }
-
-        // Check if event is sold out or not.
-        int reserved = get_reserved_seats(eid);
-        if(reserved == -1){
-            events.push_back({eid, EVENT_CORRUPTED});
-            continue;
-        }
-        int event_status = (reserved >= data.event_attend) ? EVENT_SOLD_OUT : EVENT_ACCEPTING;
-        events.push_back({eid, event_status});
+        // Get status of events
+        events.push_back({eid, get_event_status(eid, data)});
     }
+
+    // Sort by EID.
+    sort(events.begin(), events.end(),
+     [](const pair<string, int> &a, const pair<string, int> &b) {
+         return stoi(a.first) < stoi(b.first);
+     });
 }
 
 void Database::get_user_reservations(const string &uid, vector<Reservation> &reservations){
@@ -576,3 +582,34 @@ bool Database::create_event(const string &uid, Event_creation_Info &event, strin
     close(fd);
     return true;
  }
+
+bool Database::get_all_events(vector<Event_list> &events){
+    const string counter_path = base_path + EID_COUNTER;
+    int fd;
+
+    // Try to open and get a lock on the EID counter file.
+    if (!open_and_lock(counter_path, O_RDWR | O_CREAT, LOCK_EX, fd)) {
+        return false;
+    }
+
+    int current_events = read_eid(fd);
+    close(fd);
+    if(current_events == -1)
+        return false;
+
+    for (int i = 1; i <= current_events; i++){
+        // Get EID.
+        string eid = format_eid(i);
+
+        StartFileData data = extract_start_file_data(event_start_file(eid));
+
+        int status = get_event_status(eid, data);
+        if(status == EVENT_CORRUPTED){
+            events.push_back({eid, "-1", status, DateTime()});
+        }
+        else{
+            events.push_back({eid, data.event_name, status, data.start_date_time});
+        }
+    }
+    return true;
+}

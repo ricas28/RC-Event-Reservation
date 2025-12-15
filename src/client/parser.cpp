@@ -363,6 +363,11 @@ bool parse_events_list(const char *response, vector<Event_list> &events_list){
     string timepart;   // hh:mm
 
     while (iss >> eid >> name >> state >> datepart >> timepart){
+        // Check for corrupted
+        if(state == EVENT_CORRUPTED){
+            events_list.push_back({eid, "", EVENT_CORRUPTED, DateTime()});
+            continue;
+        }
         // Validate EID
         if (!is_valid_eid((char *)eid.c_str())) {
             cerr << "Invalid EID in server response: " << eid << endl;

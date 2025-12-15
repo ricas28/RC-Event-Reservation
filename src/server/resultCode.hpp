@@ -58,4 +58,10 @@ enum class CloseResult{
     IO_ERROR,
 };
 
+enum class ListResult{
+    SUCCESS,
+    NO_EVENT_CREATED,
+    IO_ERROR
+};
+
 #endif

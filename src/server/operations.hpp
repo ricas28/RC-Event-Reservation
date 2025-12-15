@@ -91,4 +91,14 @@ CreateResult create(string &uid, string &password, Event_creation_Info &event, s
  * @return CloseResult enum.
  */
 CloseResult close(string &uid, string &password, string &eid);
+
+/**
+ * Executes a 'list' command.
+ * 
+ * @param events Vector that will contain every event on the server.
+ * 
+ * @return ListResult enum.
+ */
+ListResult list(vector<Event_list> &events);
+
 #endif

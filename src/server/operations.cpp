@@ -169,3 +169,12 @@ CloseResult close(string &uid, string &password, string &eid){
         return CloseResult::IO_ERROR;
     return CloseResult::SUCCESS;
 }
+
+ListResult list(vector<Event_list> &events){
+    if(!db->get_all_events(events))
+        return ListResult::IO_ERROR;
+
+    if(events.empty())
+        return ListResult::NO_EVENT_CREATED;
+    return ListResult::SUCCESS;
+}

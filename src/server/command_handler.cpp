@@ -290,10 +290,41 @@ void handle_close(int fd, string request_so_far){
     }  
 }
 
+string event_list_to_string(vector<Event_list> &events){
+    ostringstream oss;
+    bool first = true;
+
+    for (auto &e : events) {
+        if (!first) oss << " ";
+        oss << e.eid << " " << e.name << " " << e.state << " " << e.datetime.toString(false); 
+        first = false;
+    }
+
+    return oss.str();
+}
+
 void handle_list(int fd, string request_so_far){
-    (void)fd;
-    (void)request_so_far;
-    cout << "LIST" << endl;
+    if(!parse_list_request(request_so_far.c_str())){
+        string message = op_to_str(OP_LIST_RESP) + " ERR\n";
+        write_all(fd, message.c_str(), message.size());
+        return;
+    }
+
+    vector<Event_list> events;
+    string message;
+    switch(list(events)){
+        case ListResult::SUCCESS:
+            message = op_to_str(OP_LIST_RESP) + " OK " + event_list_to_string(events) + "\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+        case ListResult::NO_EVENT_CREATED:
+            message = op_to_str(OP_LIST_RESP) + " NOK\n";
+            write_all(fd, message.c_str(), message.size());
+            return;
+         case ListResult::IO_ERROR:
+            write_all(fd, "NOK\n", 4);
+            return;
+    }   
 }
 
 void handle_show(int fd, string request_so_far){

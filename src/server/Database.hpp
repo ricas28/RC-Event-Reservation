@@ -6,6 +6,7 @@
 
 #include "../common/DateTime.hpp"
 #include "../common/protocol.hpp"
+#include "server.hpp"
 
 using namespace std;
 
@@ -102,6 +103,8 @@ public:
     bool event_passed(const string &eid, bool &in_past);
     // Checks if an event is sold out.
     bool is_event_sold_out(const string &eid, bool &sold_out);
+    // Returns the status of an event.
+    int get_event_status(const string &eid, StartFileData data);
 
     // ----- OPERATIONS -------
 
@@ -128,6 +131,8 @@ public:
      * returns true and sets 'eid' to '-1'.
      */
     bool create_event(const string &uid, Event_creation_Info &event, string &eid);
+    // Returns all of the events on the server.
+    bool get_all_events(vector<Event_list> &events);
 };
 
 
