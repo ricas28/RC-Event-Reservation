@@ -78,6 +78,8 @@ private:
     bool write_res_file(const string &end_path, int reservations);
     // Writes content to description file.
     bool write_description_file(const string &description_path, const string &Fdata);
+    // Writes a password to a user password file.
+    bool write_password(const string &uid, const string &pass);
 
 public:
     // Get the only instance

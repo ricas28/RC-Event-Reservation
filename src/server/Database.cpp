@@ -270,6 +270,23 @@ bool Database::write_description_file(const string &description_path, const stri
     return true;
 }
 
+bool Database::write_password(const string &uid, const string &password){
+    string pass_file = user_pass_file(uid);
+    int fd;
+    if(!open_and_lock(pass_file, O_CREAT | O_WRONLY | O_TRUNC, LOCK_EX, fd))
+        return false;
+
+    string data = password + "\n";
+    if(write_all(fd, data.c_str(), data.size()) != (ssize_t)data.size()){
+        perror(("Failed to write password to " + pass_file).c_str());
+        close(fd);
+        return false;
+    }
+
+    close(fd); // Release lock
+    return true;
+}
+
 bool Database::user_exists(const string &uid){
     return fs::exists(user_dir(uid));
 }
@@ -479,19 +496,8 @@ bool Database::login_user(const string &uid){
 bool Database::register_user(const string &uid, const string &password) {
     if (!ensure_user_dirs(uid)) return false;
 
-    string pass_file = user_pass_file(uid);
-    int fd;
-    if(!open_and_lock(pass_file, O_CREAT | O_WRONLY | O_TRUNC, LOCK_EX, fd))
+    if(!write_password(uid, password))
         return false;
-
-    string data = password + "\n";
-    if(write_all(fd, data.c_str(), data.size()) != (ssize_t)data.size()){
-        perror(("Failed to write password to " + pass_file).c_str());
-        close(fd);
-        return false;
-    }
-
-    close(fd); // Release lock
 
     // Create login file
     if(!login_user(uid))
