@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include "../common/constants.hpp"
+#include "../common/util.hpp"
 #include "parser.hpp"
 #include "server.hpp"
 #include "operations.hpp"
@@ -32,9 +33,8 @@ void process_commands(int verbose) {
         }
         // UDP ready
         if (FD_ISSET(_udp_socket, &readfds)) {
-            if(handle_udp_request(_udp_socket, verbose) == -1){
-
-            }
+            handle_udp_request(_udp_socket, verbose);
+            
         }
         // TCP ready
         if (FD_ISSET(_tcp_socket, &readfds)) {
@@ -94,6 +94,8 @@ int main(int argc, char **argv){
         cerr << "Failure to initialize server sockets" << endl;
         exit(EXIT_FAILURE);
     }
+    print_my_ipv4();
+    cout << ":" << port << endl;
     process_commands(verbose);
     destroy_server(_tcp_socket, _udp_socket);
     exit(EXIT_SUCCESS);

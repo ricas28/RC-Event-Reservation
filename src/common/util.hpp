@@ -174,4 +174,7 @@ bool safe_create_dir(const string &path);
 /** Receives an integer representation of an EID and returns its string format.*/
 string format_eid(int eid);
 
+/** Prints a message 'listening on' and the ipv4 of the running machine. */
+void print_my_ipv4();
+
 #endif
