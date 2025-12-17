@@ -66,8 +66,11 @@ void process_commands(CLArgs *client){
             case CMD_MYRESERVATIONS:
                 handle_myreservations(args, client);
                 break;
+            case CMD_HELP:
+                print_help();
+                break;
             case CMD_INVALID:
-                cerr << "Invalid/Unknown command!\nSee help for usage." << endl;
+                cerr << "Invalid/Unknown command!\nUse 'help' for usage." << endl;
                 break;
         }   
     }

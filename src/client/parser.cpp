@@ -36,6 +36,7 @@ Command get_command(char *buf){
     else if(strcmp(buf, "show") == 0) return CMD_SHOW;
     else if(strcmp(buf, "reserve") == 0) return CMD_RESERVE;
     else if(strcmp(buf, "myr") == 0 || strcmp(buf, "myreservations") == 0) return CMD_MYRESERVATIONS;
+    else if(strcmp(buf, "help") == 0) return CMD_HELP;
     else return CMD_INVALID;
 }
 

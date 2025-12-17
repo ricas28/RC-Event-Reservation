@@ -16,6 +16,7 @@ typedef enum{
     CMD_UNREGISTER,
     CMD_LOGOUT,
     CMD_EXIT,
+    CMD_HELP,
     CMD_INVALID
 }Command;
 
@@ -115,5 +116,10 @@ void handle_reserve(char *args, CLArgs *client);
  * @param client Pointer to client attributes.
  */
 void handle_myreservations(char *args, CLArgs *client);
+
+/**
+ * Prints the usage of every command.
+ */
+void print_help();
 
 #endif
