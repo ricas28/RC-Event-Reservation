@@ -522,11 +522,13 @@ string save_event_file(int sock, const Event_show_Info &event) {
     if(read(sock, &c, 1)  <= 0){
         cerr << "Failure to read ending of protocol message" << endl;
         close(fd);
+        unlink(path.c_str());
         return "";
     }
     if(c != '\n'){
         cerr << "'show' response didn't end with a '\\n'" << endl;
         close(fd);
+        unlink(path.c_str());
         return "";
     }
     close(fd);

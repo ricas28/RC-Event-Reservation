@@ -599,29 +599,39 @@ int Database::get_reserved_seats(const string &eid){
     return reservations;
 }
 
-void Database::get_user_events(const string &uid,  vector<pair<string, int>> &events){
+void Database::get_user_events(const string &uid, vector<pair<string, int>> &events) {
     events.clear();
     string user_events_path = user_created_dir(uid);
 
-    // Iterate through files on the CREATED dir.
+    // Temporary vector to store (numeric EID, string EID, status)
+    vector<tuple<int, string, int>> temp;
+
     for (const auto& entry : fs::directory_iterator(user_events_path)) {
-        if (!entry.is_regular_file())
+        if (!entry.is_regular_file()) continue;
+
+        string eid_str = entry.path().stem().string();
+        // EID must be a 3 digit number.
+        if (eid_str.size() != 3 || !isdigit(eid_str[0]) || !isdigit(eid_str[1]) || !isdigit(eid_str[2]))
             continue;
-        // Extract the eid of the event for each file.
-        string eid = entry.path().stem().string();
+        int eid_num = stoi(eid_str); 
 
-        StartFileData data = extract_start_file_data(eid);
+        StartFileData data = extract_start_file_data(eid_str);
+        int status = get_event_status(eid_str, data);
 
-        // Get status of events
-        events.push_back({eid, get_event_status(eid, data)});
+        temp.emplace_back(eid_num, eid_str, status);
     }
 
-    // Sort by EID.
-    sort(events.begin(), events.end(),
-     [](const pair<string, int> &a, const pair<string, int> &b) {
-         return stoi(a.first) < stoi(b.first);
-     });
+    // Sort by numeric EID
+    sort(temp.begin(), temp.end(), [](const auto &a, const auto &b) {
+        return get<0>(a) < get<0>(b);
+    });
+
+    // Fill the final vector with (string EID, status)
+    for (const auto &t : temp) {
+        events.emplace_back(get<1>(t), get<2>(t));
+    }
 }
+
 
 void Database::get_user_reservations(const string &uid, vector<Reservation> &reservations){
     reservations.clear();
@@ -634,7 +644,7 @@ void Database::get_user_reservations(const string &uid, vector<Reservation> &res
         files.push_back(entry.path().string());
     }
 
-    // Sort by name.
+    // Sort by file name (format of file name makes sure we get the most recent reservations first).
     sort(files.begin(), files.end(), greater<string>());
 
     for (size_t i = 0; i < MAX_RESERVATIONS_SEND && i < files.size(); i++) {
