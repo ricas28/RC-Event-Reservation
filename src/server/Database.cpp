@@ -600,6 +600,7 @@ int Database::get_reserved_seats(const string &eid){
 }
 
 void Database::get_user_events(const string &uid,  vector<pair<string, int>> &events){
+    events.clear();
     string user_events_path = user_created_dir(uid);
 
     // Iterate through files on the CREATED dir.
@@ -623,6 +624,7 @@ void Database::get_user_events(const string &uid,  vector<pair<string, int>> &ev
 }
 
 void Database::get_user_reservations(const string &uid, vector<Reservation> &reservations){
+    reservations.clear();
     string reservations_path = user_reserved_dir(uid);
 
     vector<string> files;
@@ -697,6 +699,24 @@ bool Database::create_event(int sock, const string &uid, Event_creation_Info &ev
         close(fd);
         return false;
     }
+    // Make sure the message sent ends with '\n'
+    char c;
+    if(read(sock, &c, 1)  <= 0){
+        cerr << "Failure to read ending of protocol message" << endl;
+        delete_file(event_file);
+        delete_file(start_path);
+        delete_file(res_path);
+        close(fd);
+        return false;
+    }
+    if(c != '\n'){
+        cerr << "'create' request didn't end with a '\\n'" << endl;
+        delete_file(event_file);
+        delete_file(start_path);
+        delete_file(res_path);
+        close(fd);
+        return false;
+    }
     // Increase EID counter.
     if(!increment_eid(fd, events_created)){
         delete_file(event_file);
@@ -709,31 +729,39 @@ bool Database::create_event(int sock, const string &uid, Event_creation_Info &ev
     return true;
  }
 
-bool Database::get_all_events(vector<Event_list> &events){
-    const string counter_path = base_path + EID_COUNTER;
-    int fd;
+bool Database::get_all_events(vector<Event_list> &events) {
+    events.clear();
+    vector<pair<int, string>> eids; // (numeric eid, string eid)
 
-    // Try to open and get a lock on the EID counter file.
-    if (!open_and_lock(counter_path, O_RDWR | O_CREAT, LOCK_EX, fd)) {
-        return false;
+    // Search through every event and store numeric eid (for sorting).
+    for (const auto &entry : fs::directory_iterator(events_path)) {
+        if (!entry.is_directory() && !entry.is_regular_file())
+            continue;
+
+        string name = entry.path().filename().string();
+
+        // EID must have 3 digits.
+        if (name.size() != 3 || !isdigit(name[0]) || !isdigit(name[1]) || !isdigit(name[2]))
+            continue;
+
+        int eid_num = stoi(name);
+        eids.emplace_back(eid_num, name);
     }
 
-    int current_events = read_eid(fd);
-    close(fd);
-    if(current_events == -1)
-        return false;
+    // Sort by EID number (if we sort with the original EID results are not correct).
+    sort(eids.begin(), eids.end(),
+         [](const auto &a, const auto &b) {
+             return a.first < b.first;
+         });
 
-    for (int i = 1; i <= current_events; i++){
-        // Get EID.
-        string eid = format_eid(i);
-
+    // Process sorted EID's
+    for (const auto &[eid_num, eid] : eids) {
         StartFileData data = extract_start_file_data(eid);
-
         int status = get_event_status(eid, data);
-        if(status == EVENT_CORRUPTED){
+
+        if (status == EVENT_CORRUPTED) {
             events.push_back({eid, "-1", status, DateTime()});
-        }
-        else{
+        } else {
             events.push_back({eid, data.event_name, status, data.start_date_time});
         }
     }

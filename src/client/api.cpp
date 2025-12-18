@@ -327,6 +327,13 @@ int er_create(CLArgs client, string name, string event_fname, ssize_t Fsize,
         close(filefd);
         return -1;
     }
+    if(write(sock, "\n", 1) <= 0){
+        perror("Failute to send end of protocol message");
+        close(sock);
+        close(filefd);
+        return -1;
+    }
+
     string response = tcp_read_message(sock);
     if(response == ""){
         cerr << "Failute to read response from server" << endl;
@@ -510,6 +517,18 @@ string save_event_file(int sock, const Event_show_Info &event) {
         return "";
     }
 
+    char c;
+    // Make sure we follow the protocol (ends with '\n')
+    if(read(sock, &c, 1)  <= 0){
+        cerr << "Failure to read ending of protocol message" << endl;
+        close(fd);
+        return "";
+    }
+    if(c != '\n'){
+        cerr << "'show' response didn't end with a '\\n'" << endl;
+        close(fd);
+        return "";
+    }
     close(fd);
     return path;
 }

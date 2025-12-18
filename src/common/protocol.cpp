@@ -88,7 +88,7 @@ string tcp_read_message(int fd) {
     char tmp[TCP_READING_SIZE];
 
     while (true) {
-        ssize_t n = read_all(fd, tmp, sizeof(tmp));
+        ssize_t n = read(fd, tmp, sizeof(tmp));
         if (n <= 0) {
             if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
                 // Timeout reached
@@ -136,7 +136,7 @@ ssize_t stream_file_TCP(int sendingfd, int receivingfd, size_t Fsize){
     char buffer[TCP_CHUNK];
 
     while (remaining > 0) {
-        ssize_t n = read_all(sendingfd, buffer,
+        ssize_t n = read(sendingfd, buffer,
                          remaining < sizeof(buffer) ? remaining : sizeof(buffer));
         if (n <= 0) {
             // erro reading file

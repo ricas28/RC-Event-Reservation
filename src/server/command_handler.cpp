@@ -356,6 +356,7 @@ void stream_show_response(int sock, Event_show_Info &data, string &filepath){
         close(fd);
         return;
     }
+    write_all(sock, "\n", 1);
     close(fd);
 }
 
