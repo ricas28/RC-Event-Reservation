@@ -106,15 +106,19 @@ This compiles both the server and the client executables.
 
 ## 🚀 Execution
 Start the Event Server
+```bash
 ./ES [-p ESport] [-v]
+```
 
+```bash
 Start the User Application
 ./user [-n ESIP] [-p ESport]
+```
 
 Optional Arguments:
-- <code>ESIP</code>: 🌐 Server IP (default: localhost)
-- <code>ESport/code>: 🔢 Server port (default: 58000 + group number)
-- <code>-v</code>: 🗯 Verbose mode (server only)
+- `ESIP`: 🌐 Server IP (default: localhost)
+- `ESport`: 🔢 Server port (default: 58000 + group number)
+- `-v`: 🗯 Verbose mode (server only)
 
 ---
 

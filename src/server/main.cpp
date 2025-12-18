@@ -94,8 +94,6 @@ int main(int argc, char **argv){
         cerr << "Failure to initialize server sockets" << endl;
         exit(EXIT_FAILURE);
     }
-    print_my_ipv4();
-    cout << ":" << port << endl;
     process_commands(verbose);
     destroy_server(_tcp_socket, _udp_socket);
     exit(EXIT_SUCCESS);

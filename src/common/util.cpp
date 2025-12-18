@@ -173,24 +173,3 @@ string format_eid(int eid){
     oss << setw(3) << setfill('0') << eid;
     return oss.str();
 }
-
-void print_my_ipv4(){
-    struct ifaddrs *ifaddr, *ifa;
-    getifaddrs(&ifaddr);
-
-    for (ifa = ifaddr; ifa; ifa = ifa->ifa_next) {
-        if (!ifa->ifa_addr) continue;
-        if (ifa->ifa_addr->sa_family == AF_INET &&
-            string(ifa->ifa_name) != "lo") {
-
-            char ip[INET_ADDRSTRLEN];
-            inet_ntop(AF_INET,
-                      &((struct sockaddr_in*)ifa->ifa_addr)->sin_addr,
-                      ip, sizeof(ip));
-
-            cerr << "Listening on " << ip;
-            break;
-        }
-    }
-    freeifaddrs(ifaddr);
-}
