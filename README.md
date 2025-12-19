@@ -41,10 +41,12 @@ All communications are multiplexed using `select()` for efficiency.
 
 ## 🗂 Project Structure
 
+```bash
 src/
 ├── common/ # Shared utilities, constants, protocol handling, date/time logic
 ├── server/ # Server implementation, database management, TCP/UDP handlers
 └── client/ # Client-side application and protocol implementation
+```
 
 **Separation of concerns:**
 - Protocol logic  
@@ -64,13 +66,15 @@ The database is filesystem-based and stored under the root directory:
 ./ES_DB/
 
 ### Users
+```bash
 USERS/
 └── <UID>/
 ├── <UID>_pass.txt # User password
 ├── <UID>_login.txt # Login status
 ├── CREATED/ # Event IDs created by the user
 └── RESERVED/ # Reservation files for reserved events
-
+```
+```bash
 ### Events
 EVENTS/
 └── <EID>/
@@ -79,10 +83,12 @@ EVENTS/
 ├── DESCRIPTION/ # Uploaded description files
 ├── RESERVATIONS/ # Reservation files per user
 └── END_<EID>.txt # Created when the event is closed
+```
 
 ### Global Files
+```bash
 EID_COUNTER.txt # Stores the last assigned event ID
-
+```
 
 **Design Notes:**
 - ✅ Files are locked before reading/writing to prevent concurrent corruption.  
@@ -106,14 +112,10 @@ This compiles both the server and the client executables.
 
 ## 🚀 Execution
 Start the Event Server
-```bash
 ./ES [-p ESport] [-v]
-```
 
-```bash
 Start the User Application
 ./user [-n ESIP] [-p ESport]
-```
 
 Optional Arguments:
 - `ESIP`: 🌐 Server IP (default: localhost)
