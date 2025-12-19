@@ -258,7 +258,7 @@ bool Database::write_description_file(int &sock, const string &description_path,
         return false;
 
     if(stream_file_TCP(sock, fd, (size_t)Fsize) != Fsize){
-        perror(("write_all: " + description_path).c_str());
+        perror(("stream_file " + description_path).c_str());
         unlink(description_path.c_str());
         close(fd);
         return false;
@@ -672,16 +672,20 @@ bool Database::create_event(int sock, const string &uid, Event_creation_Info &ev
         close(fd);
         return false;
     }
+    // Increase EID counter.
+    if(!increment_eid(fd, events_created)){
+        close(fd);
+        return false;
+    }
+    close(fd); // Release lock.
 
     eid = format_eid(events_created + 1);
     if(!ensure_event_dirs(eid)){
-        close(fd);
         return false;
     }
     string event_file = user_created_file(uid, eid);
     if(!create_file(event_file)){
         cerr << "Failure to open file on CREATED dir" << endl;
-        close(fd);
         return false;
     } 
 
@@ -691,14 +695,12 @@ bool Database::create_event(int sock, const string &uid, Event_creation_Info &ev
 
     if(!write_start_file(start_path, uid, event)){
         delete_file(event_file);
-        close(fd);
         return false;
     }
 
     if(!write_res_file(res_path, 0)){
         delete_file(event_file);
         delete_file(start_path);
-        close(fd);
         return false;
     }
 
@@ -706,7 +708,6 @@ bool Database::create_event(int sock, const string &uid, Event_creation_Info &ev
         delete_file(event_file);
         delete_file(start_path);
         delete_file(res_path);
-        close(fd);
         return false;
     }
     // Make sure the message sent ends with '\n'
@@ -716,7 +717,6 @@ bool Database::create_event(int sock, const string &uid, Event_creation_Info &ev
         delete_file(event_file);
         delete_file(start_path);
         delete_file(res_path);
-        close(fd);
         return false;
     }
     if(c != '\n'){
@@ -724,18 +724,8 @@ bool Database::create_event(int sock, const string &uid, Event_creation_Info &ev
         delete_file(event_file);
         delete_file(start_path);
         delete_file(res_path);
-        close(fd);
         return false;
     }
-    // Increase EID counter.
-    if(!increment_eid(fd, events_created)){
-        delete_file(event_file);
-        delete_file(start_path);
-        delete_file(res_path);
-        close(fd);
-        return false;
-    }
-    close(fd);
     return true;
  }
 

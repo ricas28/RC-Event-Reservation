@@ -4,3 +4,6 @@ user
 *.txt
 *.html
 *.sh
+*.jpg
+*.png
+*Zone.Identifier

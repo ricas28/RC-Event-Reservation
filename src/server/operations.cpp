@@ -137,7 +137,7 @@ CreateResult create(int &sock, string &uid, string &password, Event_creation_Inf
 
     // Create event
     if(!db->create_event(sock, uid, event, eid)){
-        if(eid == "-1") 
+        if(eid == "-1")
             return CreateResult::FAILED_CREATE;
         return CreateResult::IO_ERROR;
     }
