@@ -74,8 +74,9 @@ USERS/
 ├── CREATED/ # Event IDs created by the user
 └── RESERVED/ # Reservation files for reserved events
 ```
-```bash
+
 ### Events
+```bash
 EVENTS/
 └── <EID>/
 ├── START_<EID>.txt # Event metadata (creator, name, date, capacity, etc.)
@@ -94,9 +95,6 @@ EID_COUNTER.txt # Stores the last assigned event ID
 - ✅ Files are locked before reading/writing to prevent concurrent corruption.  
 - ✅ Directories are created on demand (`CREATED`, `RESERVED`, `DESCRIPTION`, `RESERVATIONS`).  
 - ✅ Events are listed **numerically by EID**.  
-- ⚠️ Reservation files store the **EID instead of UID**, unlike the original specification.  
-- Maximum events (`MAX_EVENTS`) and reservations per user (`MAX_RESERVATIONS_SEND`) are enforced.
-
 ---
 
 ## 🛠 Compilation
@@ -112,10 +110,14 @@ This compiles both the server and the client executables.
 
 ## 🚀 Execution
 Start the Event Server
+```bash
 ./ES [-p ESport] [-v]
+```
 
 Start the User Application
+```bash
 ./user [-n ESIP] [-p ESport]
+```
 
 Optional Arguments:
 - `ESIP`: 🌐 Server IP (default: localhost)
@@ -163,7 +165,6 @@ Here's a neat overview of the commands you can use in the **User** application:
 - **Events ordering:** Sorted numerically by EID.  
 - **Event corruption:** Marked only if data exists but is inconsistent.  
 - **Database initialization:** Ensures directories exist before server starts.  
-- **Server startup:** Prints IPv4 address and port for debugging.
 
 ---
 
