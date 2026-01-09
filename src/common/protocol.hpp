@@ -109,6 +109,11 @@ int send_udp_message(int socket, const char *message, struct sockaddr *addr, soc
 char *receive_udp_message(int socket,  struct sockaddr *addr, socklen_t *addr_len);
 
 /**
+ * Cleans the buffer from a TCP request/response.
+ */
+void clean_TCP_buffer(int sock);
+
+/**
  * Reads the next message from a TCP socket. Read until seeing '\n'.
  * 
  * @param fd File descriptor.

@@ -682,9 +682,11 @@ bool parse_show_response(int fd, Event_show_Info &event){
     string date = tcp_read_word(fd);
     string time = tcp_read_word(fd);
     DateTime dt;
-    if(!DateTime::fromStrings(date, time, dt))
+    if(!DateTime::fromStrings(date, time, dt)){
         // fromStrings method already prints error messages.
+        clean_TCP_buffer(fd);
         return false;
+    }
 
     // Read and validate attendace_size.
     string attendace_size_temp = tcp_read_word(fd);
@@ -692,6 +694,7 @@ bool parse_show_response(int fd, Event_show_Info &event){
     bool valid_integer = is_positive_integer(attendace_size_temp.c_str(), &attendace_size);
     if(!valid_integer || (valid_integer && !is_valid_num_attendees(attendace_size))){
         cerr << "Invalid attendace size received" << endl;
+        clean_TCP_buffer(fd);
         return false;
     }
 
@@ -701,6 +704,7 @@ bool parse_show_response(int fd, Event_show_Info &event){
     valid_integer = is_nonnegative_integer((char *)seats_reserved_temp.c_str(), &seats_reserved);
     if(!valid_integer || (valid_integer && seats_reserved > attendace_size)){
         cerr << "Invalid reserved seats received" << endl;
+        clean_TCP_buffer(fd);
         return false;
     }
 
@@ -708,6 +712,7 @@ bool parse_show_response(int fd, Event_show_Info &event){
     string Fname = tcp_read_word(fd);
     if(!is_valid_file_name((char *)Fname.c_str())){
         cerr << "Invalid file name received" << endl;
+        clean_TCP_buffer(fd);
         return false;
     }
 
@@ -717,6 +722,7 @@ bool parse_show_response(int fd, Event_show_Info &event){
     valid_integer = is_nonnegative_integer(Fsize_temp.c_str(), &Fsize); 
     if(!valid_integer || (valid_integer && Fsize > MAX_FILE_SIZE)){
         cerr << "Invalid file size received" << endl;
+        clean_TCP_buffer(fd);
         return false;
     }
 

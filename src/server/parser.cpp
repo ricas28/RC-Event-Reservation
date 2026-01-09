@@ -164,30 +164,53 @@ bool parse_create_request(int fd, const char *request_so_far,
 
     // Read values one by one and validate.
     string password_temp = tcp_read_word(fd);
-    if(!is_valid_password((char *)password_temp.c_str())) return false;
-    
+    if(!is_valid_password((char*)password_temp.c_str())){
+        clean_TCP_buffer(fd);
+        return false;
+    }
     string name = tcp_read_word(fd);
-    if(!is_valid_event_name((char *)name.c_str())) return false;
+    if(!is_valid_event_name((char *)name.c_str())){
+        clean_TCP_buffer(fd);
+        return false;
+    } 
 
     string date = tcp_read_word(fd);
-    if(date == "") return false;
+    if(date == ""){
+        clean_TCP_buffer(fd);
+        return false;
+    }
     string time = tcp_read_word(fd);
-    if(time == "") return false;
+    if(time == ""){
+        clean_TCP_buffer(fd);
+        return false;
+    }
     DateTime dt;
-    if(!DateTime::fromStrings(date, time, dt) || dt.isPast()) return false;
+    if(!DateTime::fromStrings(date, time, dt) || dt.isPast()){
+        clean_TCP_buffer(fd);
+        return false;
+    } 
 
     string attendace_size_str = tcp_read_word(fd);
     int attendace_size;
     bool valid = is_positive_integer(attendace_size_str.c_str(), &attendace_size);
-    if(!valid || (valid && !is_valid_num_attendees(attendace_size))) return false;
+    if(!valid || (valid && !is_valid_num_attendees(attendace_size))){
+        clean_TCP_buffer(fd);
+        return false;
+    }
 
     string Fname = tcp_read_word(fd);
-    if(!is_valid_file_name((char *)Fname.c_str())) return false;
+    if(!is_valid_file_name((char *)Fname.c_str())){
+        clean_TCP_buffer(fd);
+        return false;
+    }
 
     string Fsize_str = tcp_read_word(fd);
     int Fsize;
     valid = is_nonnegative_integer(Fsize_str.c_str(), &Fsize);
-    if(!valid || (valid && Fsize > MAX_FILE_SIZE)) return false;
+    if(!valid || (valid && Fsize > MAX_FILE_SIZE)){
+        clean_TCP_buffer(fd);
+        return false;
+    }
 
     uid = uid_temp;
     password = password_temp;

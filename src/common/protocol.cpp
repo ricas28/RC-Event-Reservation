@@ -153,6 +153,14 @@ ssize_t stream_file_TCP(int sendingfd, int receivingfd, size_t Fsize){
     return total_sent;
 }
 
+void clean_TCP_buffer(int sock){
+    char c;
+    while(1){
+        if(read(sock, &c, 1) <= 0 || c == '\n')
+            return;
+    }
+}
+
 
 char *receive_udp_message(int socket,  struct sockaddr *addr, socklen_t *addr_len){
     char *buffer = (char *)malloc(UDP_BUFFER_SIZE);
